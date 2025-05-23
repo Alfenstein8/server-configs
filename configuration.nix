@@ -7,17 +7,16 @@
 {
   nix.settings.experimental-features = ["nix-command" "flakes"];
   imports =
-    [ # Include the results of the hardware scan.
+    [
       ./hardware-configuration.nix
       ./caddy.nix
-      # ./postgresql.nix
       ./immich.nix
       ./paperless.nix
       ./radicale.nix
       # ./netdata.nix
       ./uptime-kuma.nix
       ./homepage.nix
-      # ./docker.nix
+      # ./pingvin-share.nix
       ./wg-easy
     ];
 

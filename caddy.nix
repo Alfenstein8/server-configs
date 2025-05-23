@@ -32,6 +32,10 @@
     virtualHosts."http://vpn.shlambert.top".extraConfig = ''
     reverse_proxy localhost:51821
     '';
+
+    virtualHosts."http://share.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:3000
+    '';
   };
 }
 
