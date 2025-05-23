@@ -28,6 +28,10 @@
     virtualHosts."http://home.shlambert.top".extraConfig = ''
     reverse_proxy localhost:8082
     '';
+
+    virtualHosts."http://vpn.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:51821
+    '';
   };
 }
 

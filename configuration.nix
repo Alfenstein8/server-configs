@@ -2,9 +2,10 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, system, inputs, ... }:
 
 {
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
@@ -16,6 +17,8 @@
       # ./netdata.nix
       ./uptime-kuma.nix
       ./homepage.nix
+      # ./docker.nix
+      ./wg-easy
     ];
 
   # Bootloader.
@@ -76,6 +79,8 @@
      neovim
      vim 
      git
+  ] ++ [
+     inputs.compose2nix.packages.${system}.default
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -98,7 +103,7 @@
   services.fail2ban.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 51820 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
