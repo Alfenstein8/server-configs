@@ -79,6 +79,7 @@
      neovim
      vim 
      git
+     lazygit
   ] ++ [
      inputs.compose2nix.packages.${system}.default
   ];
