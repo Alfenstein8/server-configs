@@ -21,6 +21,7 @@
       ./wg-easy
       ./jellyfin.nix
       ./samba.nix
+      ./mullvad.nix
     ];
 
   # Bootloader.
