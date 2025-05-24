@@ -22,6 +22,10 @@
       ./jellyfin.nix
       ./samba.nix
       ./mullvad.nix
+      ./flaresolverr.nix
+      ./prowlarr.nix
+      ./radarr.nix
+      ./deluge.nix
     ];
 
   # Bootloader.

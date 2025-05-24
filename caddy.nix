@@ -40,6 +40,18 @@
     virtualHosts."http://jellyfin.shlambert.top".extraConfig = ''
     reverse_proxy localhost:8096
     '';
+
+    virtualHosts."http://prowlarr.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:9696
+    '';
+
+    virtualHosts."http://radarr.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:7878
+    '';
+
+    virtualHosts."http://deluge.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:8112
+    '';
   };
 }
 
