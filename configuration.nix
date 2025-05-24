@@ -16,8 +16,9 @@
       # ./netdata.nix
       ./uptime-kuma.nix
       ./homepage.nix
-      # ./pingvin-share.nix
+      ./pingvin-share
       ./wg-easy
+      # ./jellyfin.nix
     ];
 
   # Bootloader.
