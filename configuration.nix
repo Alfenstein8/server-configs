@@ -9,6 +9,7 @@
   imports =
     [
       ./hardware-configuration.nix
+      ./users.nix
       ./caddy.nix
       ./immich.nix
       ./paperless.nix
@@ -18,7 +19,8 @@
       ./homepage.nix
       ./pingvin-share
       ./wg-easy
-      # ./jellyfin.nix
+      ./jellyfin.nix
+      ./samba.nix
     ];
 
   # Bootloader.
@@ -61,14 +63,6 @@
 
   # Configure console keymap
   console.keyMap = "dk-latin1";
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.alfred = {
-    isNormalUser = true;
-    description = "Alfred";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
-  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

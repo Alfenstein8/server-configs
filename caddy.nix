@@ -36,6 +36,10 @@
     virtualHosts."http://share.shlambert.top".extraConfig = ''
     reverse_proxy localhost:3000
     '';
+
+    virtualHosts."http://jellyfin.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:8096
+    '';
   };
 }
 
