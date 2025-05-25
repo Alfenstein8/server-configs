@@ -25,11 +25,11 @@
 
   users.groups.media-sccess = {};
 
-  users.users.deluge = {
-    extraGroups = [ "media-access" ];
-  };
-
-  users.users.jellyfin = {
-    extraGroups = [ "media-access" ];
-  };
+  # users.users.deluge = {
+  #   extraGroups = [ "media-access" ];
+  # };
+  #
+  # users.users.jellyfin = {
+  #   extraGroups = [ "media-access" ];
+  # };
 }

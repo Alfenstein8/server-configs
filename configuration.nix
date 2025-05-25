@@ -19,13 +19,10 @@
       ./homepage.nix
       ./pingvin-share
       ./wg-easy
+      ./arr
       ./jellyfin.nix
       ./samba.nix
-      ./mullvad.nix
-      ./flaresolverr.nix
-      ./prowlarr.nix
-      ./radarr.nix
-      ./deluge.nix
+      # ./mullvad.nix
     ];
 
   # Bootloader.

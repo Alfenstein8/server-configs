@@ -49,8 +49,8 @@
     reverse_proxy localhost:7878
     '';
 
-    virtualHosts."http://deluge.shlambert.top".extraConfig = ''
-    reverse_proxy localhost:8112
+    virtualHosts."http://torrent.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:8080
     '';
   };
 }
