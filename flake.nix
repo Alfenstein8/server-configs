@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "Home server flake";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -12,11 +12,12 @@
   outputs = { nixpkgs, ... } @ inputs:
   let
     system = "x86_64-linux";
+    hostname = "homeserver";
   in
   {
 
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      specialArgs = { inherit system inputs; };
+    nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit system hostname inputs; };
       modules = [
 	./configuration.nix
       ];

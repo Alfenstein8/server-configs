@@ -2,13 +2,15 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, system, inputs, ... }:
+{ config, hostname, pkgs, system, inputs, ... }:
 
 {
   nix.settings.experimental-features = ["nix-command" "flakes"];
   imports =
     [
       ./hardware-configuration.nix
+      ./hardware-acceleration.nix
+      ./zfs.nix
       ./users.nix
       ./caddy.nix
       ./immich.nix
@@ -21,15 +23,16 @@
       ./wg-easy
       ./arr
       ./jellyfin.nix
-      ./samba.nix
-      # ./mullvad.nix
+      # ./samba.nix
+      ./jellyseerr.nix
+      ./tailscale.nix
     ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = hostname; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -73,9 +76,10 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
      neovim
-     vim 
      git
      lazygit
+     ripgrep
+     btop
   ] ++ [
      inputs.compose2nix.packages.${system}.default
   ];
@@ -94,7 +98,7 @@
   services.openssh = {
     enable = true;
     settings = {
-      PasswordAuthentication = false;
+      PasswordAuthentication = true;
     };
   };
   services.fail2ban.enable = true;

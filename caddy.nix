@@ -49,8 +49,20 @@
     reverse_proxy localhost:7878
     '';
 
+    virtualHosts."http://sonarr.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:8989
+    '';
+
     virtualHosts."http://torrent.shlambert.top".extraConfig = ''
     reverse_proxy localhost:8080
+    '';
+
+    virtualHosts."http://jellyseerr.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:5055
+    '';
+
+    virtualHosts."http://bazarr.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:6767
     '';
   };
 }

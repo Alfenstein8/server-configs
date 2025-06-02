@@ -25,8 +25,8 @@
       "TRUST_PROXY" = "true";
     };
     volumes = [
-      "/mnt/storage/pingvin-share/data:/opt/app/backend/data:rw"
-      "/mnt/storage/pingvin-share/data/images:/opt/app/frontend/public/img:rw"
+      "/mnt/storage/data/pingvin-share:/opt/app/backend/data:rw"
+      "/mnt/storage/data/pingvin-share/images:/opt/app/frontend/public/img:rw"
     ];
     ports = [
       "3000:3000/tcp"

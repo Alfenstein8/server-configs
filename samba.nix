@@ -13,8 +13,8 @@
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
         "map to guest" = "bad user";
-	"interfaces" = "wlp4s0"; # Change or remove this on new server
-        "bind interfaces only" = "yes";
+	# "interfaces" = "wlp4s0"; # Change or remove this on new server
+        # "bind interfaces only" = "yes";
       };
   
       "public" = {
