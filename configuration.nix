@@ -26,6 +26,7 @@
       # ./samba.nix
       ./jellyseerr.nix
       ./tailscale.nix
+      ./syncthing.nix
     ];
 
   # Bootloader.
@@ -80,6 +81,7 @@
      lazygit
      ripgrep
      btop
+     tree
   ] ++ [
      inputs.compose2nix.packages.${system}.default
   ];

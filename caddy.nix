@@ -64,6 +64,10 @@
     virtualHosts."http://bazarr.shlambert.top".extraConfig = ''
     reverse_proxy localhost:6767
     '';
+
+    virtualHosts."http://syncthing.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:8384
+    '';
   };
 }
 
