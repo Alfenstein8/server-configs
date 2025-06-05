@@ -10,6 +10,7 @@
     [
       ./hardware-configuration.nix
       ./hardware-acceleration.nix
+      ./backup.nix
       ./zfs.nix
       ./users.nix
       ./caddy.nix
@@ -23,7 +24,7 @@
       ./wg-easy
       ./arr
       ./jellyfin.nix
-      # ./samba.nix
+      ./samba.nix
       ./jellyseerr.nix
       ./tailscale.nix
       ./syncthing.nix

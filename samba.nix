@@ -18,7 +18,7 @@
       };
   
       "public" = {
-        "path" = "/mnt/storage/Shares/Public";
+        "path" = "/mnt/storage/data/Shares/Public";
         "browseable" = "yes";
         "read only" = "no";
         "guest ok" = "yes";
@@ -29,7 +29,7 @@
       };
   
       "alfred" = {
-        "path" = "/mnt/storage/Shares/Users/alfred";
+        "path" = "/mnt/storage/data/Shares/Users/alfred";
         "browseable" = "yes";
         "read only" = "no";
         "guest ok" = "no";
@@ -41,7 +41,7 @@
       };
   
       "zehra" = {
-        "path" = "/mnt/storage/Shares/Users/zehra";
+        "path" = "/mnt/storage/data/Shares/Users/zehra";
         "browseable" = "yes";
         "read only" = "no";
         "guest ok" = "no";
@@ -53,7 +53,7 @@
       };
   
       "shared" = {
-        "path" = "/mnt/storage/Shares/Shared";
+        "path" = "/mnt/storage/data/Shares/Shared";
         "browseable" = "yes";
         "read only" = "no";
         "guest ok" = "no";
