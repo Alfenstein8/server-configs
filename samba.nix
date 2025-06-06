@@ -51,6 +51,42 @@
         "force user" = "zehra";
         "force group" = "users";
       };
+
+      "ole" = {
+        "path" = "/mnt/storage/data/Shares/Users/ole";
+        "browseable" = "yes";
+        "read only" = "no";
+        "guest ok" = "no";
+        "valid users" = "ole";
+        "create mask" = "0644";
+        "directory mask" = "0755";
+        "force user" = "ole";
+        "force group" = "users";
+      };
+  
+      "maj-britt" = {
+        "path" = "/mnt/storage/data/Shares/Users/maj-britt";
+        "browseable" = "yes";
+        "read only" = "no";
+        "guest ok" = "no";
+        "valid users" = "maj-britt";
+        "create mask" = "0644";
+        "directory mask" = "0755";
+        "force user" = "maj-britt";
+        "force group" = "users";
+      };
+  
+      "esajas" = {
+        "path" = "/mnt/storage/data/Shares/Users/esajas";
+        "browseable" = "yes";
+        "read only" = "no";
+        "guest ok" = "no";
+        "valid users" = "esajas";
+        "create mask" = "0644";
+        "directory mask" = "0755";
+        "force user" = "esajas";
+        "force group" = "users";
+      };
   
       "shared" = {
         "path" = "/mnt/storage/data/Shares/Shared";

@@ -13,6 +13,24 @@
     extraGroups = [ "networkmanager" "samba-users"];
   };
 
+  users.users.ole = {
+    isNormalUser = true;
+    description = "Ole";
+    extraGroups = [ "networkmanager" "samba-users"];
+  };
+
+  users.users.maj-britt = {
+    isNormalUser = true;
+    description = "Maj-Britt";
+    extraGroups = [ "networkmanager" "samba-users"];
+  };
+
+  users.users.esajas = {
+    isNormalUser = true;
+    description = "Esajas";
+    extraGroups = [ "networkmanager" "samba-users"];
+  };
+
   users.groups.samba-users = {};
 
   users.users.shared-files = {
