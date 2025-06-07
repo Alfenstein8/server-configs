@@ -83,6 +83,7 @@
      ripgrep
      btop
      tree
+     tmux
   ] ++ [
      inputs.compose2nix.packages.${system}.default
   ];
