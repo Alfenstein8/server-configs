@@ -84,6 +84,8 @@
      btop
      tree
      tmux
+     ocl-icd
+     clinfo
   ] ++ [
      inputs.compose2nix.packages.${system}.default
   ];
