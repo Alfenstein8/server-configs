@@ -3,32 +3,32 @@
   users.users.alfred = {
     isNormalUser = true;
     description = "Alfred";
-    extraGroups = [ "networkmanager" "wheel" "samba-users"];
+    extraGroups = [ "networkmanager" "wheel" "samba-users" "filebrowser" ];
     packages = with pkgs; [];
   };
 
   users.users.zehra = {
     isNormalUser = true;
     description = "Zehra";
-    extraGroups = [ "networkmanager" "samba-users"];
+    extraGroups = [ "networkmanager" "samba-users" "filebrowser"];
   };
 
   users.users.ole = {
     isNormalUser = true;
     description = "Ole";
-    extraGroups = [ "networkmanager" "samba-users"];
+    extraGroups = [ "networkmanager" "samba-users" "filebrowser"];
   };
 
   users.users.maj-britt = {
     isNormalUser = true;
     description = "Maj-Britt";
-    extraGroups = [ "networkmanager" "samba-users"];
+    extraGroups = [ "networkmanager" "samba-users" "filebrowser"];
   };
 
   users.users.esajas = {
     isNormalUser = true;
     description = "Esajas";
-    extraGroups = [ "networkmanager" "samba-users"];
+    extraGroups = [ "networkmanager" "samba-users" "filebrowser"];
   };
 
   users.groups.samba-users = {};

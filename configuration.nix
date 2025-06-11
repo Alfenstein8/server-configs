@@ -28,6 +28,8 @@
       ./jellyseerr.nix
       ./tailscale.nix
       ./syncthing.nix
+      ./filebrowser.nix
+      ./navidrome.nix
     ];
 
   # Bootloader.
