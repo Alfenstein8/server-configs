@@ -3,7 +3,7 @@
     enable = true;
     settings = {
       MusicFolder = "/mnt/storage/data/Shares/Shared/Musik/Music";
-      BaseUrl = "navidrome.shlambert.top";
+      BaseUrl = "http://navidrome.shlambert.top";
     };
   };
   users.users.navidrome.extraGroups = [ "shared-files" ];
