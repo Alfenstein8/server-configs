@@ -9,27 +9,28 @@
   imports =
     [
       ./hardware-configuration.nix
-      ./hardware-acceleration.nix
-      ./backup.nix
-      ./zfs.nix
-      ./users.nix
-      ./caddy.nix
-      ./immich.nix
-      ./paperless.nix
-      ./radicale.nix
-      # ./netdata.nix
-      ./uptime-kuma.nix
-      ./homepage.nix
-      ./pingvin-share
-      ./wg-easy
-      ./arr
-      ./jellyfin.nix
-      ./samba.nix
-      ./jellyseerr.nix
-      ./tailscale.nix
-      ./syncthing.nix
-      ./filebrowser.nix
-      ./navidrome.nix
+      ./hardware-acceleration.nix # QSV use GPU
+      ./backup.nix # Upload backup to backblaze
+      ./zfs.nix # zsf Mirror
+      ./users.nix 
+      ./caddy.nix # Reverse proxy
+      ./immich.nix # Image backup
+      ./paperless.nix # Document management
+      ./radicale.nix # Contacts and calendar
+      # ./netdata.nix # Server Monitor
+      ./uptime-kuma.nix # Services monitor
+      ./homepage.nix 
+      ./pingvin-share # Share big files
+      ./wg-easy # Wireguard VPN with web ui
+      ./arr # The arr stack
+      ./jellyfin.nix # Video streaming
+      ./samba.nix # Samba server
+      ./jellyseerr.nix # Jellyfin video requests
+      ./tailscale.nix # Easy VPN setup
+      ./syncthing.nix # Sync files to divices
+      ./filebrowser.nix # Use samba share in web
+      ./navidrome.nix # Music streaming
+      # ./traccar.nix
     ];
 
   # Bootloader.
