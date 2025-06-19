@@ -1,0 +1,30 @@
+name: owntracks
+services:
+  otrecorder:
+    image: owntracks/recorder
+    volumes:
+      - /mnt/storage/data/owntracks/store:/store
+    restart: unless-stopped
+    ports:
+      - 8083:8083
+    environment:
+      OTR_HOST: mosquitto
+
+  frontend:
+    image: owntracks/frontend
+    volumes:
+      - /mnt/storage/data/owntracks/fronend_config.js:/usr/share/nginx/html/config/config.js
+    restart: unless-stopped
+    ports:
+      - 8084:80
+    environment:
+      - SERVER_HOST=otrecorder
+      - SERVER_PORT=8083
+
+  mosquitto:
+    image: eclipse-mosquitto
+    volumes:
+      - /mnt/storage/data/mosquitto/data:/mosquitto/data
+      - /mnt/storage/data/mosquitto/logs:/mosquitto/logs
+      - /mnt/storage/data/mosquitto/conf:/mosquitto/config
+    restart: unless-stopped

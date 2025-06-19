@@ -31,6 +31,7 @@
       ./filebrowser.nix # Use samba share in web
       ./navidrome.nix # Music streaming
       # ./traccar.nix
+      ./owntracks
     ];
 
   # Bootloader.
