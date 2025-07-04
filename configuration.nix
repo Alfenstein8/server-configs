@@ -32,6 +32,7 @@
       ./navidrome.nix # Music streaming
       # ./traccar.nix
       ./owntracks
+      ./cockpit.nix
     ];
 
   # Bootloader.
@@ -90,6 +91,7 @@
      tmux
      ocl-icd
      clinfo
+     lsd
   ] ++ [
      inputs.compose2nix.packages.${system}.default
   ];
