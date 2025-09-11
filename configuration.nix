@@ -26,7 +26,7 @@
       ./jellyfin.nix # Video streaming
       ./samba.nix # Samba server
       ./jellyseerr.nix # Jellyfin video requests
-      ./tailscale.nix # Easy VPN setup
+      # ./tailscale.nix # Easy VPN setup
       ./syncthing.nix # Sync files to divices
       ./filebrowser.nix # Use samba share in web
       ./navidrome.nix # Music streaming
