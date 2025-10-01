@@ -109,9 +109,10 @@
   # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
-    settings = {
-      PasswordAuthentication = true;
-    };
+    # settings = {
+      # PasswordAuthentication = true;
+    # };
+    extraConfig = "AuthenticationMethods \"publickey,password\"";
   };
   services.fail2ban.enable = true;
 
