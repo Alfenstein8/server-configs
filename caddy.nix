@@ -68,6 +68,10 @@
     virtualHosts."http://syncthing.shlambert.top".extraConfig = ''
     reverse_proxy localhost:8384
     '';
+
+    virtualHosts."http://watchlist.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:3080
+    '';
   };
 }
 
