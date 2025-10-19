@@ -33,6 +33,7 @@
       # ./traccar.nix
       ./owntracks
       ./cockpit.nix
+      ./bash.nix
     ];
 
   # Bootloader.
