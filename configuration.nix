@@ -10,6 +10,7 @@
     [
       ./hardware-configuration.nix
       ./hardware-acceleration.nix # QSV use GPU
+      ./root-certificates.nix
       ./backup.nix # Upload backup to backblaze
       ./zfs.nix # zsf Mirror
       ./users.nix 
