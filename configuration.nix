@@ -1,41 +1,47 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, hostname, pkgs, system, inputs, ... }:
-
 {
+  config,
+  hostname,
+  pkgs,
+  system,
+  inputs,
+  nvfNeovim,
+  ...
+}: {
   nix.settings.experimental-features = ["nix-command" "flakes"];
-  imports =
-    [
-      ./hardware-configuration.nix
-      ./hardware-acceleration.nix # QSV use GPU
-      ./root-certificates.nix
-      ./backup.nix # Upload backup to backblaze
-      ./zfs.nix # zsf Mirror
-      ./users.nix 
-      ./caddy.nix # Reverse proxy
-      ./immich.nix # Image backup
-      ./paperless.nix # Document management
-      ./radicale.nix # Contacts and calendar
-      # ./netdata.nix # Server Monitor
-      ./uptime-kuma.nix # Services monitor
-      ./homepage.nix 
-      ./pingvin-share # Share big files
-      ./wg-easy # Wireguard VPN with web ui
-      ./arr # The arr stack
-      ./jellyfin.nix # Video streaming
-      ./samba.nix # Samba server
-      ./jellyseerr.nix # Jellyfin video requests
-      # ./tailscale.nix # Easy VPN setup
-      ./syncthing.nix # Sync files to divices
-      ./filebrowser.nix # Use samba share in web
-      ./navidrome.nix # Music streaming
-      # ./traccar.nix
-      ./owntracks
-      ./cockpit.nix
-      ./bash.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+    ./hardware-acceleration.nix # QSV use GPU
+    ./secrets.nix
+    ./root-certificates.nix
+    ./backup.nix # Upload backup to backblaze
+    ./zfs.nix # zsf Mirror
+    ./users.nix
+    ./caddy.nix # Reverse proxy
+    ./immich.nix # Image backup
+    ./paperless.nix # Document management
+    ./radicale.nix # Contacts and calendar
+    # ./netdata.nix # Server Monitor
+    ./uptime-kuma.nix # Services monitor
+    ./homepage.nix
+    ./pingvin-share # Share big files
+    ./wg-easy # Wireguard VPN with web ui
+    ./arr # The arr stack
+    ./jellyfin.nix # Video streaming
+    ./samba.nix # Samba server
+    ./jellyseerr.nix # Jellyfin video requests
+    # ./tailscale.nix # Easy VPN setup
+    ./syncthing.nix # Sync files to divices
+    ./filebrowser.nix # Use samba share in web
+    ./navidrome.nix # Music streaming
+    # ./traccar.nix
+    ./owntracks
+    ./cockpit.nix
+    ./bash.nix
+    ./acme.nix
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -83,20 +89,23 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-     neovim
-     git
-     lazygit
-     ripgrep
-     btop
-     tree
-     tmux
-     ocl-icd
-     clinfo
-     lsd
-  ] ++ [
-     inputs.compose2nix.packages.${system}.default
-  ];
+  environment.systemPackages = with pkgs;
+    [
+      git
+      lazygit
+      ripgrep
+      btop
+      tree
+      tmux
+      ocl-icd
+      clinfo
+      lsd
+      yazi
+    ]
+    ++ [
+      inputs.compose2nix.packages.${system}.default
+      nvfNeovim
+    ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -112,14 +121,14 @@
   services.openssh = {
     enable = true;
     # settings = {
-      # PasswordAuthentication = true;
+    # PasswordAuthentication = true;
     # };
     extraConfig = "AuthenticationMethods \"publickey,password\"";
   };
   services.fail2ban.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 80 443 51820 ];
+  networking.firewall.allowedTCPPorts = [80 443 51820];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
@@ -131,5 +140,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
-
 }

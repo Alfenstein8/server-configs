@@ -1,8 +1,11 @@
+{pkgs, config, lib, ...}:
+let
+  certloc = "/var/lib/acme/shlambert.top";
+in
 {
   services.caddy = {
     enable = true;
     globalConfig = ''
-      local_certs
     '';
 
     virtualHosts."http://immich.shlambert.top, https://immich.shlambert.top".extraConfig = ''
@@ -13,9 +16,17 @@
     reverse_proxy localhost:28981
     '';
 
-    virtualHosts."http://radicale.shlambert.top, https://radicale.shlambert.top".extraConfig = ''
+    virtualHosts."radicale.shlambert.top".extraConfig = ''
     reverse_proxy localhost:5232
+      tls ${certloc}/cert.pem ${certloc}/key.pem
     '';
+
+    # virtualHosts."radicale.shlambert.top".extraConfig = ''
+    # reverse_proxy localhost:5232
+    #  tls ${certloc}/cert.pem ${certloc}/key.pem {
+    #      protocols tls1.3
+    #  }
+    # '';
 
     virtualHosts."http://netdata.shlambert.top, https://netdata.shlambert.top".extraConfig = ''
     reverse_proxy localhost:19999
@@ -40,6 +51,12 @@
     virtualHosts."http://jellyfin.shlambert.top, https://jellyfin.shlambert.top".extraConfig = ''
     reverse_proxy localhost:8096
     '';
+
+
+
+    # virtualHosts."http://jellyfin.shlambert.top".extraConfig = ''
+    # reverse_proxy localhost:8096
+    # # '';
 
     virtualHosts."http://prowlarr.shlambert.top, https://prowlarr.shlambert.top".extraConfig = ''
     reverse_proxy localhost:9696
