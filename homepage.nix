@@ -9,14 +9,21 @@
             "Jellyfin" = {
               icon = "jellyfin.svg"; # Assuming default icons are available or you'll provide them
               description = "Media Server";
-              href = "http://jellyfin.shlambert.top";
+              href = "https://jellyfin.shlambert.top";
             };
           }
           {
             "Jellyseerr" = {
               icon = "jellyseerr.svg";
               description = "Media Requests";
-              href = "http://jellyseerr.shlambert.top";
+              href = "https://jellyseerr.shlambert.top";
+            };
+          }
+          {
+            "Watcharr" = {
+              icon = "watcharr-light.webp";
+              description = "Watch list";
+              href = "https://watchlist.shlambert.top";
             };
           }
         ];
@@ -27,28 +34,28 @@
             "Immich" = {
               icon = "immich.svg";
               description = "Photo & Video Backup";
-              href = "http://immich.shlambert.top";
+              href = "https://immich.shlambert.top";
             };
           }
           {
             "Paperless-ngx" = {
               icon = "paperless-ngx.svg";
               description = "Document Archiving";
-              href = "http://paper.shlambert.top";
+              href = "https://paper.shlambert.top";
             };
           }
           {
             "Pingvin Share" = {
               icon = "pingvin-share.svg";
               description = "File Sharing";
-              href = "http://share.shlambert.top";
+              href = "https://share.shlambert.top";
             };
           }
           {
             "Syncthing" = {
               icon = "syncthing.svg";
               description = "File Synchronization";
-              href = "http://syncthing.shlambert.top";
+              href = "https://syncthing.shlambert.top";
             };
           }
         ];
@@ -59,64 +66,64 @@
             "Radicale" = {
               icon = "radicale.svg";
               description = "Calendar & Contacts";
-              href = "http://radicale.shlambert.top";
+              href = "https://radicale.shlambert.top";
             };
           }
           {
             "Uptime Kuma" = {
               icon = "uptime-kuma.svg";
               description = "Service Monitoring";
-              href = "http://uptime.shlambert.top";
+              href = "https://uptime.shlambert.top";
             };
           }
           {
             "WG-Easy" = {
-              icon = "wg-easy.svg";
+              icon = "wireguard.svg";
               description = "WireGuard VPN Management";
-              href = "http://vpn.shlambert.top";
+              href = "https://vpn.shlambert.top";
             };
           }
         ];
       }
       {
-	"Media administration" = [
+        "Media administration" = [
           {
             "Radarr" = {
               icon = "radarr.svg";
               description = "Movie Automation";
-              href = "http://radarr.shlambert.top";
+              href = "https://radarr.shlambert.top";
             };
           }
           {
             "Sonarr" = {
               icon = "sonarr.svg";
               description = "TV Show Automation";
-              href = "http://sonarr.shlambert.top";
+              href = "https://sonarr.shlambert.top";
             };
           }
           {
             "Bazarr" = {
               icon = "bazarr.svg";
               description = "Subtitle Automation";
-              href = "http://bazarr.shlambert.top";
+              href = "https://bazarr.shlambert.top";
             };
           }
           {
             "Prowlarr" = {
               icon = "prowlarr.svg";
               description = "Indexer Management";
-              href = "http://prowlarr.shlambert.top";
+              href = "https://prowlarr.shlambert.top";
             };
           }
           {
             "qBittorrent" = {
               icon = "qbittorrent.svg";
               description = "Torrent Client";
-              href = "http://torrent.shlambert.top";
+              href = "https://torrent.shlambert.top";
             };
           }
 
-	];
+        ];
       }
     ];
   };
