@@ -1,5 +1,0 @@
-{
-  services.traccar = {
-    enable = true;
-  };
-}

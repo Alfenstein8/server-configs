@@ -13,7 +13,6 @@
 
       # The password for your Restic repository.
       # It's highly recommended to store this securely, e.g., using agenix or sops-nix.
-      # For demonstration, we'll put it directly here, but DON'T do this in production.
       passwordFile = config.age.secrets.restic.path;
 
       # Schedule for backups using systemd.timers syntax.

@@ -15,8 +15,8 @@
     ./hardware-configuration.nix
     ./hardware-acceleration.nix # QSV use GPU
     ./secrets.nix
-    ./root-certificates.nix
-    ./backup.nix # Upload backup to backblaze
+    # ./root-certificates.nix
+    # ./backup.nix # Upload backup to backblaze
     ./zfs.nix # zsf Mirror
     ./users.nix
     ./caddy.nix # Reverse proxy
@@ -34,13 +34,12 @@
     ./jellyseerr.nix # Jellyfin video requests
     # ./tailscale.nix # Easy VPN setup
     ./syncthing.nix # Sync files to divices
-    ./filebrowser.nix # Use samba share in web
+    # ./filebrowser.nix # Use samba share in web
     ./navidrome.nix # Music streaming
-    # ./traccar.nix
     ./owntracks
     ./cockpit.nix
     ./bash.nix
-    ./acme.nix
+    ./acme.nix # dns-01 challenge to get ssl certificate for caddy
   ];
 
   # Bootloader.
