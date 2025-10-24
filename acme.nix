@@ -11,7 +11,7 @@
       dnsProvider = "spaceship";
       dnsResolver = "1.1.1.1";
       dnsPropagationCheck = true;
-      environmentFile = config.age.secrets.secret1.path;
+      environmentFile = config.age.secrets.spaceship.path;
     };
   };
 }

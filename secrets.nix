@@ -1,4 +1,8 @@
 {
-  age.secrets.secret1.file = ./secrets/secret1.age;
+  age.secrets = {
+    spaceship.file = ./secrets/spaceship.age;
+    restic.file = ./secrets/restic.age;
+    backblaze.file = ./secrets/backblaze.age;
+  };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }

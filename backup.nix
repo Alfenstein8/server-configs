@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   services.restic.backups = {
     # You can give your backup a meaningful name
@@ -13,7 +14,7 @@
       # The password for your Restic repository.
       # It's highly recommended to store this securely, e.g., using agenix or sops-nix.
       # For demonstration, we'll put it directly here, but DON'T do this in production.
-      passwordFile = "/etc/nixos/restic-password";
+      passwordFile = config.age.secrets.restic.path;
 
       # Schedule for backups using systemd.timers syntax.
       # This example runs daily at 3 AM.
@@ -22,7 +23,7 @@
         Persistent = true;
       };
 
-      exclude = ["/mnt/storage/data/media"];
+      exclude = [ "/mnt/storage/data/media" ];
 
       # Pruning old backups based on a retention policy.
       # This example keeps:
@@ -37,7 +38,7 @@
         "--keep-yearly 1"
       ];
 
-      environmentFile = "/etc/nixos/backblaze.env";
+      environmentFile = config.age.secrets.backblaze.path;
 
       # You might want to enable health checking with healthchecks.io or similar.
       # healthChecks = [ "https://hc-ping.com/YOUR_HEALTHCHECK_UUID" ];
