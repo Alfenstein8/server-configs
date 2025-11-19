@@ -9,8 +9,8 @@
       intel-media-driver
       # intel-vaapi-driver
       opencl-headers
-      vaapiVdpau
-      vaapiIntel
+      libva-vdpau-driver
+      intel-vaapi-driver
       libvdpau-va-gl
       # intel-compute-runtime # OpenCL filter support (hardware tonemapping and subtitle burn-in)
       intel-compute-runtime-legacy1
