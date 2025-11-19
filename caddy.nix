@@ -86,6 +86,10 @@ in
     reverse_proxy localhost:8384
     '';
 
+    virtualHosts."http://launchpad.shlambert.top, https://launchpad.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:5500
+    '';
+
     virtualHosts."https://watchlist.shlambert.top".extraConfig = ''
     reverse_proxy localhost:3080
     '';
