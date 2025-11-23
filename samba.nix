@@ -8,7 +8,7 @@
         "server string" = "shlamb";
         "netbios name" = "shlamb";
         security = "user";
-        "hosts allow" = "192.168.0. 10.89.1.0/24 127.0.0.1 localhost"; # 10.89.1.0/24 is wg-easy
+        "hosts allow" = "192.168.0.0/24 10.89.1.0/24 127.0.0.1 localhost"; # 10.89.1.0/24 is wg-easy
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
         "map to guest" = "bad user";
@@ -34,10 +34,10 @@
         "read only" = "no";
         "guest ok" = "no";
         "valid users" = "alfred";
-        "create mask" = "0644";
-        "directory mask" = "0755";
+        "create mask" = "0660";
+        "directory mask" = "0770";
         "force user" = "alfred";
-        "force group" = "users";
+        "force group" = "alfred";
       };
   
       "zehra" = {
@@ -93,7 +93,7 @@
         "browseable" = "yes";
         "read only" = "no";
         "guest ok" = "no";
-        "valid users" = "@samba-users";
+        "valid users" = ["alfred" "ole" "maj-britt" "esajas"];
         "create mask" = "0664"; # Allow owner/group to read/write, others no (Unix permissions will enforce)
         "directory mask" = "0775"; # Allow owner/group to rwx, others rx
         "force user" = "shared-files";

@@ -1,9 +1,10 @@
 { pkgs, ... }: {
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.groups.alfred = {};
   users.users.alfred = {
     isNormalUser = true;
     description = "Alfred";
-    extraGroups = [ "networkmanager" "wheel" "samba-users" "filebrowser" ];
+    extraGroups = [ "networkmanager" "wheel" "samba-users" "filebrowser" "alfred" ];
     packages = with pkgs; [];
   };
 
@@ -37,6 +38,10 @@
     isSystemUser = true;
     description = "Shared Files";
     group = "shared-files";
+  };
+
+  users.users.root = {
+    extraGroups = [ "alfred" ];
   };
 
   users.groups.shared-files = {};
