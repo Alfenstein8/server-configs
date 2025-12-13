@@ -28,6 +28,18 @@
         "force group" = "users";
       };
   
+      "shlammen" = {
+        "path" = "/mnt/storage/data/Shares/shlammen";
+        "browseable" = "yes";
+        "read only" = "no";
+        "guest ok" = "no";
+        "valid users" = ["alfred" "zehra"];
+        "create mask" = "0660";
+        "directory mask" = "0770";
+        "force user" = "shlammen";
+        "force group" = "shlammen";
+      };
+
       "alfred" = {
         "path" = "/mnt/storage/data/Shares/Users/alfred";
         "browseable" = "yes";
