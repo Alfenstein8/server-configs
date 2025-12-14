@@ -21,6 +21,7 @@
     ./users.nix
     ./caddy.nix # Reverse proxy
     ./immich.nix # Image backup
+    ./immichframe.nix
     ./paperless.nix # Document management
     ./radicale.nix # Contacts and calendar
     # ./netdata.nix # Server Monitor
