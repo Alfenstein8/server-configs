@@ -43,6 +43,7 @@
     ./acme.nix # dns-01 challenge to get ssl certificate for caddy
     ./rustdesk.nix
     ./minecraft.nix
+    ./adguardhome.nix
   ];
 
   # Bootloader.

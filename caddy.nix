@@ -90,6 +90,10 @@ in
     reverse_proxy localhost:5500
     '';
 
+    virtualHosts."https://adguard.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:3005
+    '';
+
     virtualHosts."https://watchlist.shlambert.top".extraConfig = ''
     reverse_proxy localhost:3080
     '';
