@@ -6,4 +6,5 @@ in
   "restic.age".publicKeys = [ homeserver ];
   "backblaze.age".publicKeys = [ homeserver ];
   "immich.age".publicKeys = [ homeserver ];
+  "mullvad.age".publicKeys = [ homeserver ];
 }

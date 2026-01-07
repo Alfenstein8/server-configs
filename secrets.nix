@@ -4,6 +4,7 @@
     restic.file = ./secrets/restic.age;
     backblaze.file = ./secrets/backblaze.age;
     immich.file = ./secrets/immich.age;
+    mullvad.file = ./secrets/mullvad.age;
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }
