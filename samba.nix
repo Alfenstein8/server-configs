@@ -8,7 +8,7 @@
         "server string" = "shlamb";
         "netbios name" = "shlamb";
         security = "user";
-        "hosts allow" = "192.168.0.0/24 10.89.1.0/24 127.0.0.1 localhost"; # 10.89.1.0/24 is wg-easy
+        "hosts allow" = "192.168.0.0/24 10.42.42.0/24 127.0.0.1 localhost"; # 10.42.42.0/24 is wg-easy
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
         "map to guest" = "bad user";

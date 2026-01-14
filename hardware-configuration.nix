@@ -10,7 +10,7 @@
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" "ip_tables" ];
+  boot.kernelModules = [ "kvm-intel" "ip_tables" "iptable_nat" "ip6table_nat" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
