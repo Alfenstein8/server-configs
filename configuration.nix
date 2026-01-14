@@ -40,6 +40,7 @@
     ./cockpit.nix
     ./bash.nix
     ./acme.nix # dns-01 challenge to get ssl certificate for caddy
+    ./tubearchivist # Youtube
     # ./rustdesk.nix
     # ./minecraft.nix
     # ./adguardhome.nix

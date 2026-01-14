@@ -32,6 +32,10 @@ in
       reverse_proxy localhost:19999
       '';
 
+      "https://tube.shlambert.top".extraConfig = ''
+      reverse_proxy localhost:8000
+      '';
+
       "http://uptime.shlambert.top, https://uptime.shlambert.top".extraConfig = ''
       reverse_proxy localhost:3001
       '';
