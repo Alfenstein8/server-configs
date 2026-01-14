@@ -3,12 +3,7 @@
   services.cockpit = {
     enable = true;
     port = 9090;
-    allowed-origins = [ "http://cockpit.shlambert.top" ];
-    settings = {
-      WebService = {
-        AllowUnencrypted = true;
-      };
-    };
+    allowed-origins = [ "https://cockpit.shlambert.top" ];
   };
 
   environment.systemPackages = with pkgs; [ cockpit ];
