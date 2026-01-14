@@ -27,7 +27,6 @@
     # ./netdata.nix # Server Monitor
     ./uptime-kuma.nix # Services monitor
     ./homepage.nix
-    ./pingvin-share # Share big files
     ./wg-easy # Wireguard VPN with web ui
     ./arr # The arr stack
     ./jellyfin.nix # Video streaming

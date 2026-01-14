@@ -44,10 +44,6 @@ in
       reverse_proxy localhost:51821
       '';
 
-      "http://share.shlambert.top, https://share.shlambert.top".extraConfig = ''
-      reverse_proxy localhost:3000
-      '';
-
       "http://jellyfin.shlambert.top, https://jellyfin.shlambert.top".extraConfig = ''
       reverse_proxy localhost:8096
       '';
