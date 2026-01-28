@@ -44,6 +44,7 @@
     # ./rustdesk.nix
     # ./minecraft.nix
     # ./adguardhome.nix
+    ./forgejo.nix
   ];
 
   # Bootloader.
@@ -131,7 +132,7 @@
   services.fail2ban.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [80 443 51820];
+  networking.firewall.allowedTCPPorts = [80 443 51820 2222]; #HTTP, HTTPS, Wireguard, forgejo SSH
   networking.firewall.enable = true;
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
