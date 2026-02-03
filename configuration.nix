@@ -19,6 +19,7 @@
     # ./backup.nix # Upload backup to backblaze
     ./zfs.nix # zsf Mirror
     ./users.nix
+    ./services.nix # Custom systemd services
     ./caddy.nix # Reverse proxy
     ./immich.nix # Image backup
     ./immichframe.nix
