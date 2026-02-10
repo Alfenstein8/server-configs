@@ -21,7 +21,7 @@
 
   # Containers
   virtualisation.oci-containers.containers."wg-easy" = {
-    image = "ghcr.io/wg-easy/wg-easy:15.2.1";
+    image = "ghcr.io/wg-easy/wg-easy:15.2.2";
     volumes = [
       "/run/current-system/kernel-modules/lib/modules:/lib/modules:ro"
       "wg-easy_etc_wireguard:/etc/wireguard:rw"
