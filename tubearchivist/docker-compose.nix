@@ -91,7 +91,7 @@
     ];
   };
   virtualisation.oci-containers.containers."tubearchivist" = {
-    image = "docker.io/bbilly1/tubearchivist:v0.5.8";
+    image = "docker.io/bbilly1/tubearchivist:v0.5.9";
     environment = {
       "ELASTIC_PASSWORD" = "verysecret";
       "ES_URL" = "http://archivist-es:9200";
