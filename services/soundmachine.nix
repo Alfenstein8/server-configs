@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   systemd.services.soundmachine = {
-    description = "Soundmachine Bun Server";
+    description = "Soundmachine Server";
     
     # Ensure the network is up before starting
     after = [ "network.target" ];
@@ -12,15 +12,21 @@
       User = "alfred";
       WorkingDirectory = "/home/alfred/manual/soundmachine/server";
       
-      # We explicitly add 'bun' to the service's PATH
-      # This replaces the need for 'nix-shell -p bun'
-      ExecStart = "${pkgs.bun}/bin/bun -b run dev --host";
+      ExecStart = "${pkgs.pnpm}/bin/pnpm preview --host --outDir build";
       
       Restart = "on-failure";
       RestartSec = "5s";
+
+      # Optional but good practice
+      StandardOutput = "journal";
+      StandardError = "journal";
+      Environment = [
+        "HOME=/home/alfred"
+        "PATH=${pkgs.pnpm}/bin:${pkgs.nodejs}/bin:/run/current-system/sw/bin"
+      ];
     };
     
     # This ensures bun is available in the service environment
-    path = [ pkgs.bun ];
+    path = [ pkgs.pnpm pkgs.nodejs ];
   };
 }

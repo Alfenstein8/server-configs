@@ -85,7 +85,7 @@ in
       '';
 
       "http://launchpad.shlambert.top, https://launchpad.shlambert.top".extraConfig = ''
-      reverse_proxy localhost:5500
+      reverse_proxy localhost:4173
       '';
 
       "https://adguard.shlambert.top".extraConfig = ''
