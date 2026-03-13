@@ -26,6 +26,13 @@
               href = "https://watchlist.shlambert.top";
             };
           }
+          {
+            "Navidrome" = {
+              icon = "navidrome.svg";
+              description = "Music";
+              href = "https://navidrome.shlambert.top";
+            };
+          }
         ];
       }
       {
@@ -42,13 +49,6 @@
               icon = "paperless-ngx.svg";
               description = "Document Archiving";
               href = "https://paper.shlambert.top";
-            };
-          }
-          {
-            "Pingvin Share" = {
-              icon = "pingvin-share.svg";
-              description = "File Sharing";
-              href = "https://share.shlambert.top";
             };
           }
           {
