@@ -46,6 +46,7 @@
     # ./minecraft.nix
     # ./adguardhome.nix
     ./forgejo.nix
+    ./adguardhome.nix
   ];
 
   # Bootloader.
@@ -133,9 +134,9 @@
   services.fail2ban.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [80 443 51820 2222]; #HTTP, HTTPS, Wireguard, forgejo SSH
+  networking.firewall.allowedTCPPorts = [80 443 51820 2222 53]; #HTTP, HTTPS, Wireguard, forgejo SSH, adguard home
   networking.firewall.enable = true;
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedUDPPorts = [ 53 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
