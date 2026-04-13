@@ -7,4 +7,5 @@ in
   "backblaze.age".publicKeys = [ homeserver ];
   "immich.age".publicKeys = [ homeserver ];
   "mullvad.age".publicKeys = [ homeserver ];
+  "airvpn.age".publicKeys = [ homeserver ];
 }

@@ -5,6 +5,7 @@
     backblaze.file = ./secrets/backblaze.age;
     immich.file = ./secrets/immich.age;
     mullvad.file = ./secrets/mullvad.age;
+    airvpn.file = ./secrets/airvpn.age;
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }
