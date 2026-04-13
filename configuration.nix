@@ -17,6 +17,7 @@
     ./secrets.nix
     # ./root-certificates.nix
     # ./backup.nix # Upload backup to backblaze
+    # ./dawarich.nix
     ./zfs.nix # zsf Mirror
     ./users.nix
     ./services # Custom systemd services
@@ -37,7 +38,7 @@
     ./syncthing.nix # Sync files to divices
     # ./filebrowser.nix # Use samba share in web
     ./navidrome.nix # Music streaming
-    ./owntracks
+    # ./owntracks
     ./cockpit.nix
     ./bash.nix
     ./acme.nix # dns-01 challenge to get ssl certificate for caddy

@@ -16,6 +16,10 @@ in
       reverse_proxy localhost:28981
       '';
 
+      "http://dawarich.shlambert.top, https://dawarich.shlambert.top".extraConfig = ''
+      reverse_proxy localhost:3002
+      '';
+
       "radicale.shlambert.top".extraConfig = ''
       reverse_proxy localhost:5232
         tls ${certloc}/cert.pem ${certloc}/key.pem
