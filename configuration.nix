@@ -22,6 +22,7 @@
     ./users.nix
     ./services # Custom systemd services
     ./caddy.nix # Reverse proxy
+    ./headscale.nix
     ./immich.nix # Image backup
     ./immichframe.nix
     ./paperless.nix # Document management
