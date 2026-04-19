@@ -13,10 +13,10 @@
         "guest account" = "nobody";
         "map to guest" = "bad user";
 
-	# "interfaces" = "wlp4s0"; # Change or remove this on new server
+        # "interfaces" = "wlp4s0"; # Change or remove this on new server
         # "bind interfaces only" = "yes";
       };
-  
+
       "public" = {
         "path" = "/mnt/storage/data/Shares/Public";
         "browseable" = "yes";
@@ -27,13 +27,16 @@
         "force user" = "alfred";
         "force group" = "users";
       };
-  
+
       "shlammen" = {
         "path" = "/mnt/storage/data/Shares/shlammen";
         "browseable" = "yes";
         "read only" = "no";
         "guest ok" = "no";
-        "valid users" = ["alfred" "zehra"];
+        "valid users" = [
+          "alfred"
+          "zehra"
+        ];
         "create mask" = "0660";
         "directory mask" = "0770";
         "force user" = "shlammen";
@@ -51,7 +54,7 @@
         "force user" = "alfred";
         "force group" = "alfred";
       };
-  
+
       "zehra" = {
         "path" = "/mnt/storage/data/Shares/Users/zehra";
         "browseable" = "yes";
@@ -75,7 +78,7 @@
         "force user" = "ole";
         "force group" = "users";
       };
-  
+
       "maj-britt" = {
         "path" = "/mnt/storage/data/Shares/Users/maj-britt";
         "browseable" = "yes";
@@ -87,7 +90,7 @@
         "force user" = "maj-britt";
         "force group" = "users";
       };
-  
+
       "esajas" = {
         "path" = "/mnt/storage/data/Shares/Users/esajas";
         "browseable" = "yes";
@@ -99,13 +102,18 @@
         "force user" = "esajas";
         "force group" = "users";
       };
-  
+
       "shared" = {
         "path" = "/mnt/storage/data/Shares/Shared";
         "browseable" = "yes";
         "read only" = "no";
         "guest ok" = "no";
-        "valid users" = ["alfred" "ole" "maj-britt" "esajas"];
+        "valid users" = [
+          "alfred"
+          "ole"
+          "maj-britt"
+          "esajas"
+        ];
         "create mask" = "0664"; # Allow owner/group to read/write, others no (Unix permissions will enforce)
         "directory mask" = "0775"; # Allow owner/group to rwx, others rx
         "force user" = "shared-files";
@@ -113,12 +121,12 @@
       };
     };
   };
-  
+
   services.samba-wsdd = {
     enable = true;
     openFirewall = true;
   };
-  
+
   networking.firewall.allowPing = true;
 
 }

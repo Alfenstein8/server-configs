@@ -1,4 +1,4 @@
-{pkgs, config, ...}:
+{ pkgs, config, ... }:
 {
   security.acme = {
     acceptTerms = true;
@@ -7,7 +7,7 @@
       group = config.services.caddy.group;
 
       domain = "shlambert.top";
-      extraDomainNames = ["*.shlambert.top"];
+      extraDomainNames = [ "*.shlambert.top" ];
       dnsProvider = "spaceship";
       dnsResolver = "1.1.1.1";
       dnsPropagationCheck = true;

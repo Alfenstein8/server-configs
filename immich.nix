@@ -13,5 +13,11 @@
 
     };
   };
-  users.users.immich.extraGroups = [ "video" "render" "shared-files" "users" "alfred" ];
+  users.users.immich.extraGroups = [
+    "video"
+    "render"
+    "shared-files"
+    "users"
+    "alfred"
+  ];
 }

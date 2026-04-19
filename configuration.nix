@@ -9,8 +9,12 @@
   inputs,
   nvfNeovim,
   ...
-}: {
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+}:
+{
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   imports = [
     ./hardware-configuration.nix
     ./hardware-acceleration.nix # QSV use GPU
@@ -96,7 +100,8 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs;
+  environment.systemPackages =
+    with pkgs;
     [
       git
       lazygit
@@ -108,6 +113,7 @@
       clinfo
       lsd
       yazi
+      nixfmt
     ]
     ++ [
       inputs.compose2nix.packages.${system}.default
@@ -135,7 +141,13 @@
   services.fail2ban.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [80 443 51820 2222 53]; #HTTP, HTTPS, Wireguard, forgejo SSH, adguard home
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+    51820
+    2222
+    53
+  ]; # HTTP, HTTPS, Wireguard, forgejo SSH, adguard home
   networking.firewall.enable = true;
   networking.firewall.allowedUDPPorts = [ 53 ];
   # Or disable the firewall altogether.

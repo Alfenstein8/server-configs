@@ -11,7 +11,7 @@
         SSH_LISTEN_PORT = 2222;
         START_SSH_SERVER = true;
       };
-      service.DISABLE_REGISTRATION = false; 
+      service.DISABLE_REGISTRATION = false;
       actions = {
         ENABLED = true;
         DEFAULT_ACTIONS_URL = "github";

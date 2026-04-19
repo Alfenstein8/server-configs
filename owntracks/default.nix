@@ -8,4 +8,3 @@
     reverse_proxy localhost:8084
   '';
 }
-

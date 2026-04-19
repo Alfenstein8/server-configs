@@ -1,5 +1,5 @@
 {
-  imports = [ 
-    ./docker-compose.nix 
-    ];
+  imports = [
+    ./docker-compose.nix
+  ];
 }

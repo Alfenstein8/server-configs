@@ -1,45 +1,70 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.groups.shlammen = {};
+  users.groups.shlammen = { };
   users.users.shlammen = {
     isSystemUser = true;
     description = "Alfred and Zehra";
     group = "shlammen";
   };
 
-  users.groups.alfred = {};
+  users.groups.alfred = { };
   users.users.alfred = {
     isNormalUser = true;
     description = "Alfred";
-    extraGroups = [ "networkmanager" "wheel" "samba-users" "filebrowser" "alfred" "shlammen" ];
-    packages = with pkgs; [];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "samba-users"
+      "filebrowser"
+      "alfred"
+      "shlammen"
+    ];
+    packages = with pkgs; [ ];
   };
 
   users.users.zehra = {
     isNormalUser = true;
     description = "Zehra";
-    extraGroups = [ "networkmanager" "samba-users" "filebrowser" "shlammen"];
+    extraGroups = [
+      "networkmanager"
+      "samba-users"
+      "filebrowser"
+      "shlammen"
+    ];
   };
 
   users.users.ole = {
     isNormalUser = true;
     description = "Ole";
-    extraGroups = [ "networkmanager" "samba-users" "filebrowser"];
+    extraGroups = [
+      "networkmanager"
+      "samba-users"
+      "filebrowser"
+    ];
   };
 
   users.users.maj-britt = {
     isNormalUser = true;
     description = "Maj-Britt";
-    extraGroups = [ "networkmanager" "samba-users" "filebrowser"];
+    extraGroups = [
+      "networkmanager"
+      "samba-users"
+      "filebrowser"
+    ];
   };
 
   users.users.esajas = {
     isNormalUser = true;
     description = "Esajas";
-    extraGroups = [ "networkmanager" "samba-users" "filebrowser"];
+    extraGroups = [
+      "networkmanager"
+      "samba-users"
+      "filebrowser"
+    ];
   };
 
-  users.groups.samba-users = {};
+  users.groups.samba-users = { };
 
   users.users.shared-files = {
     isSystemUser = true;
@@ -51,9 +76,9 @@
     extraGroups = [ "alfred" ];
   };
 
-  users.groups.shared-files = {};
+  users.groups.shared-files = { };
 
-  users.groups.media-sccess = {};
+  users.groups.media-sccess = { };
 
   # users.users.deluge = {
   #   extraGroups = [ "media-access" ];

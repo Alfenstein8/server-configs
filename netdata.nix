@@ -12,7 +12,7 @@
     };
   };
   services.caddy.virtualHosts."http://netdata.shlambert.top".extraConfig = ''
-  reverse_proxy localhost:19999
+    reverse_proxy localhost:19999
   '';
-  networking.firewall.allowedTCPPorts = [19999];
+  networking.firewall.allowedTCPPorts = [ 19999 ];
 }

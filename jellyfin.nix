@@ -1,4 +1,5 @@
-{pkgs, ...}:{
+{ pkgs, ... }:
+{
   services.jellyfin = {
     enable = true;
     openFirewall = true;
@@ -9,6 +10,9 @@
     pkgs.jellyfin-ffmpeg
   ];
   users.users.jellyfin = {
-    extraGroups = [ "render" "video" ];
+    extraGroups = [
+      "render"
+      "video"
+    ];
   };
 }

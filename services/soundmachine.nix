@@ -33,9 +33,8 @@
     ];
   };
 
-  services.caddy.virtualHosts."http://launchpad.shlambert.top".extraConfig =
-    ''
-      reverse_proxy localhost:4173
-    '';
+  services.caddy.virtualHosts."http://launchpad.shlambert.top".extraConfig = ''
+    reverse_proxy localhost:4173
+  '';
 
 }
