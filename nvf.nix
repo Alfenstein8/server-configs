@@ -20,7 +20,7 @@
 
     lsp.enable = true;
     languages = {
-      enableTreesitter = true;
+      # enableTreesitter = true;
 
       nix.enable = true;
     };
