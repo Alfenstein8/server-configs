@@ -36,7 +36,6 @@
     ./jellyseerr.nix # Jellyfin video requests
     # ./tailscale.nix # Easy VPN setup
     ./syncthing.nix # Sync files to divices
-    # ./filebrowser.nix # Use samba share in web
     ./navidrome.nix # Music streaming
     # ./owntracks
     ./cockpit.nix
