@@ -6,7 +6,7 @@
     settings = {
       dns = {
         base_domain = "ts.shlambert.top";
-        nameservers.global = [ "127.0.0.1" ];
+        nameservers.global = [ "192.168.0.188" ];
       };
       server_url = "https://headscale.shlambert.top";
       logtail.enabled = false;

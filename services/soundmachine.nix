@@ -2,7 +2,7 @@
 {
   systemd.services.soundmachine = {
     description = "Soundmachine Server";
-    
+
     # Ensure the network is up before starting
     after = [ "network.target" ];
     wantedBy = [ "multi-user.target" ];
@@ -11,9 +11,9 @@
       Type = "simple";
       User = "alfred";
       WorkingDirectory = "/home/alfred/manual/soundmachine/server";
-      
+
       ExecStart = "${pkgs.pnpm}/bin/pnpm preview --host --outDir build";
-      
+
       Restart = "on-failure";
       RestartSec = "5s";
 
@@ -25,8 +25,17 @@
         "PATH=${pkgs.pnpm}/bin:${pkgs.nodejs}/bin:/run/current-system/sw/bin"
       ];
     };
-    
+
     # This ensures bun is available in the service environment
-    path = [ pkgs.pnpm pkgs.nodejs ];
+    path = [
+      pkgs.pnpm
+      pkgs.nodejs
+    ];
   };
+
+  services.caddy.virtualHosts."http://launchpad.shlambert.top".extraConfig =
+    ''
+      reverse_proxy localhost:4173
+    '';
+
 }

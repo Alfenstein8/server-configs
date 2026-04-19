@@ -88,10 +88,6 @@ in
       reverse_proxy localhost:8384
       '';
 
-      "http://launchpad.shlambert.top, https://launchpad.shlambert.top".extraConfig = ''
-      reverse_proxy localhost:4173
-      '';
-
       "https://adguard.shlambert.top".extraConfig = ''
       reverse_proxy localhost:3005
       '';
