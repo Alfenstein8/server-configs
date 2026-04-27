@@ -16,6 +16,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
+    copyparty = {
+      url = "github:9001/copyparty";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -23,6 +27,7 @@
       nixpkgs,
       nvf,
       agenix,
+      copyparty,
       ...
     }@inputs:
     let
@@ -43,11 +48,13 @@
             hostname
             inputs
             nvfNeovim
+            copyparty
             ;
         };
         modules = [
           agenix.nixosModules.default
           nvf.nixosModules.default
+          copyparty.nixosModules.default
           ./configuration.nix
         ];
       };

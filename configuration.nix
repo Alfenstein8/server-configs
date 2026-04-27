@@ -22,6 +22,7 @@
     # ./root-certificates.nix
     # ./backup.nix # Upload backup to backblaze
     # ./dawarich.nix
+    # ./copyparty.nix
     ./zfs.nix # zsf Mirror
     ./users.nix
     ./services # Custom systemd services
