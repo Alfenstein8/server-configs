@@ -8,4 +8,5 @@ in
   "immich.age".publicKeys = [ homeserver ];
   "mullvad.age".publicKeys = [ homeserver ];
   "airvpn.age".publicKeys = [ homeserver ];
+  "wireguard.age".publicKeys = [ homeserver ];
 }

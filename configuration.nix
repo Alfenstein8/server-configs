@@ -35,7 +35,8 @@
     # ./netdata.nix # Server Monitor
     ./uptime-kuma.nix # Services monitor
     ./homepage.nix
-    ./wg-easy # Wireguard VPN with web ui
+    # ./wg-easy # Wireguard VPN with web ui
+    ./wireguard.nix
     ./arr # The arr stack
     ./jellyfin.nix # Video streaming
     ./samba.nix # Samba server
@@ -115,6 +116,7 @@
       lsd
       yazi
       nixfmt
+      wireguard-tools
     ]
     ++ [
       inputs.compose2nix.packages.${system}.default
@@ -145,10 +147,9 @@
   networking.firewall.allowedTCPPorts = [
     80
     443
-    51820
     2222
     53
-  ]; # HTTP, HTTPS, Wireguard, forgejo SSH, adguard home
+  ]; # HTTP, HTTPS, forgejo SSH, adguard home
   networking.firewall.enable = true;
   networking.firewall.allowedUDPPorts = [ 53 ];
   # Or disable the firewall altogether.

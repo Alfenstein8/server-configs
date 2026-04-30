@@ -76,13 +76,6 @@
               href = "https://uptime.shlambert.top";
             };
           }
-          {
-            "WG-Easy" = {
-              icon = "wireguard.svg";
-              description = "WireGuard VPN Management";
-              href = "https://vpn.shlambert.top";
-            };
-          }
         ];
       }
       {
