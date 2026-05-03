@@ -54,6 +54,8 @@
     # ./adguardhome.nix
     ./forgejo.nix
     ./adguardhome.nix
+    ./prometheus.nix
+    ./grafana.nix
   ];
 
   # Bootloader.

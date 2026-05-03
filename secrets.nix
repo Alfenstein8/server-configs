@@ -7,6 +7,10 @@
     mullvad.file = ./secrets/mullvad.age;
     airvpn.file = ./secrets/airvpn.age;
     wireguard.file = ./secrets/wireguard.age;
+    grafana = {
+      file = ./secrets/grafana.age;
+      owner = "grafana";
+    };
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }

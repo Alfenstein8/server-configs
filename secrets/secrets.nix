@@ -9,4 +9,5 @@ in
   "mullvad.age".publicKeys = [ homeserver ];
   "airvpn.age".publicKeys = [ homeserver ];
   "wireguard.age".publicKeys = [ homeserver ];
+  "grafana.age".publicKeys = [ homeserver ];
 }
