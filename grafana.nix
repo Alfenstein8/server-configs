@@ -25,6 +25,23 @@
         isDefault = true;
       }
     ];
+    alerting = {
+      contactPoints.settings.contactPoints = [
+        {
+          name = "ntfy";
+          receivers = [
+            {
+              uid = "ntfy-receiver";
+              type = "webhook";
+              settings = {
+                url = "https://ntfy.sh/shlambert-metrics-alert-a8888";
+                httpMethod = "POST";
+              };
+            }
+          ];
+        }
+      ];
+    };
   };
 
   services.caddy.virtualHosts."https://grafana.shlambert.top".extraConfig = ''
