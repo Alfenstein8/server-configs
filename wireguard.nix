@@ -22,14 +22,24 @@
 
       peers = [
         {
+          name = "oneplus-phone";
+          publicKey = "lVhLVbeGWGZafGhAb6ddgLsspqIT0ZQc1L0pCom+SUY=";
+          allowedIPs = [ "10.8.0.2/32" ];
+        }
+        {
           name = "tux-laptop";
           publicKey = "wL3prq6+hOHqNbSqNUYTkyUEET4yfp1KupzEYnhntjA=";
           allowedIPs = [ "10.8.0.3/32" ];
         }
         {
-          name = "oneplus-phone";
-          publicKey = "lVhLVbeGWGZafGhAb6ddgLsspqIT0ZQc1L0pCom+SUY=";
-          allowedIPs = [ "10.8.0.2/32" ];
+          name = "zehra-desktop";
+          publicKey = "/HcB18CU6+q82Be1F+Sz4dOEcp4VuL+7TJ5NWvkcFRU=";
+          allowedIPs = [ "10.8.0.4/32" ];
+        }
+        {
+          name = "zehra-ipad";
+          publicKey = "tYyz3mR7DuihQcBMFP8hhUMCVQyLLE1UPkWDv0RcfhU=";
+          allowedIPs = [ "10.8.0.5/32" ];
         }
       ];
     };
