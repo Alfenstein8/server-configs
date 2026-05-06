@@ -56,6 +56,7 @@
     ./adguardhome.nix
     ./prometheus.nix
     ./grafana.nix
+    ./loki.nix
   ];
 
   # Bootloader.

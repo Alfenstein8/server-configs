@@ -20,6 +20,17 @@
           }
         ];
       }
+      {
+        job_name = "immich";
+        static_configs = [
+          {
+            targets = [
+              "localhost:8083"
+              "localhost:8084"
+            ];
+          }
+        ];
+      }
     ];
   };
 
