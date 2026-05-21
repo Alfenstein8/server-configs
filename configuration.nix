@@ -57,6 +57,8 @@
     ./prometheus.nix
     ./grafana.nix
     ./loki.nix
+    # ./tandoor.nix
+    ./mealie.nix
   ];
 
   # Bootloader.
