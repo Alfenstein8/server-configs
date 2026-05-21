@@ -32,6 +32,7 @@
     ./immichframe.nix
     ./paperless.nix # Document management
     ./radicale.nix # Contacts and calendar
+    ./restic.nix # restic server
     # ./netdata.nix # Server Monitor
     ./uptime-kuma.nix # Services monitor
     ./homepage.nix

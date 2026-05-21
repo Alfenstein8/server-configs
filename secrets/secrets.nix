@@ -11,4 +11,5 @@ in
   "wireguard.age".publicKeys = [ homeserver ];
   "tandoor.age".publicKeys = [ homeserver ];
   "grafana.age".publicKeys = [ homeserver ];
+  "restic-htpasswd.age".publicKeys = [ homeserver ];
 }

@@ -8,6 +8,10 @@
     airvpn.file = ./secrets/airvpn.age;
     wireguard.file = ./secrets/wireguard.age;
     tandoor.file = ./secrets/tandoor.age;
+    restic-htpasswd = {
+      file = ./secrets/restic-htpasswd.age;
+      owner = "restic";
+    };
     grafana = {
       file = ./secrets/grafana.age;
       owner = "grafana";
