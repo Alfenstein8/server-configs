@@ -29,7 +29,7 @@
     ./caddy.nix # Reverse proxy
     ./headscale.nix
     ./immich.nix # Image backup
-    ./immichframe.nix
+    # ./immichframe.nix
     ./paperless.nix # Document management
     ./radicale.nix # Contacts and calendar
     ./restic.nix # restic server
