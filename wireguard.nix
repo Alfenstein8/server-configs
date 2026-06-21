@@ -41,6 +41,11 @@
           publicKey = "tYyz3mR7DuihQcBMFP8hhUMCVQyLLE1UPkWDv0RcfhU=";
           allowedIPs = [ "10.8.0.5/32" ];
         }
+        {
+          name = "chromecast";
+          publicKey = "DOKwjuT0MMYT0U1liAGPnEYkAk3vb+ptW4wKZpMDaA4=";
+          allowedIPs = [ "10.8.0.6/32" ];
+        }
       ];
     };
   };
