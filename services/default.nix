@@ -3,6 +3,6 @@
   imports = [
     # ./quantumsurvivors.nix
     ./soundmachine.nix
-    ./kajak.nix
+    # ./kajak.nix
   ];
 }
