@@ -23,6 +23,7 @@
       Environment = [
         "HOME=/home/alfred"
         "PATH=${pkgs.pnpm}/bin:${pkgs.nodejs}/bin:/run/current-system/sw/bin"
+        "ORIGIN=https://launchpad.shlambert.top"
       ];
     };
 
@@ -33,7 +34,7 @@
     ];
   };
 
-  services.caddy.virtualHosts."http://launchpad.shlambert.top".extraConfig = ''
+  services.caddy.virtualHosts."launchpad.shlambert.top".extraConfig = ''
     reverse_proxy localhost:4173
   '';
 
