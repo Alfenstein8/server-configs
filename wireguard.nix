@@ -46,6 +46,11 @@
           publicKey = "DOKwjuT0MMYT0U1liAGPnEYkAk3vb+ptW4wKZpMDaA4=";
           allowedIPs = [ "10.8.0.6/32" ];
         }
+        {
+          name = "ole-mobile";
+          publicKey = "ychp24+0sdzMcc+GR8Ip6iVUD41Z3DYz3zdK1OeTq1s=";
+          allowedIPs = [ "10.8.0.7/32" ];
+        }
       ];
     };
   };
