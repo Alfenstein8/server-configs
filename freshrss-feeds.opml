@@ -1,56 +1,134 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Release feeds for the services configured in this repo.
+  Feeds for the homeserver: upstream release feeds for every service enabled in
+  configuration.nix, plus Danish news.
 
   Import in FreshRSS: Subscription management, then Import / export, then Import.
-  A CLI alternative is noted in freshrss.nix.
 
-  Every feed is a GitHub/Codeberg release feed for the upstream project, not the
-  distro package, so it tells you what is out there rather than what nixpkgs has.
+  Two categories, both flat. FreshRSS has no sub-folders: its categories are a
+  single level, so nested OPML outlines are not nested on import, they just
+  become separate top-level categories named after the innermost outline.
+  Per-feed labels are not possible either, labels apply to articles rather than
+  feeds and the OPML importer has no attribute for them. The service each feed
+  belongs to is recorded in its description instead.
+
+  Release feeds point at the upstream project rather than the nixpkgs package,
+  so they say what has been released, not what your channel has.
+
   frss:ttl="21600" throttles each feed to at most one fetch per 6h; the NixOS
-  updater runs every 5 minutes and 40 feeds at that rate would hammer GitHub.
+  updater runs every 5 minutes and 44 feeds at that rate would hammer GitHub.
 -->
 <opml version="2.0" xmlns:frss="https://freshrss.org/opml">
   <head>
-    <title>Homeserver service releases</title>
+    <title>Homeserver feeds</title>
   </head>
   <body>
-    <outline text="Releases: Media">
-      <outline type="rss" text="Jellyfin" title="Jellyfin"
-        description="Media server (services.jellyfin)"
-        xmlUrl="https://github.com/jellyfin/jellyfin/releases.atom"
-        htmlUrl="https://github.com/jellyfin/jellyfin/releases" frss:ttl="21600" />
-      <outline type="rss" text="Seerr (Jellyseerr)" title="Seerr (Jellyseerr)"
-        description="Media requests (services.seerr) - project renamed from Jellyseerr to Seerr"
-        xmlUrl="https://github.com/seerr-team/seerr/releases.atom"
-        htmlUrl="https://github.com/seerr-team/seerr/releases" frss:ttl="21600" />
-      <outline type="rss" text="Watcharr" title="Watcharr"
-        description="Watch list (podman: ghcr.io/sbondco/watcharr)"
-        xmlUrl="https://github.com/sbondCo/Watcharr/releases.atom"
-        htmlUrl="https://github.com/sbondCo/Watcharr/releases" frss:ttl="21600" />
-      <outline type="rss" text="Navidrome" title="Navidrome"
-        description="Music streaming (services.navidrome)"
-        xmlUrl="https://github.com/navidrome/navidrome/releases.atom"
-        htmlUrl="https://github.com/navidrome/navidrome/releases" frss:ttl="21600" />
-      <outline type="rss" text="TubeArchivist" title="TubeArchivist"
-        description="YouTube archiving (podman: bbilly1/tubearchivist)"
-        xmlUrl="https://github.com/tubearchivist/tubearchivist/releases.atom"
-        htmlUrl="https://github.com/tubearchivist/tubearchivist/releases" frss:ttl="21600" />
-    </outline>
-
-    <outline text="Releases: Arr stack">
-      <outline type="rss" text="Radarr" title="Radarr"
-        description="Movie automation (podman: lscr.io/linuxserver/radarr)"
-        xmlUrl="https://github.com/Radarr/Radarr/releases.atom"
-        htmlUrl="https://github.com/Radarr/Radarr/releases" frss:ttl="21600" />
-      <outline type="rss" text="Sonarr" title="Sonarr"
-        description="TV automation (podman: lscr.io/linuxserver/sonarr)"
-        xmlUrl="https://github.com/Sonarr/Sonarr/releases.atom"
-        htmlUrl="https://github.com/Sonarr/Sonarr/releases" frss:ttl="21600" />
+    <outline text="Releases">
+      <outline type="rss" text="AdGuard Home" title="AdGuard Home"
+        description="DNS filtering (services.adguardhome) - feed includes beta builds"
+        xmlUrl="https://github.com/AdguardTeam/AdGuardHome/releases.atom"
+        htmlUrl="https://github.com/AdguardTeam/AdGuardHome/releases" frss:ttl="21600" />
+      <outline type="rss" text="agenix" title="agenix"
+        description="Secret management flake input"
+        xmlUrl="https://github.com/ryantm/agenix/releases.atom"
+        htmlUrl="https://github.com/ryantm/agenix/releases" frss:ttl="21600" />
       <outline type="rss" text="Bazarr" title="Bazarr"
         description="Subtitles (podman: lscr.io/linuxserver/bazarr) - feed includes beta tags"
         xmlUrl="https://github.com/morpheus65535/bazarr/releases.atom"
         htmlUrl="https://github.com/morpheus65535/bazarr/releases" frss:ttl="21600" />
+      <outline type="rss" text="Caddy" title="Caddy"
+        description="Reverse proxy (services.caddy)"
+        xmlUrl="https://github.com/caddyserver/caddy/releases.atom"
+        htmlUrl="https://github.com/caddyserver/caddy/releases" frss:ttl="21600" />
+      <outline type="rss" text="Cockpit" title="Cockpit"
+        description="Server admin UI (services.cockpit)"
+        xmlUrl="https://github.com/cockpit-project/cockpit/releases.atom"
+        htmlUrl="https://github.com/cockpit-project/cockpit/releases" frss:ttl="21600" />
+      <outline type="rss" text="compose2nix" title="compose2nix"
+        description="Generates the podman stacks in arr/ and tubearchivist/"
+        xmlUrl="https://github.com/aksiksi/compose2nix/releases.atom"
+        htmlUrl="https://github.com/aksiksi/compose2nix/releases" frss:ttl="21600" />
+      <outline type="rss" text="FlareSolverr" title="FlareSolverr"
+        description="Cloudflare solver for Prowlarr (podman: ghcr.io/flaresolverr/flaresolverr)"
+        xmlUrl="https://github.com/FlareSolverr/FlareSolverr/releases.atom"
+        htmlUrl="https://github.com/FlareSolverr/FlareSolverr/releases" frss:ttl="21600" />
+      <outline type="rss" text="Forgejo" title="Forgejo"
+        description="Git forge (services.forgejo) - Codeberg release feed"
+        xmlUrl="https://codeberg.org/forgejo/forgejo/releases.rss"
+        htmlUrl="https://codeberg.org/forgejo/forgejo/releases" frss:ttl="21600" />
+      <outline type="rss" text="FreshRSS" title="FreshRSS"
+        description="This RSS reader (services.freshrss)"
+        xmlUrl="https://github.com/FreshRSS/FreshRSS/releases.atom"
+        htmlUrl="https://github.com/FreshRSS/FreshRSS/releases" frss:ttl="21600" />
+      <outline type="rss" text="Gluetun" title="Gluetun"
+        description="VPN container the arr stack routes through - pinned to pr-3109, worth watching"
+        xmlUrl="https://github.com/passteque/gluetun/releases.atom"
+        htmlUrl="https://github.com/passteque/gluetun/releases" frss:ttl="21600" />
+      <outline type="rss" text="Grafana" title="Grafana"
+        description="Dashboards (services.grafana)"
+        xmlUrl="https://github.com/grafana/grafana/releases.atom"
+        htmlUrl="https://github.com/grafana/grafana/releases" frss:ttl="21600" />
+      <outline type="rss" text="Headscale" title="Headscale"
+        description="Tailscale control server (services.headscale)"
+        xmlUrl="https://github.com/juanfont/headscale/releases.atom"
+        htmlUrl="https://github.com/juanfont/headscale/releases" frss:ttl="21600" />
+      <outline type="rss" text="Homepage" title="Homepage"
+        description="Dashboard (services.homepage-dashboard)"
+        xmlUrl="https://github.com/gethomepage/homepage/releases.atom"
+        htmlUrl="https://github.com/gethomepage/homepage/releases" frss:ttl="21600" />
+      <outline type="rss" text="Immich" title="Immich"
+        description="Photo and video backup (services.immich)"
+        xmlUrl="https://github.com/immich-app/immich/releases.atom"
+        htmlUrl="https://github.com/immich-app/immich/releases" frss:ttl="21600" />
+      <outline type="rss" text="Jellyfin" title="Jellyfin"
+        description="Media server (services.jellyfin)"
+        xmlUrl="https://github.com/jellyfin/jellyfin/releases.atom"
+        htmlUrl="https://github.com/jellyfin/jellyfin/releases" frss:ttl="21600" />
+      <outline type="rss" text="Loki" title="Loki"
+        description="Logs (services.loki) - Helm chart tags auto-marked read"
+        xmlUrl="https://github.com/grafana/loki/releases.atom"
+        htmlUrl="https://github.com/grafana/loki/releases" frss:ttl="21600"
+        frss:filtersActionRead="intitle:helm-" />
+      <outline type="rss" text="Mealie" title="Mealie"
+        description="Recipes (services.mealie)"
+        xmlUrl="https://github.com/mealie-recipes/mealie/releases.atom"
+        htmlUrl="https://github.com/mealie-recipes/mealie/releases" frss:ttl="21600" />
+      <outline type="rss" text="Navidrome" title="Navidrome"
+        description="Music streaming (services.navidrome)"
+        xmlUrl="https://github.com/navidrome/navidrome/releases.atom"
+        htmlUrl="https://github.com/navidrome/navidrome/releases" frss:ttl="21600" />
+      <outline type="rss" text="Nix" title="Nix"
+        description="The package manager itself"
+        xmlUrl="https://github.com/NixOS/nix/releases.atom"
+        htmlUrl="https://github.com/NixOS/nix/releases" frss:ttl="21600" />
+      <outline type="rss" text="NixOS announcements" title="NixOS announcements"
+        description="Release announcements and security notices"
+        xmlUrl="https://nixos.org/blog/announcements-rss.xml"
+        htmlUrl="https://nixos.org/blog/announcements" frss:ttl="21600" />
+      <outline type="rss" text="nvf" title="nvf"
+        description="Neovim config flake input - pinned to v0.8"
+        xmlUrl="https://github.com/notashelf/nvf/releases.atom"
+        htmlUrl="https://github.com/notashelf/nvf/releases" frss:ttl="21600" />
+      <outline type="rss" text="OpenZFS" title="OpenZFS"
+        description="Storage pool (zfs.nix) - check kernel compat before upgrading"
+        xmlUrl="https://github.com/openzfs/zfs/releases.atom"
+        htmlUrl="https://github.com/openzfs/zfs/releases" frss:ttl="21600" />
+      <outline type="rss" text="Paperless-ngx" title="Paperless-ngx"
+        description="Document archive (services.paperless)"
+        xmlUrl="https://github.com/paperless-ngx/paperless-ngx/releases.atom"
+        htmlUrl="https://github.com/paperless-ngx/paperless-ngx/releases" frss:ttl="21600" />
+      <outline type="rss" text="Podman" title="Podman"
+        description="Container runtime behind the arr and tubearchivist stacks"
+        xmlUrl="https://github.com/podman-container-tools/podman/releases.atom"
+        htmlUrl="https://github.com/podman-container-tools/podman/releases" frss:ttl="21600" />
+      <outline type="rss" text="Prometheus" title="Prometheus"
+        description="Metrics (services.prometheus)"
+        xmlUrl="https://github.com/prometheus/prometheus/releases.atom"
+        htmlUrl="https://github.com/prometheus/prometheus/releases" frss:ttl="21600" />
+      <outline type="rss" text="Prometheus node_exporter" title="Prometheus node_exporter"
+        description="Host metrics exporter (services.prometheus.exporters.node)"
+        xmlUrl="https://github.com/prometheus/node_exporter/releases.atom"
+        htmlUrl="https://github.com/prometheus/node_exporter/releases" frss:ttl="21600" />
       <outline type="rss" text="Prowlarr" title="Prowlarr"
         description="Indexer management (podman: lscr.io/linuxserver/prowlarr)"
         xmlUrl="https://github.com/Prowlarr/Prowlarr/releases.atom"
@@ -59,29 +137,14 @@
         description="Torrent client (podman: lscr.io/linuxserver/qbittorrent)"
         xmlUrl="https://github.com/qbittorrent/qBittorrent/releases.atom"
         htmlUrl="https://github.com/qbittorrent/qBittorrent/releases" frss:ttl="21600" />
-      <outline type="rss" text="Gluetun" title="Gluetun"
-        description="VPN container the arr stack routes through - pinned to pr-3109, worth watching"
-        xmlUrl="https://github.com/passteque/gluetun/releases.atom"
-        htmlUrl="https://github.com/passteque/gluetun/releases" frss:ttl="21600" />
-      <outline type="rss" text="FlareSolverr" title="FlareSolverr"
-        description="Cloudflare solver for Prowlarr (podman: ghcr.io/flaresolverr/flaresolverr)"
-        xmlUrl="https://github.com/FlareSolverr/FlareSolverr/releases.atom"
-        htmlUrl="https://github.com/FlareSolverr/FlareSolverr/releases" frss:ttl="21600" />
-    </outline>
-
-    <outline text="Releases: Files and documents">
-      <outline type="rss" text="Immich" title="Immich"
-        description="Photo and video backup (services.immich)"
-        xmlUrl="https://github.com/immich-app/immich/releases.atom"
-        htmlUrl="https://github.com/immich-app/immich/releases" frss:ttl="21600" />
-      <outline type="rss" text="Paperless-ngx" title="Paperless-ngx"
-        description="Document archive (services.paperless)"
-        xmlUrl="https://github.com/paperless-ngx/paperless-ngx/releases.atom"
-        htmlUrl="https://github.com/paperless-ngx/paperless-ngx/releases" frss:ttl="21600" />
-      <outline type="rss" text="Syncthing" title="Syncthing"
-        description="File sync (services.syncthing)"
-        xmlUrl="https://github.com/syncthing/syncthing/releases.atom"
-        htmlUrl="https://github.com/syncthing/syncthing/releases" frss:ttl="21600" />
+      <outline type="rss" text="Radarr" title="Radarr"
+        description="Movie automation (podman: lscr.io/linuxserver/radarr)"
+        xmlUrl="https://github.com/Radarr/Radarr/releases.atom"
+        htmlUrl="https://github.com/Radarr/Radarr/releases" frss:ttl="21600" />
+      <outline type="rss" text="Radicale" title="Radicale"
+        description="CalDAV and CardDAV (services.radicale)"
+        xmlUrl="https://github.com/Kozea/Radicale/releases.atom"
+        htmlUrl="https://github.com/Kozea/Radicale/releases" frss:ttl="21600" />
       <outline type="rss" text="restic" title="restic"
         description="Backup client used against the local rest-server"
         xmlUrl="https://github.com/restic/restic/releases.atom"
@@ -94,107 +157,66 @@
         description="SMB shares (services.samba) - tag feed, Samba publishes no GitHub releases"
         xmlUrl="https://github.com/samba-team/samba/tags.atom"
         htmlUrl="https://github.com/samba-team/samba/tags" frss:ttl="21600" />
-    </outline>
-
-    <outline text="Releases: Productivity">
-      <outline type="rss" text="Radicale" title="Radicale"
-        description="CalDAV and CardDAV (services.radicale)"
-        xmlUrl="https://github.com/Kozea/Radicale/releases.atom"
-        htmlUrl="https://github.com/Kozea/Radicale/releases" frss:ttl="21600" />
-      <outline type="rss" text="Mealie" title="Mealie"
-        description="Recipes (services.mealie)"
-        xmlUrl="https://github.com/mealie-recipes/mealie/releases.atom"
-        htmlUrl="https://github.com/mealie-recipes/mealie/releases" frss:ttl="21600" />
-      <outline type="rss" text="FreshRSS" title="FreshRSS"
-        description="This RSS reader (services.freshrss)"
-        xmlUrl="https://github.com/FreshRSS/FreshRSS/releases.atom"
-        htmlUrl="https://github.com/FreshRSS/FreshRSS/releases" frss:ttl="21600" />
-      <outline type="rss" text="Forgejo" title="Forgejo"
-        description="Git forge (services.forgejo) - Codeberg release feed"
-        xmlUrl="https://codeberg.org/forgejo/forgejo/releases.rss"
-        htmlUrl="https://codeberg.org/forgejo/forgejo/releases" frss:ttl="21600" />
-      <outline type="rss" text="Homepage" title="Homepage"
-        description="Dashboard (services.homepage-dashboard)"
-        xmlUrl="https://github.com/gethomepage/homepage/releases.atom"
-        htmlUrl="https://github.com/gethomepage/homepage/releases" frss:ttl="21600" />
-    </outline>
-
-    <outline text="Releases: Network and infrastructure">
-      <outline type="rss" text="Caddy" title="Caddy"
-        description="Reverse proxy (services.caddy)"
-        xmlUrl="https://github.com/caddyserver/caddy/releases.atom"
-        htmlUrl="https://github.com/caddyserver/caddy/releases" frss:ttl="21600" />
-      <outline type="rss" text="AdGuard Home" title="AdGuard Home"
-        description="DNS filtering (services.adguardhome) - feed includes beta builds"
-        xmlUrl="https://github.com/AdguardTeam/AdGuardHome/releases.atom"
-        htmlUrl="https://github.com/AdguardTeam/AdGuardHome/releases" frss:ttl="21600" />
-      <outline type="rss" text="Headscale" title="Headscale"
-        description="Tailscale control server (services.headscale)"
-        xmlUrl="https://github.com/juanfont/headscale/releases.atom"
-        htmlUrl="https://github.com/juanfont/headscale/releases" frss:ttl="21600" />
+      <outline type="rss" text="Seerr (Jellyseerr)" title="Seerr (Jellyseerr)"
+        description="Media requests (services.seerr) - project renamed from Jellyseerr to Seerr"
+        xmlUrl="https://github.com/seerr-team/seerr/releases.atom"
+        htmlUrl="https://github.com/seerr-team/seerr/releases" frss:ttl="21600" />
+      <outline type="rss" text="Sonarr" title="Sonarr"
+        description="TV automation (podman: lscr.io/linuxserver/sonarr)"
+        xmlUrl="https://github.com/Sonarr/Sonarr/releases.atom"
+        htmlUrl="https://github.com/Sonarr/Sonarr/releases" frss:ttl="21600" />
+      <outline type="rss" text="Syncthing" title="Syncthing"
+        description="File sync (services.syncthing)"
+        xmlUrl="https://github.com/syncthing/syncthing/releases.atom"
+        htmlUrl="https://github.com/syncthing/syncthing/releases" frss:ttl="21600" />
       <outline type="rss" text="Tailscale" title="Tailscale"
         description="Client and daemon (services.tailscale) - watch for headscale compat breaks"
         xmlUrl="https://github.com/tailscale/tailscale/releases.atom"
         htmlUrl="https://github.com/tailscale/tailscale/releases" frss:ttl="21600" />
-      <outline type="rss" text="Cockpit" title="Cockpit"
-        description="Server admin UI (services.cockpit)"
-        xmlUrl="https://github.com/cockpit-project/cockpit/releases.atom"
-        htmlUrl="https://github.com/cockpit-project/cockpit/releases" frss:ttl="21600" />
-      <outline type="rss" text="Podman" title="Podman"
-        description="Container runtime behind the arr and tubearchivist stacks"
-        xmlUrl="https://github.com/podman-container-tools/podman/releases.atom"
-        htmlUrl="https://github.com/podman-container-tools/podman/releases" frss:ttl="21600" />
-      <outline type="rss" text="OpenZFS" title="OpenZFS"
-        description="Storage pool (zfs.nix) - check kernel compat before upgrading"
-        xmlUrl="https://github.com/openzfs/zfs/releases.atom"
-        htmlUrl="https://github.com/openzfs/zfs/releases" frss:ttl="21600" />
-    </outline>
-
-    <outline text="Releases: Monitoring">
-      <outline type="rss" text="Prometheus" title="Prometheus"
-        description="Metrics (services.prometheus)"
-        xmlUrl="https://github.com/prometheus/prometheus/releases.atom"
-        htmlUrl="https://github.com/prometheus/prometheus/releases" frss:ttl="21600" />
-      <outline type="rss" text="Prometheus node_exporter" title="Prometheus node_exporter"
-        description="Host metrics exporter (services.prometheus.exporters.node)"
-        xmlUrl="https://github.com/prometheus/node_exporter/releases.atom"
-        htmlUrl="https://github.com/prometheus/node_exporter/releases" frss:ttl="21600" />
-      <outline type="rss" text="Grafana" title="Grafana"
-        description="Dashboards (services.grafana)"
-        xmlUrl="https://github.com/grafana/grafana/releases.atom"
-        htmlUrl="https://github.com/grafana/grafana/releases" frss:ttl="21600" />
-      <outline type="rss" text="Loki" title="Loki"
-        description="Logs (services.loki) - Helm chart tags auto-marked read"
-        xmlUrl="https://github.com/grafana/loki/releases.atom"
-        htmlUrl="https://github.com/grafana/loki/releases" frss:ttl="21600"
-        frss:filtersActionRead="intitle:helm-" />
+      <outline type="rss" text="TubeArchivist" title="TubeArchivist"
+        description="YouTube archiving (podman: bbilly1/tubearchivist)"
+        xmlUrl="https://github.com/tubearchivist/tubearchivist/releases.atom"
+        htmlUrl="https://github.com/tubearchivist/tubearchivist/releases" frss:ttl="21600" />
       <outline type="rss" text="Uptime Kuma" title="Uptime Kuma"
         description="Service monitoring (services.uptime-kuma)"
         xmlUrl="https://github.com/louislam/uptime-kuma/releases.atom"
         htmlUrl="https://github.com/louislam/uptime-kuma/releases" frss:ttl="21600" />
+      <outline type="rss" text="Watcharr" title="Watcharr"
+        description="Watch list (podman: ghcr.io/sbondco/watcharr)"
+        xmlUrl="https://github.com/sbondCo/Watcharr/releases.atom"
+        htmlUrl="https://github.com/sbondCo/Watcharr/releases" frss:ttl="21600" />
     </outline>
 
-    <outline text="Releases: NixOS">
-      <outline type="rss" text="NixOS announcements" title="NixOS announcements"
-        description="Release announcements and security notices"
-        xmlUrl="https://nixos.org/blog/announcements-rss.xml"
-        htmlUrl="https://nixos.org/blog/announcements" frss:ttl="21600" />
-      <outline type="rss" text="Nix" title="Nix"
-        description="The package manager itself"
-        xmlUrl="https://github.com/NixOS/nix/releases.atom"
-        htmlUrl="https://github.com/NixOS/nix/releases" frss:ttl="21600" />
-      <outline type="rss" text="agenix" title="agenix"
-        description="Secret management flake input"
-        xmlUrl="https://github.com/ryantm/agenix/releases.atom"
-        htmlUrl="https://github.com/ryantm/agenix/releases" frss:ttl="21600" />
-      <outline type="rss" text="nvf" title="nvf"
-        description="Neovim config flake input - pinned to v0.8"
-        xmlUrl="https://github.com/notashelf/nvf/releases.atom"
-        htmlUrl="https://github.com/notashelf/nvf/releases" frss:ttl="21600" />
-      <outline type="rss" text="compose2nix" title="compose2nix"
-        description="Generates the podman stacks in arr/ and tubearchivist/"
-        xmlUrl="https://github.com/aksiksi/compose2nix/releases.atom"
-        htmlUrl="https://github.com/aksiksi/compose2nix/releases" frss:ttl="21600" />
+    <outline text="News">
+      <outline type="rss" text="DR Nyheder" title="DR Nyheder"
+        description="DR seneste nyt - other DR feeds exist at the same path: indland, udland, penge, politik, sporten, kultur, viden, regionale"
+        xmlUrl="https://www.dr.dk/nyheder/service/feeds/allenyheder"
+        htmlUrl="https://www.dr.dk/nyheder" frss:ttl="1800" />
+      <outline type="rss" text="DR Indland" title="DR Indland"
+        description="DR domestic news"
+        xmlUrl="https://www.dr.dk/nyheder/service/feeds/indland"
+        htmlUrl="https://www.dr.dk/nyheder/indland" frss:ttl="1800" />
+      <outline type="rss" text="DR Udland" title="DR Udland"
+        description="DR world news"
+        xmlUrl="https://www.dr.dk/nyheder/service/feeds/udland"
+        htmlUrl="https://www.dr.dk/nyheder/udland" frss:ttl="1800" />
+      <!--
+        TV 2 publishes no RSS for its national news, so this one is scraped from
+        the front page with FreshRSS's HTML+XPath feed type. The teaser markup
+        is server rendered, so it works, but a TV 2 redesign will break it: if
+        the feed goes empty, re-check the tc_teaser class names below.
+        Live-blog teasers are excluded, their URLs are permanent while their
+        titles churn, so they would show up once and then never update.
+        cssFullContent pulls the article body so entries are readable in place.
+      -->
+      <outline type="HTML+XPath" text="TV 2 Nyheder" title="TV 2 Nyheder"
+        description="TV 2 front page, scraped - no official RSS"
+        xmlUrl="https://nyheder.tv2.dk/"
+        htmlUrl="https://nyheder.tv2.dk/" frss:ttl="1800"
+        frss:xPathItem='//article[contains(@class,"tc_teaser")][not(contains(descendant::a[contains(@class,"tc_teaser__link")]/@href,"/live/"))]'
+        frss:xPathItemTitle='descendant::a[contains(@class,"tc_teaser__link")]/@aria-label'
+        frss:xPathItemUri='descendant::a[contains(@class,"tc_teaser__link")]/@href'
+        frss:cssFullContent=".tc_richcontent" />
     </outline>
   </body>
 </opml>
