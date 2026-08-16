@@ -1,9 +1,6 @@
 { config, ... }:
 # Release feeds for the services in this repo live in ./freshrss-feeds.opml.
-# Import them from the web UI (Subscription management > Import / export), or:
-#   FRESHRSS=$(nix eval --raw /etc/nixos#nixosConfigurations.homeserver.config.services.freshrss.package)
-#   cd $FRESHRSS && sudo -u freshrss env DATA_PATH=/mnt/storage/data/freshrss \
-#     ./cli/import-for-user.php --user alfred --filename /etc/nixos/freshrss-feeds.opml
+# Import them from the web UI (Subscription management > Import / export)
 {
   services.freshrss = {
     enable = true;
