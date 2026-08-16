@@ -60,6 +60,7 @@
     ./loki.nix
     # ./tandoor.nix
     ./mealie.nix
+    ./freshrss.nix # RSS reader
   ];
 
   # Bootloader.

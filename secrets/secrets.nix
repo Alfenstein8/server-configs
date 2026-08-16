@@ -12,4 +12,5 @@ in
   "tandoor.age".publicKeys = [ homeserver ];
   "grafana.age".publicKeys = [ homeserver ];
   "restic-htpasswd.age".publicKeys = [ homeserver ];
+  "freshrss.age".publicKeys = [ homeserver ];
 }

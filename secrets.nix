@@ -16,6 +16,10 @@
       file = ./secrets/grafana.age;
       owner = "grafana";
     };
+    freshrss = {
+      file = ./secrets/freshrss.age;
+      owner = "freshrss";
+    };
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }
