@@ -21,7 +21,7 @@ in
       title = "Restic";
       group = "File Management";
       order = 40;
-      icon = "restic.svg";
+      icon = "restic.webp";
       description = "Backup Repository";
     };
   };

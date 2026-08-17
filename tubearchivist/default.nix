@@ -12,7 +12,7 @@
       title = "TubeArchivist";
       group = "Media";
       order = 50;
-      icon = "tube-archivist.svg";
+      icon = "tube-archivist.webp";
       description = "YouTube Archive";
     };
   };
