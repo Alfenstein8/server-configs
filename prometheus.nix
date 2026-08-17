@@ -34,7 +34,5 @@
     ];
   };
 
-  services.caddy.virtualHosts."https://prometheus.shlambert.top".extraConfig = ''
-    reverse_proxy localhost:9003
-  '';
+  shlam.services.prometheus.port = config.services.prometheus.port;
 }
