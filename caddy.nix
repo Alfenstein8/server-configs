@@ -4,9 +4,6 @@
   lib,
   ...
 }:
-let
-  certloc = "/var/lib/acme/shlambert.top";
-in
 {
   services.caddy = {
     enable = true;
@@ -23,18 +20,6 @@ in
       "http://dawarich.shlambert.top, https://dawarich.shlambert.top".extraConfig = ''
         reverse_proxy localhost:3002
       '';
-
-      "radicale.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:5232
-          tls ${certloc}/cert.pem ${certloc}/key.pem
-      '';
-
-      # virtualHosts."radicale.shlambert.top".extraConfig = ''
-      # reverse_proxy localhost:5232
-      #  tls ${certloc}/cert.pem ${certloc}/key.pem {
-      #      protocols tls1.3
-      #  }
-      # '';
 
       "http://netdata.shlambert.top, https://netdata.shlambert.top".extraConfig = ''
         reverse_proxy localhost:19999

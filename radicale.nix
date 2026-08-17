@@ -1,9 +1,12 @@
+let
+  port = 5232;
+in
 {
   services.radicale = {
     enable = true;
     settings = {
       storage.filesystem_folder = "/mnt/storage/data/radicale";
-      server.hosts = [ "localhost:5232" ];
+      server.hosts = [ "localhost:${toString port}" ];
       auth = {
         type = "htpasswd";
         htpasswd_filename = "/etc/nixos/radicale-users";
@@ -11,4 +14,6 @@
       };
     };
   };
+
+  shlam.services.radicale.port = port;
 }
