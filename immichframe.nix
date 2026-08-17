@@ -1,3 +1,6 @@
+# Parked: not imported from ./configuration.nix. Kept in registry form so that
+# uncommenting the import is all that is needed to bring it back -- the vhost
+# and TLS come with it.
 { config, ... }:
 let
   port = 6565;
@@ -5,7 +8,7 @@ in
 {
   services.immichframe = {
     enable = true;
-    port = port;
+    inherit port;
     settings = {
       General = {
         Language = "da";
@@ -16,7 +19,7 @@ in
       };
       Accounts = [
         {
-          ImmichServerUrl = "https://immich.shlambert.top";
+          ImmichServerUrl = config.shlam.services.immich.url;
           ApiKeyFile = config.age.secrets.immich.path;
           Albums = [ "8fe9c514-8eaf-4ebc-b853-d4ab5f468d8d" ];
         }
@@ -24,8 +27,9 @@ in
     };
   };
 
-  services.caddy.virtualHosts."http://frame.shlambert.top, https://frame.shlambert.top".extraConfig =
-    ''
-      reverse_proxy localhost:${toString port}
-    '';
+  # No dashboard tile: this is a wall display, not something to click through to.
+  shlam.services.immichframe = {
+    subdomain = "frame";
+    inherit port;
+  };
 }
