@@ -4,7 +4,6 @@
     restic.file = ./secrets/restic.age;
     backblaze.file = ./secrets/backblaze.age;
     immich.file = ./secrets/immich.age;
-    mullvad.file = ./secrets/mullvad.age;
     airvpn.file = ./secrets/airvpn.age;
     wireguard.file = ./secrets/wireguard.age;
     restic-htpasswd = {

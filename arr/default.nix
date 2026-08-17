@@ -3,8 +3,9 @@
     ./docker-compose.nix
   ];
 
-  # Ports come from the published mappings in ./docker-compose.nix, which is
-  # compose2nix output and gets regenerated -- so they are declared here.
+  # Ports mirror the published mappings in ./docker-compose.nix. They are
+  # declared here rather than read from there because they only exist inside
+  # "7878:7878/tcp" strings, with no port value to reference.
   #
   # prowlarr and qbittorrent share gluetun's network namespace
   # (--network=container:gluetun), so 9696 and 8080 are published by the gluetun
