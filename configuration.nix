@@ -26,6 +26,7 @@
     ./zfs.nix # zsf Mirror
     ./users.nix
     ./services # Custom systemd services
+    ./registry.nix # shlam.services.<name> -> Caddy vhosts
     ./caddy.nix # Reverse proxy
     ./headscale.nix
     ./immich.nix # Image backup
