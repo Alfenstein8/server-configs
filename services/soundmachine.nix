@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+let
+  # `vite preview` is not given an explicit --port, so this is its default.
+  # caddy.nix was already assuming it.
+  port = 4173;
+in
 {
   systemd.services.soundmachine = {
     description = "Soundmachine Server";
@@ -23,7 +28,7 @@
       Environment = [
         "HOME=/home/alfred"
         "PATH=${pkgs.pnpm}/bin:${pkgs.nodejs}/bin:/run/current-system/sw/bin"
-        "ORIGIN=https://launchpad.shlambert.top"
+        "ORIGIN=${config.shlam.services.soundmachine.url}"
       ];
     };
 
@@ -34,8 +39,8 @@
     ];
   };
 
-  services.caddy.virtualHosts."launchpad.shlambert.top".extraConfig = ''
-    reverse_proxy localhost:4173
-  '';
-
+  shlam.services.soundmachine = {
+    subdomain = "launchpad";
+    inherit port;
+  };
 }
