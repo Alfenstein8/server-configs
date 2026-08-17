@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 {
   services.adguardhome = {
     enable = true;
@@ -22,4 +22,5 @@
     };
   };
 
+  shlam.services.adguard.port = config.services.adguardhome.port;
 }

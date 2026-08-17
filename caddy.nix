@@ -84,10 +84,6 @@ in
         reverse_proxy localhost:8384
       '';
 
-      "https://adguard.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:3005
-      '';
-
       "https://watchlist.shlambert.top".extraConfig = ''
         reverse_proxy localhost:3080
       '';
