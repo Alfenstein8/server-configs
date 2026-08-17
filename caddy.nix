@@ -1,27 +1,8 @@
 {
-  pkgs,
-  config,
-  lib,
-  ...
-}:
-{
-  services.caddy = {
-    enable = true;
-    globalConfig = "";
-    virtualHosts = {
-      "http://dawarich.shlambert.top, https://dawarich.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:3002
-      '';
-
-      "http://netdata.shlambert.top, https://netdata.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:19999
-      '';
-
-      "http://vpn.shlambert.top, https://vpn.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:51821
-      '';
-
-    };
-
-  };
+  # Virtual hosts are not defined here any more. Each service declares its own
+  # with shlam.services.<name> in its own module (see ./registry.nix), so that
+  # commenting a module out of ./configuration.nix also removes its route --
+  # which is what the dawarich, netdata and vpn entries deleted here failed to
+  # do, leaving three hostnames serving 502s.
+  services.caddy.enable = true;
 }
