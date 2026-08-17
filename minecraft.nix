@@ -1,3 +1,5 @@
+# Parked: not imported from ./configuration.nix. No registry entry -- the server
+# speaks the Minecraft protocol on 43000 (and rcon on 25575), not HTTP.
 # https://minecraft.wiki/w/Server.properties#Java_Edition
 { pkgs, inputs, ... }:
 {

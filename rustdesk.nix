@@ -1,3 +1,5 @@
+# Parked: not imported from ./configuration.nix. No registry entry -- the signal
+# and relay servers speak RustDesk's own protocol, not HTTP.
 {
   services.rustdesk-server = {
     enable = true;

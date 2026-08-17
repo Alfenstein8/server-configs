@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+# Parked: not imported from ./default.nix.
+{ config, pkgs, ... }:
+let
+  port = 5554;
+in
 {
   systemd.services.kajak = {
     description = "Kajak Dev Server";
@@ -12,7 +16,7 @@
       User = "alfred";
       WorkingDirectory = "/home/alfred/manual/kajak";
 
-      ExecStart = "${pkgs.pnpm}/bin/pnpm preview --host --port 5554";
+      ExecStart = "${pkgs.pnpm}/bin/pnpm preview --host --port ${toString port}";
 
       Restart = "on-failure";
       RestartSec = "5s";
@@ -23,6 +27,7 @@
       Environment = [
         "HOME=/home/alfred"
         "PATH=${pkgs.pnpm}/bin:${pkgs.nodejs}/bin:/run/current-system/sw/bin"
+        "ORIGIN=${config.shlam.services.kajak.url}"
       ];
     };
 
@@ -32,5 +37,19 @@
       pkgs.nodejs
     ];
   };
-  networking.firewall.allowedTCPPorts = [ 5554 ];
+
+  # Predates the reverse proxy: with a vhost in front, this hole is no longer
+  # needed for browser access, only for hitting the port directly on the LAN.
+  networking.firewall.allowedTCPPorts = [ port ];
+
+  shlam.services.kajak = {
+    inherit port;
+    dashboard = {
+      title = "Kajak";
+      group = "Productivity & Utilities";
+      order = 70;
+      icon = "mdi-kayaking";
+      description = "Kajak Dev Server";
+    };
+  };
 }
