@@ -37,10 +37,6 @@
         reverse_proxy localhost:8080
       '';
 
-      "http://jellyseerr.shlambert.top, https://jellyseerr.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:5055
-      '';
-
       "http://bazarr.shlambert.top, https://bazarr.shlambert.top".extraConfig = ''
         reverse_proxy localhost:6767
       '';
