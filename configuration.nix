@@ -22,7 +22,6 @@
     # ./root-certificates.nix
     # ./backup.nix # Upload backup to backblaze
     # ./dawarich.nix
-    # ./copyparty.nix
     ./zfs.nix # zsf Mirror
     ./users.nix
     ./services # Custom systemd services
@@ -36,7 +35,6 @@
     ./restic.nix # restic server
     ./uptime-kuma.nix # Services monitor
     ./homepage.nix
-    # ./wg-easy # Wireguard VPN with web ui
     ./wireguard.nix
     ./arr # The arr stack
     ./jellyfin.nix # Video streaming
