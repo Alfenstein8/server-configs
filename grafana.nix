@@ -8,7 +8,7 @@
         http_port = 3010;
         enforce_domain = true;
         enable_gzip = true;
-        domain = "grafana.shlambert.top";
+        domain = config.shlam.services.grafana.host;
       };
       security.secret_key = "$__file{${config.age.secrets.grafana.path}}";
       analytics.reporting_enabled = false;
@@ -50,7 +50,5 @@
     };
   };
 
-  services.caddy.virtualHosts."https://grafana.shlambert.top".extraConfig = ''
-    reverse_proxy localhost:3010
-  '';
+  shlam.services.grafana.port = config.services.grafana.settings.server.http_port;
 }
