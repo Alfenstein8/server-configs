@@ -9,10 +9,6 @@
     enable = true;
     globalConfig = "";
     virtualHosts = {
-      "http://immich.shlambert.top, https://immich.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:2283
-      '';
-
       "http://paper.shlambert.top, https://paper.shlambert.top".extraConfig = ''
         reverse_proxy localhost:28981
       '';

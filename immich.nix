@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   services.immich = {
     enable = true;
@@ -17,6 +18,8 @@
       };
     };
   };
+  shlam.services.immich.port = config.services.immich.port;
+
   users.users.immich.extraGroups = [
     "video"
     "render"
