@@ -44,10 +44,6 @@ in
         reverse_proxy localhost:8000
       '';
 
-      "http://uptime.shlambert.top, https://uptime.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:3001
-      '';
-
       "http://home.shlambert.top, https://home.shlambert.top".extraConfig = ''
         reverse_proxy localhost:8082
       '';
