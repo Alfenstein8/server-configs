@@ -1,5 +1,3 @@
-# Parked: not imported from ./configuration.nix. No registry entry -- restic
-# backups are a systemd timer with no listening port and nothing to proxy.
 { config, ... }:
 {
   services.restic.backups = {

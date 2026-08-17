@@ -149,5 +149,7 @@ them locally.
 | `arr/`, `tubearchivist/` | Podman stacks; `docker-compose.nix` is hand-edited |
 | `services/` | systemd units for apps run out of `/home/alfred/manual` |
 
-Modules starting with a `# Parked:` comment are not imported. Those with an HTTP
-port carry a registry entry already, so re-enabling one is a single uncomment.
+Whether a module is enabled is recorded in exactly one place: the `imports` list
+in `configuration.nix` (or `services/default.nix`). Modules commented out there
+still carry their registry entry, so enabling one is a single uncomment — no
+other file needs touching.

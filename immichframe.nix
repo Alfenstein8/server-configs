@@ -1,6 +1,3 @@
-# Parked: not imported from ./configuration.nix. Kept in registry form so that
-# uncommenting the import is all that is needed to bring it back -- the vhost
-# and TLS come with it.
 { config, ... }:
 let
   port = 6565;

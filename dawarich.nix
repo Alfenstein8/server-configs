@@ -1,5 +1,3 @@
-# Parked: not imported from ./configuration.nix. Kept in registry form so that
-# uncommenting the import brings the vhost and TLS with it.
 { config, ... }:
 let
   port = 3002;
