@@ -40,10 +40,6 @@ in
         reverse_proxy localhost:19999
       '';
 
-      "https://tube.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:8000
-      '';
-
       "http://home.shlambert.top, https://home.shlambert.top".extraConfig = ''
         reverse_proxy localhost:8082
       '';
