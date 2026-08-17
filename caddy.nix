@@ -41,10 +41,6 @@
         reverse_proxy localhost:6767
       '';
 
-      "http://syncthing.shlambert.top, https://syncthing.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:8384
-      '';
-
     };
 
   };
