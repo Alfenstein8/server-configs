@@ -21,14 +21,6 @@
         reverse_proxy localhost:51821
       '';
 
-      "http://jellyfin.shlambert.top, https://jellyfin.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:8096
-      '';
-
-      # virtualHosts."http://jellyfin.shlambert.top".extraConfig = ''
-      # reverse_proxy localhost:8096
-      # # '';
-
       "http://prowlarr.shlambert.top, https://prowlarr.shlambert.top".extraConfig = ''
         reverse_proxy localhost:9696
       '';

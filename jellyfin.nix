@@ -1,4 +1,8 @@
 { pkgs, ... }:
+let
+  # The NixOS module exposes no port option; 8096 is Jellyfin's own default.
+  port = 8096;
+in
 {
   services.jellyfin = {
     enable = true;
@@ -15,4 +19,6 @@
       "video"
     ];
   };
+
+  shlam.services.jellyfin.port = port;
 }
