@@ -84,9 +84,6 @@ in
         reverse_proxy localhost:8384
       '';
 
-      "https://git.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:3000
-      '';
     };
 
   };
