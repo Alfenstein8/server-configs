@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   services.headscale = {
     enable = true;
@@ -5,18 +6,18 @@
     port = 3006;
     settings = {
       dns = {
-        base_domain = "ts.shlambert.top";
+        base_domain = "ts.${config.shlam.domain}";
         nameservers.global = [ "192.168.0.188" ];
         extra_records = [
           {
-            name = "immich.shlambert.top";
+            name = config.shlam.services.immich.host;
             type = "A";
             value = "100.64.0.2";
           }
 
         ];
       };
-      server_url = "https://headscale.shlambert.top";
+      server_url = config.shlam.services.headscale.url;
       logtail.enabled = false;
     };
   };
@@ -25,7 +26,5 @@
     useRoutingFeatures = "server";
   };
 
-  services.caddy.virtualHosts."https://headscale.shlambert.top".extraConfig = ''
-    reverse_proxy localhost:3006
-  '';
+  shlam.services.headscale.port = config.services.headscale.port;
 }
