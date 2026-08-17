@@ -1,7 +1,12 @@
+{ config, ... }:
+let
+  port = 8082;
+in
 {
   services.homepage-dashboard = {
     enable = true;
-    allowedHosts = "home.shlambert.top";
+    listenPort = port;
+    allowedHosts = config.shlam.services.homepage.host;
     services = [
       {
         "Media" = [
@@ -119,5 +124,14 @@
         ];
       }
     ];
+  };
+
+  # Port is declared here rather than read back out of listenPort: the registry
+  # will later generate services.homepage-dashboard.services, and having this
+  # file read from the same option tree the registry writes to is a shape worth
+  # avoiding.
+  shlam.services.homepage = {
+    subdomain = "home";
+    inherit port;
   };
 }

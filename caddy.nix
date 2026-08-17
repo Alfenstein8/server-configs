@@ -17,10 +17,6 @@
         reverse_proxy localhost:19999
       '';
 
-      "http://home.shlambert.top, https://home.shlambert.top".extraConfig = ''
-        reverse_proxy localhost:8082
-      '';
-
       "http://vpn.shlambert.top, https://vpn.shlambert.top".extraConfig = ''
         reverse_proxy localhost:51821
       '';
