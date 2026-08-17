@@ -34,7 +34,6 @@
     ./paperless.nix # Document management
     ./radicale.nix # Contacts and calendar
     ./restic.nix # restic server
-    # ./netdata.nix # Server Monitor
     ./uptime-kuma.nix # Services monitor
     ./homepage.nix
     # ./wg-easy # Wireguard VPN with web ui
@@ -46,7 +45,6 @@
     # ./tailscale.nix # Easy VPN setup
     ./syncthing.nix # Sync files to divices
     ./navidrome.nix # Music streaming
-    # ./owntracks
     ./cockpit.nix
     ./bash.nix
     ./acme.nix # dns-01 challenge to get ssl certificate for caddy
@@ -59,7 +57,6 @@
     ./prometheus.nix
     ./grafana.nix
     ./loki.nix
-    # ./tandoor.nix
     ./mealie.nix
     ./freshrss.nix # RSS reader
   ];
