@@ -8,5 +8,14 @@
 
   environment.systemPackages = with pkgs; [ cockpit ];
 
-  shlam.services.cockpit.port = config.services.cockpit.port;
+  shlam.services.cockpit = {
+    port = config.services.cockpit.port;
+    dashboard = {
+      title = "Cockpit";
+      group = "Infrastructure";
+      order = 50;
+      icon = "cockpit.svg";
+      description = "Server Administration";
+    };
+  };
 }

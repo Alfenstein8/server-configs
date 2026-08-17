@@ -11,5 +11,14 @@ in
     guiAddress = "0.0.0.0:${toString port}";
   };
 
-  shlam.services.syncthing.port = port;
+  shlam.services.syncthing = {
+    inherit port;
+    dashboard = {
+      title = "Syncthing";
+      group = "File Management";
+      order = 30;
+      icon = "syncthing.svg";
+      description = "File Synchronization";
+    };
+  };
 }

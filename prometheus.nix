@@ -34,5 +34,14 @@
     ];
   };
 
-  shlam.services.prometheus.port = config.services.prometheus.port;
+  shlam.services.prometheus = {
+    port = config.services.prometheus.port;
+    dashboard = {
+      title = "Prometheus";
+      group = "Infrastructure";
+      order = 20;
+      icon = "prometheus.svg";
+      description = "Metrics Collection";
+    };
+  };
 }

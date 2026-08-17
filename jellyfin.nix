@@ -20,5 +20,14 @@ in
     ];
   };
 
-  shlam.services.jellyfin.port = port;
+  shlam.services.jellyfin = {
+    inherit port;
+    dashboard = {
+      title = "Jellyfin";
+      group = "Media";
+      order = 10;
+      icon = "jellyfin.svg";
+      description = "Media Server";
+    };
+  };
 }

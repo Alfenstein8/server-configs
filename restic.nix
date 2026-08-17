@@ -15,5 +15,14 @@ in
     # privateRepos = true;
   };
 
-  shlam.services.restic.port = port;
+  shlam.services.restic = {
+    inherit port;
+    dashboard = {
+      title = "Restic";
+      group = "File Management";
+      order = 40;
+      icon = "restic.svg";
+      description = "Backup Repository";
+    };
+  };
 }

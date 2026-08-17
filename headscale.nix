@@ -26,5 +26,14 @@
     useRoutingFeatures = "server";
   };
 
-  shlam.services.headscale.port = config.services.headscale.port;
+  shlam.services.headscale = {
+    port = config.services.headscale.port;
+    dashboard = {
+      title = "Headscale";
+      group = "Infrastructure";
+      order = 60;
+      icon = "headscale.svg";
+      description = "Tailnet Control Server";
+    };
+  };
 }

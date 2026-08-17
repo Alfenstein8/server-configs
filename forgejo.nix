@@ -27,5 +27,12 @@ in
   shlam.services.forgejo = {
     subdomain = "git";
     inherit port;
+    dashboard = {
+      title = "Forgejo";
+      group = "Infrastructure";
+      order = 30;
+      icon = "forgejo.svg";
+      description = "Git Hosting";
+    };
   };
 }

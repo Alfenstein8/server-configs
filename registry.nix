@@ -172,6 +172,34 @@ let
       && !(lib.strings.hasInfix "." (lib.removeSuffix ".${domain}" h))
     );
   uncovered = filterAttrs (_: s: !(covered s.host)) vhostSvcs;
+
+  # --- homepage-dashboard ---------------------------------------------------
+
+  dashSvcs = builtins.filter (s: s.dashboard != null) (builtins.attrValues cfg.services);
+  byGroup = lib.groupBy (s: s.dashboard.group) dashSvcs;
+  present = builtins.attrNames byGroup;
+
+  # Groups listed in dashboardGroups come first, in that order; anything else
+  # is appended alphabetically rather than silently dropped.
+  ordered =
+    builtins.filter (g: builtins.elem g present) cfg.dashboardGroups
+    ++ lib.sort (a: b: a < b) (builtins.filter (g: !(builtins.elem g cfg.dashboardGroups)) present);
+
+  cmp =
+    a: b:
+    if a.dashboard.order != b.dashboard.order then
+      a.dashboard.order < b.dashboard.order
+    else
+      a.dashboard.title < b.dashboard.title;
+
+  mkItem = s: {
+    ${s.dashboard.title} =
+      (filterAttrs (_: v: v != null) {
+        href = if s.dashboard.href != null then s.dashboard.href else s.url;
+        inherit (s.dashboard) icon description;
+      })
+      // s.dashboard.extra;
+  };
 in
 {
   options.shlam = {
@@ -192,6 +220,22 @@ in
       readOnly = true;
       default = acmeHost;
       description = "security.acme.certs.<name> providing the wildcard certificate.";
+    };
+
+    dashboardGroups = mkOption {
+      type = types.listOf types.str;
+      default = [
+        "Media"
+        "File Management"
+        "Productivity & Utilities"
+        "Media administration"
+        "Infrastructure"
+      ];
+      description = ''
+        Dashboard group order. Groups not listed here are appended, sorted
+        alphabetically, so a typo in a group name shows up as a stray section
+        rather than a missing tile.
+      '';
     };
 
     services = mkOption {
@@ -232,5 +276,12 @@ in
         extraConfig = (optionalString s.proxy "reverse_proxy ${s.upstream}\n") + s.extraConfig;
       }
     ) vhostSvcs;
+
+    # This option merges by CONCATENATION, not replacement -- any hand-written
+    # list left in homepage.nix would render alongside this one, every group
+    # appearing twice.
+    services.homepage-dashboard.services = map (g: {
+      ${g} = map mkItem (lib.sort cmp byGroup.${g});
+    }) ordered;
   };
 }

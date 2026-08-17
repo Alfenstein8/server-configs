@@ -19,5 +19,14 @@
   # registry emits only useACMEHost -- the freshrss module supplies the site
   # body (root / php_fastcgi / file_server) and the two merge on the same
   # vhost. A reverse_proxy here would shadow PHP entirely.
-  shlam.services.freshrss.subdomain = "rss";
+  shlam.services.freshrss = {
+    subdomain = "rss";
+    dashboard = {
+      title = "FreshRSS";
+      group = "Productivity & Utilities";
+      order = 30;
+      icon = "freshrss.svg";
+      description = "RSS Reader";
+    };
+  };
 }

@@ -11,19 +11,72 @@
   # container rather than by the services themselves. Caddy still reaches both
   # on localhost.
   shlam.services = {
-    bazarr.port = 6767;
-    prowlarr.port = 9696;
-    radarr.port = 7878;
-    sonarr.port = 8989;
+    radarr = {
+      port = 7878;
+      dashboard = {
+        title = "Radarr";
+        group = "Media administration";
+        order = 10;
+        icon = "radarr.svg";
+        description = "Movie Automation";
+      };
+    };
+
+    sonarr = {
+      port = 8989;
+      dashboard = {
+        title = "Sonarr";
+        group = "Media administration";
+        order = 20;
+        icon = "sonarr.svg";
+        description = "TV Show Automation";
+      };
+    };
+
+    bazarr = {
+      port = 6767;
+      dashboard = {
+        title = "Bazarr";
+        group = "Media administration";
+        order = 30;
+        icon = "bazarr.svg";
+        description = "Subtitle Automation";
+      };
+    };
+
+    prowlarr = {
+      port = 9696;
+      dashboard = {
+        title = "Prowlarr";
+        group = "Media administration";
+        order = 40;
+        icon = "prowlarr.svg";
+        description = "Indexer Management";
+      };
+    };
 
     qbittorrent = {
       subdomain = "torrent";
       port = 8080;
+      dashboard = {
+        title = "qBittorrent";
+        group = "Media administration";
+        order = 50;
+        icon = "qbittorrent.svg";
+        description = "Torrent Client";
+      };
     };
 
     watcharr = {
       subdomain = "watchlist";
       port = 3080;
+      dashboard = {
+        title = "Watcharr";
+        group = "Media";
+        order = 30;
+        icon = "watcharr-light.webp";
+        description = "Watch list";
+      };
     };
   };
 }

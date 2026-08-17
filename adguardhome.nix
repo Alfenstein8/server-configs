@@ -22,5 +22,14 @@
     };
   };
 
-  shlam.services.adguard.port = config.services.adguardhome.port;
+  shlam.services.adguard = {
+    port = config.services.adguardhome.port;
+    dashboard = {
+      title = "AdGuard Home";
+      group = "Infrastructure";
+      order = 40;
+      icon = "adguard-home.svg";
+      description = "DNS & Ad Blocking";
+    };
+  };
 }

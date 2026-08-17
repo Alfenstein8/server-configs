@@ -10,5 +10,12 @@
   shlam.services.paperless = {
     subdomain = "paper";
     port = config.services.paperless.port;
+    dashboard = {
+      title = "Paperless-ngx";
+      group = "File Management";
+      order = 20;
+      icon = "paperless-ngx.svg";
+      description = "Document Archiving";
+    };
   };
 }

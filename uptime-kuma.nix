@@ -11,5 +11,12 @@ in
   shlam.services.uptime-kuma = {
     subdomain = "uptime";
     inherit port;
+    dashboard = {
+      title = "Uptime Kuma";
+      group = "Productivity & Utilities";
+      order = 20;
+      icon = "uptime-kuma.svg";
+      description = "Service Monitoring";
+    };
   };
 }

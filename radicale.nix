@@ -15,5 +15,14 @@ in
     };
   };
 
-  shlam.services.radicale.port = port;
+  shlam.services.radicale = {
+    inherit port;
+    dashboard = {
+      title = "Radicale";
+      group = "Productivity & Utilities";
+      order = 10;
+      icon = "radicale.svg";
+      description = "Calendar & Contacts";
+    };
+  };
 }

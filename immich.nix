@@ -18,7 +18,16 @@
       };
     };
   };
-  shlam.services.immich.port = config.services.immich.port;
+  shlam.services.immich = {
+    port = config.services.immich.port;
+    dashboard = {
+      title = "Immich";
+      group = "File Management";
+      order = 10;
+      icon = "immich.svg";
+      description = "Photo & Video Backup";
+    };
+  };
 
   users.users.immich.extraGroups = [
     "video"

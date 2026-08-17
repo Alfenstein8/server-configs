@@ -42,5 +42,12 @@ in
   shlam.services.soundmachine = {
     subdomain = "launchpad";
     inherit port;
+    dashboard = {
+      title = "Launchpad";
+      group = "Productivity & Utilities";
+      order = 50;
+      icon = "mdi-music-box";
+      description = "Soundmachine";
+    };
   };
 }

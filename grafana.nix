@@ -50,5 +50,14 @@
     };
   };
 
-  shlam.services.grafana.port = config.services.grafana.settings.server.http_port;
+  shlam.services.grafana = {
+    port = config.services.grafana.settings.server.http_port;
+    dashboard = {
+      title = "Grafana";
+      group = "Infrastructure";
+      order = 10;
+      icon = "grafana.svg";
+      description = "Metrics & Dashboards";
+    };
+  };
 }

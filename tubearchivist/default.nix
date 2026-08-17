@@ -8,5 +8,12 @@
   shlam.services.tubearchivist = {
     subdomain = "tube";
     port = 8000;
+    dashboard = {
+      title = "TubeArchivist";
+      group = "Media";
+      order = 50;
+      icon = "tube-archivist.svg";
+      description = "YouTube Archive";
+    };
   };
 }
