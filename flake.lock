@@ -44,27 +44,6 @@
         "type": "github"
       }
     },
-    "copyparty": {
-      "inputs": {
-        "flake-utils": "flake-utils_2",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1785796596,
-        "narHash": "sha256-Zd38vtS+SEDAq+792iPS8nGUyeVAIDH6gndXhKoXsv4=",
-        "owner": "9001",
-        "repo": "copyparty",
-        "rev": "ef75220faf25f2eb040f84f2ea02bc09c0c946b2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "9001",
-        "repo": "copyparty",
-        "type": "github"
-      }
-    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -147,21 +126,6 @@
         "owner": "numtide",
         "repo": "flake-utils",
         "rev": "04c1b180862888302ddfb2e3ad9eaa63afc60cf8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_2": {
-      "locked": {
-        "lastModified": 1678901627,
-        "narHash": "sha256-U02riOqrKKzwjsxc/400XnElV+UtPUQWpANPlyazjH0=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "93a2b84fc4b70d9e089d029deacc3583435c2ed6",
         "type": "github"
       },
       "original": {
@@ -367,7 +331,6 @@
       "inputs": {
         "agenix": "agenix",
         "compose2nix": "compose2nix",
-        "copyparty": "copyparty",
         "nix-minecraft": "nix-minecraft",
         "nixpkgs": "nixpkgs_2",
         "nvf": "nvf"
