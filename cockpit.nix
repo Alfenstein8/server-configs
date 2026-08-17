@@ -1,14 +1,12 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   services.cockpit = {
     enable = true;
     port = 9090;
-    allowed-origins = [ "https://cockpit.shlambert.top" ];
+    allowed-origins = [ config.shlam.services.cockpit.url ];
   };
 
   environment.systemPackages = with pkgs; [ cockpit ];
 
-  services.caddy.virtualHosts."https://cockpit.shlambert.top".extraConfig = ''
-    reverse_proxy localhost:9090
-  '';
+  shlam.services.cockpit.port = config.services.cockpit.port;
 }
