@@ -28,7 +28,7 @@
         }
         {
           name = "tux-laptop";
-          publicKey = "jqGw6qvus1TmmZWFPSPMdd/fP8P/E88UwNiw/B3LiHc=";
+          publicKey = "m+pWzB0q5wq8ViQgaDjopKmHN+MJrIHEdsaVMCRkzB8=";
           allowedIPs = [ "10.8.0.3/32" ];
         }
         {
