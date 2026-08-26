@@ -15,22 +15,21 @@ in
       User = "alfred";
       WorkingDirectory = "/home/alfred/manual/QuantumSurvivors";
 
-      ExecStart = "${pkgs.nodejs_25}/bin/node server/app.js -p ${toString port}";
+      ExecStart = "${pkgs.nodejs_26}/bin/node server/app.js -p ${toString port}";
 
       Restart = "on-failure";
       RestartSec = "5s";
     };
 
     # This ensures bun is available in the service environment
-    path = [ pkgs.nodejs_25 ];
+    path = [ pkgs.nodejs_26 ];
   };
 
-  # Predates the reverse proxy: with a vhost in front, this hole is no longer
-  # needed for browser access, only for hitting the port directly on the LAN.
   networking.firewall.allowedTCPPorts = [ port ];
 
   shlam.services.quantumsurvivors = {
-    subdomain = "quantum";
+    host = "zehra.click";
+    acmeHost = "zehra.click";
     inherit port;
     dashboard = {
       title = "Quantum Survivors";

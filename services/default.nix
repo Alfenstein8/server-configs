@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   imports = [
-    # ./quantumsurvivors.nix
+    ./quantumsurvivors.nix
     ./soundmachine.nix
     # ./kajak.nix
   ];

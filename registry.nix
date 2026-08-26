@@ -13,6 +13,14 @@
 #     useACMEHost = "shlambert.top";
 #     extraConfig = "reverse_proxy localhost:2283\n";
 #   };
+#
+# A service on a different domain overrides both halves of that -- the vhost key
+# and the certificate it is served with:
+#
+#   shlam.services.quantumsurvivors = {
+#     host = "zehra.click";
+#     acmeHost = "zehra.click";
+#   };
 { config, lib, ... }:
 
 let
@@ -34,7 +42,8 @@ let
   # (documentation.nixos.enable defaults to true), outside any config context.
   domain = "shlambert.top";
 
-  # security.acme.certs.<name> from ./acme.nix -- the DNS-01 wildcard.
+  # security.acme.certs.<name> from ./acme.nix -- the DNS-01 wildcard. Only the
+  # default: a service on another domain points at its own cert.
   acmeHost = "shlambert.top";
 
   cfg = config.shlam;
@@ -58,6 +67,18 @@ let
           default = "${config.subdomain}.${domain}";
           defaultText = literalExpression ''"''${subdomain}.${domain}"'';
           description = "Bare hostname, used verbatim as the Caddy vhost key. No scheme.";
+        };
+
+        acmeHost = mkOption {
+          type = types.str;
+          default = acmeHost;
+          defaultText = literalExpression ''"${acmeHost}"'';
+          description = ''
+            security.acme.certs.<name> supplying this vhost's certificate. The
+            lexical default, not config.shlam.acmeHost, for the same reason as
+            `domain` above. An assertion checks that the named cert actually
+            covers `host`.
+          '';
         };
 
         url = mkOption {
@@ -162,16 +183,35 @@ let
 
   badUpstream = filterAttrs (_: s: s.proxy && s.upstream == null) cfg.services;
 
-  # *.shlambert.top covers exactly one label, so a.b.shlambert.top would fail
-  # the TLS handshake at runtime with no build-time signal.
+  # "Is this host covered?" is a question about the SAN list of the cert the
+  # vhost is actually served with, not about the base domain -- otherwise a
+  # second domain could only ever be added by editing this file.
+  certs = config.security.acme.certs;
+
+  # A wildcard covers exactly one label, so a.b.shlambert.top under
+  # *.shlambert.top would fail the TLS handshake at runtime with no build-time
+  # signal.
+  matches =
+    pattern: h:
+    if lib.hasPrefix "*." pattern then
+      let
+        base = lib.removePrefix "*." pattern;
+      in
+      lib.hasSuffix ".${base}" h && !(lib.strings.hasInfix "." (lib.removeSuffix ".${base}" h))
+    else
+      pattern == h;
+
   covered =
-    h:
-    h == domain
-    || (
-      lib.hasSuffix ".${domain}" h
-      && !(lib.strings.hasInfix "." (lib.removeSuffix ".${domain}" h))
-    );
-  uncovered = filterAttrs (_: s: !(covered s.host)) vhostSvcs;
+    s:
+    let
+      cert = certs.${s.acmeHost};
+    in
+    builtins.any (p: matches p s.host) ([ cert.domain ] ++ cert.extraDomainNames);
+
+  # Split in two so a typo'd cert name reports itself instead of blowing up as
+  # a bare "attribute missing" error midway through evaluating `covered`.
+  unknownCert = filterAttrs (_: s: !(builtins.hasAttr s.acmeHost certs)) vhostSvcs;
+  uncovered = filterAttrs (_: s: builtins.hasAttr s.acmeHost certs && !(covered s)) vhostSvcs;
 
   # --- homepage-dashboard ---------------------------------------------------
 
@@ -219,7 +259,10 @@ in
       type = types.str;
       readOnly = true;
       default = acmeHost;
-      description = "security.acme.certs.<name> providing the wildcard certificate.";
+      description = ''
+        Default for shlam.services.<name>.acmeHost: the security.acme.certs
+        entry holding the *.${domain} wildcard.
+      '';
     };
 
     dashboardGroups = mkOption {
@@ -262,17 +305,25 @@ in
           + concatStringsSep ", " (builtins.attrNames badUpstream);
       }
       {
+        assertion = unknownCert == { };
+        message =
+          "shlam.services: acmeHost names no security.acme.certs entry (see ./acme.nix): "
+          + concatStringsSep ", " (mapAttrsToList (n: s: "${n} (${s.acmeHost})") unknownCert);
+      }
+      {
         assertion = uncovered == { };
         message =
-          "shlam.services: hosts not covered by the *.${domain} wildcard certificate: "
-          + concatStringsSep ", " (mapAttrsToList (n: s: "${n} (${s.host})") uncovered);
+          "shlam.services: hosts not covered by the certificate they are served with: "
+          + concatStringsSep ", " (
+            mapAttrsToList (n: s: "${n} (${s.host} vs. cert ${s.acmeHost})") uncovered
+          );
       }
     ];
 
     services.caddy.virtualHosts = mapAttrs' (
       _: s:
       nameValuePair s.host {
-        useACMEHost = acmeHost;
+        useACMEHost = s.acmeHost;
         extraConfig = (optionalString s.proxy "reverse_proxy ${s.upstream}\n") + s.extraConfig;
       }
     ) vhostSvcs;

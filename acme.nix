@@ -13,5 +13,16 @@
       dnsPropagationCheck = true;
       environmentFile = config.age.secrets.spaceship.path;
     };
+
+    certs."zehra.click" = {
+      group = config.services.caddy.group;
+
+      domain = "zehra.click";
+      extraDomainNames = [ "*.zehra.click" ];
+      dnsProvider = "spaceship";
+      dnsResolver = "1.1.1.1";
+      dnsPropagationCheck = true;
+      environmentFile = config.age.secrets.spaceship.path;
+    };
   };
 }
