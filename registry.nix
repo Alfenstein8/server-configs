@@ -259,6 +259,15 @@ let
   dupePorts = lib.unique (builtins.filter (p: lib.count (q: q == p) publicPorts > 1) publicPorts);
   sharedPorts = builtins.filter (p: p == 80 || p == 443) publicPorts;
 
+  # A listener bound to a port some service already answers on fails at bind
+  # time, long after the build says yes -- and only for whichever of the two
+  # loses the race. qbittorrent's 8080 is the near miss this exists for. Only
+  # registry-declared ports are knowable here; anything listening without an
+  # entry (loki, the exporters) still has to be checked by hand.
+  portOwner =
+    p: concatStringsSep ", " (builtins.attrNames (filterAttrs (_: s: s.port == p) cfg.services));
+  takenPorts = builtins.filter (p: portOwner p != "") publicPorts;
+
   body = s: (optionalString s.proxy "reverse_proxy ${s.upstream}\n") + s.extraConfig;
 
   # --- homepage-dashboard ---------------------------------------------------
@@ -371,6 +380,12 @@ in
         message =
           "shlam.services: publicPort/publicHttpPort must be unique per host, reused: "
           + concatStringsSep ", " (map toString dupePorts);
+      }
+      {
+        assertion = takenPorts == [ ];
+        message =
+          "shlam.services: publicPort/publicHttpPort already in use as a service port: "
+          + concatStringsSep ", " (map (p: "${toString p} (${portOwner p})") takenPorts);
       }
       {
         assertion = sharedPorts == [ ];

@@ -33,10 +33,11 @@ in
     inherit port;
 
     # The only service reachable from the internet. The router forwards
-    # WAN 443 -> 8443 and WAN 80 -> 8080; both listeners serve this host alone,
-    # so nothing else in the registry is exposed by the forward.
+    # WAN 443 -> 8443 and WAN 80 -> 8880; both listeners serve this host alone,
+    # so nothing else in the registry is exposed by the forward. 8880 rather
+    # than the obvious 8080, which is qbittorrent's (see ../arr/default.nix).
     publicPort = 8443;
-    publicHttpPort = 8080;
+    publicHttpPort = 8880;
     dashboard = {
       title = "Quantum Survivors";
       group = "Productivity & Utilities";
