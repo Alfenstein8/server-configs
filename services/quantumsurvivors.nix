@@ -31,6 +31,12 @@ in
     host = "zehra.click";
     acmeHost = "zehra.click";
     inherit port;
+
+    # The only service reachable from the internet. The router forwards
+    # WAN 443 -> 8443 and WAN 80 -> 8080; both listeners serve this host alone,
+    # so nothing else in the registry is exposed by the forward.
+    publicPort = 8443;
+    publicHttpPort = 8080;
     dashboard = {
       title = "Quantum Survivors";
       group = "Productivity & Utilities";

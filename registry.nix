@@ -114,6 +114,38 @@ let
           '';
         };
 
+        publicPort = mkOption {
+          type = types.nullOr types.port;
+          default = null;
+          description = ''
+            Also serve this host on a second HTTPS listener, meant to be the
+            target of a router port-forward (WAN 443 -> this port). The :443
+            vhost is left alone, so LAN and WAN are separate doors to the same
+            service rather than one replacing the other.
+
+            Isolation is the whole point: Caddy gives this port its own server
+            whose routing table holds this host and nothing else, so a service
+            added to the registry later cannot become internet-reachable by
+            accident. Forwarding WAN 443 -> 443 would instead publish every
+            vhost at once, since *.${domain} already resolves to the WAN IP.
+          '';
+        };
+
+        publicHttpPort = mkOption {
+          type = types.nullOr types.port;
+          default = null;
+          description = ''
+            Plain-HTTP counterpart of publicPort, serving nothing but a redirect
+            to https://<host> (WAN 80 -> this port). Worth having so a typed
+            "zehra.click" reaches the site at all: browsers that try HTTP first
+            would otherwise hang.
+
+            Forwarding WAN 80 -> 80 works too, but Caddy's :80 listener carries
+            the automatic redirects for *every* vhost, so it hands out the full
+            list of internal hostnames to anyone who asks.
+          '';
+        };
+
         vhost = mkOption {
           type = types.bool;
           default = true;
@@ -212,6 +244,22 @@ let
   # a bare "attribute missing" error midway through evaluating `covered`.
   unknownCert = filterAttrs (_: s: !(builtins.hasAttr s.acmeHost certs)) vhostSvcs;
   uncovered = filterAttrs (_: s: builtins.hasAttr s.acmeHost certs && !(covered s)) vhostSvcs;
+
+  publicSvcs = filterAttrs (_: s: s.publicPort != null) vhostSvcs;
+  publicHttpSvcs = filterAttrs (_: s: s.publicHttpPort != null) vhostSvcs;
+
+  publicPorts =
+    mapAttrsToList (_: s: s.publicPort) publicSvcs
+    ++ mapAttrsToList (_: s: s.publicHttpPort) publicHttpSvcs;
+
+  # A forwarded port must belong to exactly one host -- that IS the isolation
+  # property, and two entries sharing one would silently dissolve it. 80 and 443
+  # are the shared listeners every other vhost lives on, so naming them here
+  # would publish the lot.
+  dupePorts = lib.unique (builtins.filter (p: lib.count (q: q == p) publicPorts > 1) publicPorts);
+  sharedPorts = builtins.filter (p: p == 80 || p == 443) publicPorts;
+
+  body = s: (optionalString s.proxy "reverse_proxy ${s.upstream}\n") + s.extraConfig;
 
   # --- homepage-dashboard ---------------------------------------------------
 
@@ -318,15 +366,48 @@ in
             mapAttrsToList (n: s: "${n} (${s.host} vs. cert ${s.acmeHost})") uncovered
           );
       }
+      {
+        assertion = dupePorts == [ ];
+        message =
+          "shlam.services: publicPort/publicHttpPort must be unique per host, reused: "
+          + concatStringsSep ", " (map toString dupePorts);
+      }
+      {
+        assertion = sharedPorts == [ ];
+        message =
+          "shlam.services: publicPort/publicHttpPort cannot be 80 or 443 -- those are the "
+          + "shared listeners carrying every other vhost.";
+      }
     ];
 
-    services.caddy.virtualHosts = mapAttrs' (
-      _: s:
-      nameValuePair s.host {
-        useACMEHost = s.acmeHost;
-        extraConfig = (optionalString s.proxy "reverse_proxy ${s.upstream}\n") + s.extraConfig;
-      }
-    ) vhostSvcs;
+    # Only the forwarded ports; the router decides what actually reaches them.
+    networking.firewall.allowedTCPPorts = publicPorts;
+
+    services.caddy.virtualHosts =
+      mapAttrs' (
+        _: s:
+        nameValuePair s.host {
+          useACMEHost = s.acmeHost;
+          extraConfig = body s;
+        }
+      ) vhostSvcs
+      # Same site, second listener. Caddy keys servers by listen address, so
+      # this one's routing table contains exactly one host.
+      // mapAttrs' (
+        _: s:
+        nameValuePair "https://${s.host}:${toString s.publicPort}" {
+          useACMEHost = s.acmeHost;
+          extraConfig = body s;
+        }
+      ) publicSvcs
+      # No useACMEHost: an http:// address is served without TLS, and this
+      # listener does nothing but bounce to the canonical https://<host>.
+      // mapAttrs' (
+        _: s:
+        nameValuePair "http://${s.host}:${toString s.publicHttpPort}" {
+          extraConfig = "redir https://{host}{uri} permanent\n";
+        }
+      ) publicHttpSvcs;
 
     # This option merges by CONCATENATION, not replacement -- any hand-written
     # list left in homepage.nix would render alongside this one, every group
