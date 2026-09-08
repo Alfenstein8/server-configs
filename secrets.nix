@@ -10,6 +10,11 @@
       file = ./secrets/restic-htpasswd.age;
       owner = "restic";
     };
+    # The laptop's and desktop's own repository passwords, needed here because
+    # append-only moved retention off the clients. Default agenix ownership
+    # (root, 0400) is right -- restic-prune-* runs as root.
+    restic-client-backup.file = ./secrets/restic-client-backup.age;
+    restic-client-laptop-backup.file = ./secrets/restic-client-laptop-backup.age;
     grafana = {
       file = ./secrets/grafana.age;
       owner = "grafana";

@@ -8,15 +8,16 @@ let
   port = 8002;
   dataDir = "/mnt/storage/data/restic";
 
-  # One password file per repository, named after its directory under dataDir:
-  #   /var/lib/restic-server-passwords/backup
-  #   /var/lib/restic-server-passwords/laptop-backup
-  # Not agenix: these are the clients' own repository passwords, and a missing
-  # .age file breaks evaluation of the whole flake. Create them on the server,
-  # root-owned and 0400.
-  passwordDir = "/var/lib/restic-server-passwords";
+  # Directory under dataDir -> the password that repository was created with.
+  # Declared rather than discovered: adding a third machine is a new .age file
+  # and a line here, which is a better trade than a glob that silently does
+  # nothing when a password is missing.
+  clientRepos = {
+    "backup" = config.age.secrets.restic-client-backup.path;
+    "laptop-backup" = config.age.secrets.restic-client-laptop-backup.path;
+  };
 
-  keepOpts = [
+  keepOpts = lib.concatStringsSep " " [
     "--keep-daily 7"
     "--keep-weekly 4"
     "--keep-monthly 12"
@@ -40,7 +41,7 @@ in
     # ransomware on the laptop encrypts the laptop, not its own backup history.
     #
     # The cost is that clients can no longer prune, so retention moves to the
-    # restic-server-prune unit below.
+    # restic-prune-* units below.
     appendOnly = true;
 
     # privateRepos = true;
@@ -53,48 +54,41 @@ in
   };
 
   # Retention for the client repositories, since append-only takes it away from
-  # the clients. This works on the files directly rather than through the REST
-  # server, so append-only does not block it.
+  # the clients. These work on the files directly rather than through the REST
+  # server, so append-only does not block them.
   #
-  # Each repository is encrypted with the password its client chose, so pruning
-  # one requires a copy of that password here. Repositories without a password
-  # file are skipped with a log line rather than failing the unit, and if the
-  # directory does not exist at all the unit is skipped entirely -- so this is
-  # inert until you populate it.
-  systemd.services.restic-server-prune = {
-    description = "Prune the restic REST server's client repositories";
-    unitConfig.ConditionPathExists = passwordDir;
-    path = [ pkgs.restic ];
-    serviceConfig = {
-      Type = "oneshot";
-      # prune rewrites pack files; keep it off the back of the other jobs.
-      IOSchedulingClass = "idle";
-      Nice = 10;
-    };
-    script = ''
-      shopt -s nullglob
-      for repo in ${dataDir}/*; do
-        [ -f "$repo/config" ] || continue
-        name=$(basename "$repo")
-        pw="${passwordDir}/$name"
-        if [ ! -f "$pw" ]; then
-          echo "no password file at $pw -- skipping $name"
-          continue
-        fi
-        echo "pruning $name"
-        restic -r "$repo" -p "$pw" forget --prune ${lib.concatStringsSep " " keepOpts}
-      done
-    '';
-  };
+  # One unit per repository, so a stale lock on the laptop's repo cannot stop
+  # the desktop's from being pruned, and `systemctl status restic-prune-backup`
+  # names the one that failed.
+  systemd.services = lib.mapAttrs' (
+    name: passwordFile:
+    lib.nameValuePair "restic-prune-${name}" {
+      description = "Prune the ${name} restic repository";
+      path = [ pkgs.restic ];
+      serviceConfig = {
+        Type = "oneshot";
+        # prune rewrites pack files; keep it off the back of everything else.
+        IOSchedulingClass = "idle";
+        Nice = 10;
+      };
+      script = ''
+        restic -r ${dataDir}/${name} -p ${passwordFile} forget --prune ${keepOpts}
+      '';
+    }
+  ) clientRepos;
 
-  systemd.timers.restic-server-prune = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "Sun 03:00";
-      Persistent = true;
-      RandomizedDelaySec = "30m";
-    };
-  };
+  systemd.timers = lib.mapAttrs' (
+    name: _:
+    lib.nameValuePair "restic-prune-${name}" {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "Sun 03:00";
+        Persistent = true;
+        # Staggers the repos so they do not rewrite pack files at once.
+        RandomizedDelaySec = "30m";
+      };
+    }
+  ) clientRepos;
 
   shlam.services.restic = {
     inherit port;
