@@ -20,7 +20,7 @@
     ./hardware-acceleration.nix # QSV use GPU
     ./secrets.nix
     # ./root-certificates.nix
-    # ./backup.nix # Offsite restic backup -- uncomment once the Storage Box exists
+    ./backup.nix # Offsite restic backup to the Hetzner Storage Box
     # ./dawarich.nix
     ./zfs.nix # zsf Mirror
     ./users.nix

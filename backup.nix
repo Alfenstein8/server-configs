@@ -1,17 +1,18 @@
 { config, pkgs, ... }:
 let
-  # Hetzner Storage Box. `account` is both the SSH username and the hostname
-  # label, and is the only value that changes when the box is ordered.
+  # Hetzner Storage Box BX21. `account` is both the SSH username and the
+  # hostname label.
   account = "uXXXXXX";
   host = "${account}.your-storagebox.de";
 
   # Storage Boxes speak SSH on 23, not 22.
   sshPort = 23;
 
-  # Generated on the server, public half pasted into the Storage Box settings:
+  # Generated on the server, public half registered with the box:
   #   ssh-keygen -t ed25519 -N "" -f /root/.ssh/storagebox
-  # Then one manual connection as root, which verifies the fingerprint and
-  # writes /root/.ssh/known_hosts -- both jobs below rely on it being there:
+  # Then one manual connection as root, which verifies the fingerprint against
+  # the one in the Hetzner console and writes /root/.ssh/known_hosts. Both jobs
+  # below need that entry -- neither trusts a key on first sight:
   #   ssh -p 23 -i /root/.ssh/storagebox uXXXXXX@uXXXXXX.your-storagebox.de
   # Deliberately outside the repo: agenix would work, but a missing .age file
   # breaks evaluation of the whole flake, and this key has to exist before the
