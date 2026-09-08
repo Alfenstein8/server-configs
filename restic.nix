@@ -77,6 +77,11 @@ in
 
       serviceConfig = {
         Type = "oneshot";
+        # Same user rest-server runs as. prune rewrites pack files in place of
+        # old ones, and doing that as root would leave root-owned files in a
+        # repository every other writer touches as `restic`.
+        User = "restic";
+        Group = "restic";
         CacheDirectory = "restic-prune-${name}";
         CacheDirectoryMode = "0700";
         # prune rewrites pack files; keep it off the back of everything else.
