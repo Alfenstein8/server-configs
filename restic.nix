@@ -66,11 +66,14 @@ in
       description = "Prune the ${name} restic repository";
       path = [ pkgs.restic ];
 
-      # A systemd unit has no $HOME, and restic refuses to start without
-      # somewhere to put its cache. Same shape the upstream restic module uses
-      # for its backup units: systemd owns the directory, restic is told where
-      # it is.
-      environment.RESTIC_CACHE_DIR = "/var/cache/restic-prune-${name}";
+      environment = {
+        RESTIC_REPOSITORY = "${dataDir}/${name}";
+        RESTIC_PASSWORD_FILE = passwordFile;
+        # A systemd unit has no $HOME, and restic refuses to start without
+        # somewhere to put its cache. Same shape the upstream restic module
+        # uses: systemd owns the directory, restic is told where it landed.
+        RESTIC_CACHE_DIR = "/var/cache/restic-prune-${name}";
+      };
 
       serviceConfig = {
         Type = "oneshot";
@@ -80,8 +83,23 @@ in
         IOSchedulingClass = "idle";
         Nice = 10;
       };
+
       script = ''
-        restic -r ${dataDir}/${name} -p ${passwordFile} forget --prune ${keepOpts}
+        # A client that crashes mid-backup leaves its lock behind, and every
+        # later prune fails on it. `unlock` removes only locks restic considers
+        # stale -- older than 30 minutes -- and a running restic refreshes its
+        # own lock every few minutes, so a backup that is genuinely in progress
+        # is never a candidate.
+        restic unlock
+
+        # If a client really is backing up right now, wait for it instead of
+        # giving up until next Sunday. Type=oneshot has no start timeout.
+        #
+        # --group-by host matches what the clients used to pass themselves. The
+        # default is host,paths, which silently starts a fresh retention group
+        # the day someone edits the path list in their backup unit -- and then
+        # keeps 7 dailies of the old set forever.
+        restic forget --prune --retry-lock 1h --group-by host ${keepOpts}
       '';
     }
   ) clientRepos;
