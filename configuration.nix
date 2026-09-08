@@ -20,7 +20,7 @@
     ./hardware-acceleration.nix # QSV use GPU
     ./secrets.nix
     # ./root-certificates.nix
-    # ./backup.nix # Upload backup to backblaze
+    # ./backup.nix # Offsite restic backup -- uncomment once the Storage Box exists
     # ./dawarich.nix
     ./zfs.nix # zsf Mirror
     ./users.nix
