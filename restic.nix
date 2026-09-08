@@ -65,8 +65,17 @@ in
     lib.nameValuePair "restic-prune-${name}" {
       description = "Prune the ${name} restic repository";
       path = [ pkgs.restic ];
+
+      # A systemd unit has no $HOME, and restic refuses to start without
+      # somewhere to put its cache. Same shape the upstream restic module uses
+      # for its backup units: systemd owns the directory, restic is told where
+      # it is.
+      environment.RESTIC_CACHE_DIR = "/var/cache/restic-prune-${name}";
+
       serviceConfig = {
         Type = "oneshot";
+        CacheDirectory = "restic-prune-${name}";
+        CacheDirectoryMode = "0700";
         # prune rewrites pack files; keep it off the back of everything else.
         IOSchedulingClass = "idle";
         Nice = 10;

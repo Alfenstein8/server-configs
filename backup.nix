@@ -96,6 +96,7 @@ in
     };
     script = ''
       rclone sync ${resticServerDir} :sftp:${boxRoot}/pc-repos \
+        --config /dev/null \
         --sftp-host=${host} \
         --sftp-user=${account} \
         --sftp-port=${toString sshPort} \
