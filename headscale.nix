@@ -127,7 +127,22 @@ in
     # 2026-09-10 20:39 until someone noticed and ran `tailscale up` by hand.
     authKeyFile = config.age.secrets.tailscale-authkey.path;
 
-    extraUpFlags = [ "--login-server=${config.shlam.services.headscale.url}" ];
+    #
+    # --reset is load-bearing, not tidiness. A logged-out node still keeps its
+    # old prefs, so `tailscale up` trips the "requires mentioning all
+    # non-default flags" guard even here -- and since the whole point is to
+    # DROP the stale --advertise-routes, no list of flags could ever satisfy
+    # that guard. --reset says the declared config wins over whatever
+    # accumulated in tailscaled's state, which is the only sane reading of a
+    # flag list that lives in this file. It is one of the few flags exempt from
+    # the guard, so it does not chase its own tail.
+    #
+    # It clears what extraSetFlags below sets too; that is fine, tailscaled-set
+    # is ordered after tailscaled-autoconnect and puts them straight back.
+    extraUpFlags = [
+      "--reset"
+      "--login-server=${config.shlam.services.headscale.url}"
+    ];
 
     # No --advertise-routes: the /32 this box used to announce was a way to
     # reach its own services, and extra_records above already does that by
