@@ -13,4 +13,5 @@ in
   "restic-client-backup.age".publicKeys = [ homeserver ];
   "restic-client-laptop-backup.age".publicKeys = [ homeserver ];
   "freshrss.age".publicKeys = [ homeserver ];
+  "headplane.age".publicKeys = [ homeserver ];
 }

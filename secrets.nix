@@ -30,6 +30,13 @@
       file = ./secrets/freshrss.age;
       owner = "freshrss";
     };
+    # Headplane's session cookie key -- exactly 32 characters. Owned by
+    # headscale because headplane's module runs the service as headscale's user
+    # rather than creating one of its own.
+    headplane = {
+      file = ./secrets/headplane.age;
+      owner = "headscale";
+    };
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }
