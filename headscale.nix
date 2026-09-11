@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   # Router forward: WAN 8444 -> this port. Deliberately the same number on both
   # sides: server_url below carries it, and a node dials that URL verbatim from
@@ -6,6 +6,39 @@ let
   # a port nothing serves. 443 is not on the table -- it is the shared listener
   # every other vhost lives on, and the WAN 443 forward is zehra.click's.
   publicPort = 8444;
+
+  # The homeserver's own tailnet address, from `headscale nodes list`. Assigned
+  # at registration rather than declared, so it is state this repo cannot
+  # derive: delete and re-register the node and it may come back different, at
+  # which point every record below points at nothing.
+  tailnetIP = "100.64.0.2";
+
+  # One A record per vhost, all pointing at the server's tailnet address, so a
+  # node away from home resolves every service without having to reach AdGuard
+  # first. nameservers.global below is 192.168.0.188 -- a LAN address, which
+  # off-network answers nothing until the LAN subnet route is both advertised
+  # and approved. MagicDNS serves these records itself, with no route involved,
+  # which is why immich (the one record that used to be here by hand) was the
+  # only service that worked over the tailnet.
+  #
+  # Two kinds of host stay out of it:
+  #   - headscale itself. A node has to reach the control server *before* it has
+  #     a tailnet, so that name must resolve to something reachable without one.
+  #   - hosts on another domain (zehra.click). Those are public and resolve on
+  #     their own, and a tailnet-only answer would go stale the day one moves
+  #     off this box.
+  tailnetHosts = lib.filterAttrs (
+    name: s:
+    name != "headscale"
+    && s.vhost
+    && lib.hasSuffix ".${config.shlam.domain}" s.host
+  ) config.shlam.services;
+
+  extraRecords = lib.mapAttrsToList (_: s: {
+    name = s.host;
+    type = "A";
+    value = tailnetIP;
+  }) tailnetHosts;
 in
 {
   services.headscale = {
@@ -16,14 +49,7 @@ in
       dns = {
         base_domain = "ts.${config.shlam.domain}";
         nameservers.global = [ "192.168.0.188" ];
-        extra_records = [
-          {
-            name = config.shlam.services.immich.host;
-            type = "A";
-            value = "100.64.0.2";
-          }
-
-        ];
+        extra_records = extraRecords;
       };
       server_url = config.shlam.services.headscale.url;
       logtail.enabled = false;
