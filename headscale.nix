@@ -48,7 +48,24 @@ in
     settings = {
       dns = {
         base_domain = "ts.${config.shlam.domain}";
-        nameservers.global = [ "192.168.0.188" ];
+        # Deliberately empty. This is the resolver MagicDNS forwards every name
+        # it does not answer itself to -- including headscale.shlambert.top,
+        # which a node must resolve *before* it has a working tunnel. Pointing
+        # it at AdGuard's LAN address meant that off-network the control
+        # server's own name resolved to nothing, and the client logged itself
+        # out with `fetch control key: [...] context canceled`.
+        #
+        # The services do not need it: extra_records above answers all of them,
+        # locally, without a nameserver. And filtering at home is unaffected --
+        # DHCP still hands out AdGuard on the LAN. Away from home the device
+        # now uses whatever resolver its network gives it, which is the point:
+        # it is always reachable.
+        #
+        # Getting AdGuard back on the road means making it reachable without
+        # the tunnel being healthy first (bind it to the tailnet address, or
+        # advertise the LAN subnet route) -- and the control server's name has
+        # to stay on public DNS either way.
+        nameservers.global = [ ];
         extra_records = extraRecords;
       };
       server_url = config.shlam.services.headscale.url;
