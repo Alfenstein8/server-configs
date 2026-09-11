@@ -18,13 +18,21 @@ let
   # these itself, without consulting a nameserver at all, which is what makes
   # them work whatever resolver the node's network happened to hand it. A name
   # with no record here falls through to that resolver instead -- off-network
-  # that means public DNS, the WAN address, and a :443 the router does not
-  # forward to this Caddy. immich was the one record written here by hand, and
-  # was for exactly that reason the only service that worked over the tailnet.
+  # that means public DNS, which for *.shlambert.top is a wildcard pointing at
+  # this box's LAN address. Off the LAN that address routes nowhere, so the
+  # request does not fail, it hangs. immich was the one record written here by
+  # hand, and was for exactly that reason the only service that worked over the
+  # tailnet.
   #
   # Two kinds of host stay out of it:
   #   - headscale itself. A node has to reach the control server *before* it has
   #     a tailnet, so that name must resolve to something reachable without one.
+  #     The wildcard above is NOT that: it hands out the LAN address, which is
+  #     why this host timed out from mobile data while the forward, the
+  #     firewall and Caddy were all working. It needs an A record of its own at
+  #     the registrar, pointing at the WAN address, to beat the wildcard --
+  #     and ./adguardhome.nix rewrites it back to the LAN address for clients
+  #     at home, so a node there does not depend on the router hairpinning NAT.
   #   - hosts on another domain (zehra.click). Those are public and resolve on
   #     their own, and a tailnet-only answer would go stale the day one moves
   #     off this box.
