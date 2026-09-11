@@ -14,12 +14,13 @@ let
   tailnetIP = "100.64.0.2";
 
   # One A record per vhost, all pointing at the server's tailnet address, so a
-  # node away from home resolves every service without having to reach AdGuard
-  # first. nameservers.global below is 192.168.0.188 -- a LAN address, which
-  # off-network answers nothing until the LAN subnet route is both advertised
-  # and approved. MagicDNS serves these records itself, with no route involved,
-  # which is why immich (the one record that used to be here by hand) was the
-  # only service that worked over the tailnet.
+  # node away from home reaches every service over the tunnel. MagicDNS answers
+  # these itself, without consulting a nameserver at all, which is what makes
+  # them work whatever resolver the node's network happened to hand it. A name
+  # with no record here falls through to that resolver instead -- off-network
+  # that means public DNS, the WAN address, and a :443 the router does not
+  # forward to this Caddy. immich was the one record written here by hand, and
+  # was for exactly that reason the only service that worked over the tailnet.
   #
   # Two kinds of host stay out of it:
   #   - headscale itself. A node has to reach the control server *before* it has
@@ -48,23 +49,29 @@ in
     settings = {
       dns = {
         base_domain = "ts.${config.shlam.domain}";
-        # Deliberately empty. This is the resolver MagicDNS forwards every name
-        # it does not answer itself to -- including headscale.shlambert.top,
-        # which a node must resolve *before* it has a working tunnel. Pointing
-        # it at AdGuard's LAN address meant that off-network the control
-        # server's own name resolved to nothing, and the client logged itself
-        # out with `fetch control key: [...] context canceled`.
+        # These two belong together, and the module asserts it: overriding a
+        # client's resolver while handing it no nameserver would leave the node
+        # unable to resolve anything at all.
         #
-        # The services do not need it: extra_records above answers all of them,
-        # locally, without a nameserver. And filtering at home is unaffected --
-        # DHCP still hands out AdGuard on the LAN. Away from home the device
-        # now uses whatever resolver its network gives it, which is the point:
-        # it is always reachable.
+        # MagicDNS forwards every name it does not answer itself to
+        # nameservers.global -- including headscale.shlambert.top, which a node
+        # has to resolve *before* it has a tunnel to resolve it through. With
+        # AdGuard's LAN address there, off-network the control server's own name
+        # resolved to nothing and the client logged itself out with
+        # `fetch control key: [...] context canceled`, with no way back.
         #
-        # Getting AdGuard back on the road means making it reachable without
-        # the tunnel being healthy first (bind it to the tailnet address, or
-        # advertise the LAN subnet route) -- and the control server's name has
-        # to stay on public DNS either way.
+        # So: no nameserver, and no override. The node keeps whatever resolver
+        # its network already gave it -- carrier DNS on mobile, AdGuard over
+        # DHCP at home, so filtering on the LAN is unaffected. The services do
+        # not need one either: extra_records below answers all of them locally,
+        # and neither those records nor base_domain are governed by
+        # override_local_dns.
+        #
+        # Getting AdGuard back on the road means making it reachable without a
+        # healthy tunnel first -- bind it to the tailnet address, or advertise
+        # the LAN subnet route -- and the control server's name has to stay on
+        # public DNS either way, or the wedge above comes straight back.
+        override_local_dns = false;
         nameservers.global = [ ];
         extra_records = extraRecords;
       };
