@@ -37,6 +37,12 @@
       file = ./secrets/headplane.age;
       owner = "headscale";
     };
+    # A reusable headscale pre-auth key, so tailscaled-autoconnect can register
+    # this box again on its own. Left owned by root, which is who that unit
+    # runs as. Create it with `headscale preauthkeys create` -- note the CLI
+    # default expiry is one hour, so pass --expiration explicitly, and
+    # --reusable, or it is spent on the first registration.
+    tailscale-authkey.file = ./secrets/tailscale-authkey.age;
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }

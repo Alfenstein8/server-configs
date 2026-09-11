@@ -102,6 +102,41 @@ in
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "server";
+
+    # These three replace prefs that used to live only in tailscaled's mutable
+    # state, which is why `tailscale up` refused to run without being handed
+    # every non-default flag back. Declared here they survive a re-register.
+    #
+    # The split is not cosmetic, it is what each unit can do:
+    #
+    #   extraSetFlags  -> `tailscale set`, a oneshot that runs on every boot and
+    #                     needs no credential, because it only adjusts a node
+    #                     that already exists.
+    #   extraUpFlags   -> `tailscale up`, which the module only ever runs from
+    #                     tailscaled-autoconnect, and that unit exists solely
+    #                     when authKeyFile is set. Hence the key: without it
+    #                     these flags are silently inert.
+    #
+    # --login-server has to be on the `up` side; `tailscale set` has no such
+    # flag. Everything else belongs on the `set` side, where it is reapplied
+    # every boot rather than only at registration.
+    #
+    # The payoff is that logging out stops being a dead end. autoconnect polls
+    # the backend state and re-registers the moment it sees NeedsLogin, which is
+    # exactly the hole this box fell into -- stranded off the tailnet from
+    # 2026-09-10 20:39 until someone noticed and ran `tailscale up` by hand.
+    authKeyFile = config.age.secrets.tailscale-authkey.path;
+
+    extraUpFlags = [ "--login-server=${config.shlam.services.headscale.url}" ];
+
+    # No --advertise-routes: the /32 this box used to announce was a way to
+    # reach its own services, and extra_records above already does that by
+    # pointing every vhost at the tailnet address. Announcing a route to a
+    # single address the tailnet can already reach bought nothing.
+    extraSetFlags = [
+      "--accept-routes"
+      "--advertise-exit-node"
+    ];
   };
 
   shlam.services.headscale = {

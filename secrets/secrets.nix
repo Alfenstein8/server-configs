@@ -14,4 +14,5 @@ in
   "restic-client-laptop-backup.age".publicKeys = [ homeserver ];
   "freshrss.age".publicKeys = [ homeserver ];
   "headplane.age".publicKeys = [ homeserver ];
+  "tailscale-authkey.age".publicKeys = [ homeserver ];
 }
