@@ -37,10 +37,7 @@ let
   #     their own, and a tailnet-only answer would go stale the day one moves
   #     off this box.
   tailnetHosts = lib.filterAttrs (
-    name: s:
-    name != "headscale"
-    && s.vhost
-    && lib.hasSuffix ".${config.shlam.domain}" s.host
+    name: s: name != "headscale" && s.vhost && lib.hasSuffix ".${config.shlam.domain}" s.host
   ) config.shlam.services;
 
   extraRecords = lib.mapAttrsToList (_: s: {
@@ -50,6 +47,21 @@ let
   }) tailnetHosts;
 in
 {
+  # This box is its own headscale client, and headscale.shlambert.top now has a
+  # public A record pointing at the WAN address (it has to -- that is what lets
+  # a node off the LAN find the control server at all). Resolving it here would
+  # send the local tailscaled out to the router and back in, a trip that only
+  # completes if the router hairpins NAT. Ours does not: tailscaled got an empty
+  # body from /key and refused to log in with
+  # `key hex has the wrong size, got 0 want 64`.
+  #
+  # So pin the name locally. Loopback rather than the LAN address because Caddy
+  # binds :8444 on every interface and this way the control server stays
+  # reachable to itself even if the LAN is down. ./adguardhome.nix does the
+  # equivalent for LAN clients that resolve through AdGuard; this box does not,
+  # which is exactly how it got stranded.
+  networking.hosts."127.0.0.1" = [ config.shlam.services.headscale.host ];
+
   services.headscale = {
     enable = true;
     address = "0.0.0.0";
