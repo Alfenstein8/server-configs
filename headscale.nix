@@ -69,30 +69,49 @@ in
     settings = {
       dns = {
         base_domain = "ts.${config.shlam.domain}";
-        # These two belong together, and the module asserts it: overriding a
-        # client's resolver while handing it no nameserver would leave the node
-        # unable to resolve anything at all.
+        # Hand every node a public resolver, and let MagicDNS be the only DNS
+        # it uses. These two belong together, and the module asserts it.
         #
-        # MagicDNS forwards every name it does not answer itself to
-        # nameservers.global -- including headscale.shlambert.top, which a node
-        # has to resolve *before* it has a tunnel to resolve it through. With
-        # AdGuard's LAN address there, off-network the control server's own name
-        # resolved to nothing and the client logged itself out with
-        # `fetch control key: [...] context canceled`, with no way back.
+        # The empty list this replaces looked free and was not. With no resolver
+        # from the control server, tailscaled falls back to whatever the OS
+        # already had -- on a systemd-resolved box, 127.0.0.53. But tailscaled
+        # has also rewritten /etc/resolv.conf to 100.100.100.100, and resolved
+        # reads that file back as its own global upstream (`resolv.conf mode:
+        # foreign`). Each side then forwards to the other. The workstation sat
+        # in that cycle logging hundreds of `dns udp query: waiting for response
+        # or error from [127.0.0.53]: context deadline exceeded` a second, with
+        # the rate limiter dropping the rest.
         #
-        # So: no nameserver, and no override. The node keeps whatever resolver
-        # its network already gave it -- carrier DNS on mobile, AdGuard over
-        # DHCP at home, so filtering on the LAN is unaffected. The services do
-        # not need one either: extra_records below answers all of them locally,
-        # and neither those records nor base_domain are governed by
-        # override_local_dns.
+        # Naming a resolver only breaks the cycle if override_local_dns is true
+        # as well: headscale puts nameservers.global in tailcfg's Resolvers when
+        # it is set, and in FallbackResolvers when it is not -- and a fallback is
+        # consulted only when the OS offers nothing, which is never on the box
+        # that had the loop.
         #
-        # Getting AdGuard back on the road means making it reachable without a
-        # healthy tunnel first -- bind it to the tailnet address, or advertise
-        # the LAN subnet route -- and the control server's name has to stay on
-        # public DNS either way, or the wedge above comes straight back.
-        override_local_dns = false;
-        nameservers.global = [ ];
+        # The old objection to that pair was that AdGuard's LAN address was the
+        # only candidate, and a node away from home cannot reach it, so
+        # headscale.shlambert.top -- the one name that has to resolve before a
+        # tunnel exists to resolve it through -- resolved to nothing and the
+        # client logged itself out with `fetch control key: [...] context
+        # canceled`, with no way back. A public resolver has no such edge: it
+        # answers the registrar's A record for that host from anywhere.
+        #
+        # At home that record is the WAN address, reached by NAT hairpin, which
+        # this router does do -- verified 2026-09-12, /health returns 200 over
+        # the WAN address from a LAN client, three times out of three. The
+        # comment above `networking.hosts` says it does not; that reading came
+        # from probing WAN 443, a listener which answers every unmatched SNI
+        # with an empty 200 -- and an empty body from /key is exactly what
+        # `key hex has the wrong size, got 0 want 64` reports.
+        #
+        # The trade is deliberate and asked for: tailnet nodes no longer resolve
+        # through AdGuard, so tunnelled queries are unfiltered. LAN clients that
+        # are not on the tailnet still get AdGuard over DHCP, unaffected.
+        override_local_dns = true;
+        nameservers.global = [
+          "1.1.1.1"
+          "9.9.9.9"
+        ];
         extra_records = extraRecords;
       };
       server_url = config.shlam.services.headscale.url;
