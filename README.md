@@ -147,6 +147,7 @@ them locally.
 | `acme.nix` | the DNS-01 wildcard |
 | `secrets.nix`, `secrets/` | agenix; edit with the `ageGen` alias from `bash.nix` |
 | `arr/`, `tubearchivist/` | Podman stacks; `docker-compose.nix` is hand-edited |
+| `home-assistant/` | Home Assistant, and the Energi Fyn component it pins; setup lives in its own README |
 | `services/` | systemd units for apps run out of `/home/alfred/manual` |
 
 Whether a module is enabled is recorded in exactly one place: the `imports` list
