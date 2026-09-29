@@ -25,11 +25,34 @@ let
 
   # Read, not repeated: restic.nix owns this path.
   resticServerDir = config.services.restic.server.dataDir;
+
+  # A running database cannot be backed up as files. restic walks the tree while
+  # postgres is still writing to it, so the pages it captures come from
+  # different moments and the result may simply not restore. The supported
+  # answer is to dump first and back the dump up instead.
+  #
+  # The dumps land inside /mnt/storage/data, which is already a backup path, so
+  # they ride along in the same snapshot rather than needing a second job. They
+  # are written uncompressed on purpose: restic deduplicates and compresses in
+  # the repository itself, and a plain SQL dump is nearly identical from one
+  # night to the next, so it dedups down to almost nothing. Pre-compressing here
+  # would make every nightly dump a fresh blob and upload it in full.
+  dbDumpDir = "/mnt/storage/data/db-dumps";
+
+  # Jellyfin's SQLite databases. Globbed rather than named below, so the 12.0
+  # schema reshuffle cannot silently drop one from the backup.
+  jellyfinData = "${config.services.jellyfin.dataDir}/data";
 in
 {
   services.restic.backups = {
     "storagebox" = {
-      paths = [ "/mnt/storage/data" ];
+      paths = [
+        "/mnt/storage/data"
+
+        # Jellyfin's state: users, watch history, playlists, plugin config. The
+        # media itself is excluded below and re-acquirable; this is not.
+        "/var/lib/jellyfin"
+      ];
       initialize = true;
 
       repository = "sftp:${account}@${host}:${boxRoot}/homeserver";
@@ -41,6 +64,42 @@ in
       extraOptions = [
         "sftp.command='ssh ${account}@${host} -p ${toString sshPort} -i ${keyFile} -s sftp'"
       ];
+
+      # Runs as root in the unit's preStart, and the module hands it to
+      # writeScript -- a standalone executable, so it needs its own shebang.
+      # A non-zero exit here fails the unit, which is what we want: a snapshot
+      # taken after a failed dump would look healthy and restore nothing.
+      backupPrepareCommand = ''
+        #!${pkgs.runtimeShell}
+        set -euo pipefail
+
+        install -d -m 0700 ${dbDumpDir}
+
+        # pg_dumpall rather than pg_dump: it carries roles and grants too, so a
+        # restore does not need immich's database user recreated by hand.
+        # Written to .tmp and moved into place, so a dump that dies halfway
+        # cannot leave a truncated file that still looks like a backup.
+        ${pkgs.util-linux}/bin/runuser -u ${config.services.postgresql.superUser} -- \
+          ${config.services.postgresql.package}/bin/pg_dumpall --clean --if-exists \
+          > ${dbDumpDir}/postgresql.sql.tmp
+        mv ${dbDumpDir}/postgresql.sql.tmp ${dbDumpDir}/postgresql.sql
+
+        # SQLite has the same torn-copy problem as postgres. `.backup` takes a
+        # consistent snapshot through the sqlite API while jellyfin keeps
+        # running. /var/lib/jellyfin is backed up as files as well, so a miss
+        # here is a degraded backup rather than no backup -- hence a warning
+        # rather than the hard failure postgres gets.
+        install -d -m 0700 ${dbDumpDir}/jellyfin
+        shopt -s nullglob
+        found=0
+        for db in ${jellyfinData}/*.db; do
+          found=1
+          ${pkgs.sqlite}/bin/sqlite3 "$db" ".backup '${dbDumpDir}/jellyfin/$(basename "$db")'"
+        done
+        if [ "$found" -eq 0 ]; then
+          echo "warning: no *.db under ${jellyfinData}; has jellyfin moved its state?" >&2
+        fi
+      '';
 
       timerConfig = {
         OnCalendar = "daily";
@@ -60,6 +119,13 @@ in
         # Regenerated from library/ and upload/ on demand.
         "/mnt/storage/data/immich/thumbs"
         "/mnt/storage/data/immich/encoded-video"
+
+        # Jellyfin's own throwaway data. The live .db files are deliberately
+        # NOT excluded: the consistent copies under db-dumps/jellyfin are the
+        # ones to restore from, but keeping the originals too means a change in
+        # jellyfin's layout cannot leave the snapshot with no database at all.
+        "/var/lib/jellyfin/log"
+        "/var/lib/jellyfin/transcodes"
       ];
 
       # Pruning old backups based on a retention policy:
