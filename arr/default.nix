@@ -1,6 +1,7 @@
 {
   imports = [
     ./docker-compose.nix
+    ./qbit-manage.nix
   ];
 
   # Ports mirror the published mappings in ./docker-compose.nix. They are

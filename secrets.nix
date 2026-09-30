@@ -43,6 +43,9 @@
     # default expiry is one hour, so pass --expiration explicitly, and
     # --reusable, or it is spent on the first registration.
     tailscale-authkey.file = ./secrets/tailscale-authkey.age;
+    # qbit-manage's qBittorrent WebUI login, as an environment file:
+    # QBIT_PASS=<password>. Read by systemd as root, so owned by root.
+    qbit-manage.file = ./secrets/qbit-manage.age;
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }

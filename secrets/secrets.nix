@@ -15,4 +15,5 @@ in
   "freshrss.age".publicKeys = [ homeserver ];
   "headplane.age".publicKeys = [ homeserver ];
   "tailscale-authkey.age".publicKeys = [ homeserver ];
+  "qbit-manage.age".publicKeys = [ homeserver ];
 }
