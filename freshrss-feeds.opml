@@ -89,10 +89,6 @@
         xmlUrl="https://github.com/grafana/loki/releases.atom"
         htmlUrl="https://github.com/grafana/loki/releases" frss:ttl="21600"
         frss:filtersActionRead="intitle:helm-" />
-      <outline type="rss" text="Mealie" title="Mealie"
-        description="Recipes (services.mealie)"
-        xmlUrl="https://github.com/mealie-recipes/mealie/releases.atom"
-        htmlUrl="https://github.com/mealie-recipes/mealie/releases" frss:ttl="21600" />
       <outline type="rss" text="Navidrome" title="Navidrome"
         description="Music streaming (services.navidrome)"
         xmlUrl="https://github.com/navidrome/navidrome/releases.atom"

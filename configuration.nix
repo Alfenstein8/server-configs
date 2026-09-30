@@ -56,7 +56,7 @@
     ./prometheus.nix
     ./grafana.nix
     ./loki.nix
-    ./mealie.nix
+    # ./mealie.nix
     ./freshrss.nix # RSS reader
     ./home-assistant # Home automation -- see home-assistant/README.md
   ];
