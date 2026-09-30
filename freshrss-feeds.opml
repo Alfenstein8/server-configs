@@ -113,10 +113,6 @@
         description="Storage pool (zfs.nix) - check kernel compat before upgrading"
         xmlUrl="https://github.com/openzfs/zfs/releases.atom"
         htmlUrl="https://github.com/openzfs/zfs/releases" frss:ttl="21600" />
-      <outline type="rss" text="Paperless-ngx" title="Paperless-ngx"
-        description="Document archive (services.paperless)"
-        xmlUrl="https://github.com/paperless-ngx/paperless-ngx/releases.atom"
-        htmlUrl="https://github.com/paperless-ngx/paperless-ngx/releases" frss:ttl="21600" />
       <outline type="rss" text="Podman" title="Podman"
         description="Container runtime behind the arr and tubearchivist stacks"
         xmlUrl="https://github.com/podman-container-tools/podman/releases.atom"

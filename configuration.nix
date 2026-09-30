@@ -31,7 +31,7 @@
     ./headplane.nix # Web UI for headscale: users, nodes, pre-auth keys
     ./immich.nix # Image backup
     # ./immichframe.nix
-    ./paperless.nix # Document management
+    # ./paperless.nix # Document management
     ./radicale.nix # Contacts and calendar
     ./restic.nix # restic server
     ./uptime-kuma.nix # Services monitor
