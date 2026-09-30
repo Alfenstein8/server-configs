@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
   # 1. enable vaapi on OS-level
   # nixpkgs.config.packageOverrides = pkgs: {
@@ -14,7 +14,7 @@
       intel-vaapi-driver
       libvdpau-va-gl
       # intel-compute-runtime # OpenCL filter support (hardware tonemapping and subtitle burn-in)
-      intel-compute-runtime-legacy1
+      inputs.nixpkgs-legacy1.legacyPackages.${pkgs.stdenv.hostPlatform.system}.intel-compute-runtime-legacy1
       # intel-ocl
       # intel-media-sdk # QSV up to 11th gen
       vpl-gpu-rt
