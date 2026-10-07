@@ -1,8 +1,14 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   # This box's LAN address. AdGuard binds it, and the rewrite below hands it
   # back to LAN clients, so the two must agree.
   lanIP = "192.168.0.188";
+
+  # Hosts on the router's port forward (shlam.services.<name>.publicPort, see
+  # ../registry.nix): their public A records point at the WAN address too.
+  publicHosts = lib.mapAttrsToList (_: s: s.host) (
+    lib.filterAttrs (_: s: s.vhost && s.publicPort != null) config.shlam.services
+  );
 in
 {
   services.adguardhome = {
@@ -25,7 +31,8 @@ in
         port = 53;
       };
 
-      # Split horizon for the control server, and for it alone.
+      # Split horizon for the control server, and for every host published
+      # through the router's port forward.
       #
       # *.shlambert.top resolves -- publicly, at the registrar -- to this box's
       # LAN address. That is what makes every service work at home, and it is
@@ -45,16 +52,26 @@ in
       # the LAN path on the LAN and leaves the public answer to the clients that
       # actually need it.
       #
+      # The public hosts (p7.shlambert.top, zehra.click) have the same problem,
+      # and the same answer: their real A records point at the WAN address, so a
+      # phone on the Wi-Fi would be sent out and back in. Their :443 vhosts serve
+      # the LAN directly.
+      #
       # Note this REPLACES the rewrite list wholesale: mutableSettings defaults
       # to true, so a declared value wins over whatever the web UI holds. Any
       # rewrite added by hand there has to be written in here too, or it is
       # dropped on the next restart.
-      filtering.rewrites = [
-        {
-          domain = config.shlam.services.headscale.host;
-          answer = lanIP;
-        }
-      ];
+      filtering.rewrites =
+        map
+          (domain: {
+            inherit domain;
+            answer = lanIP;
+          })
+          (
+            lib.unique (
+              [ config.shlam.services.headscale.host ] ++ publicHosts
+            )
+          );
     };
   };
 

@@ -318,11 +318,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1791375390,
-        "narHash": "sha256-1bPy217IQ/DELabjehHeUw9mqVbuRdAWvfdDaDVa/cM=",
+        "lastModified": 1791388665,
+        "narHash": "sha256-YAnwKR//azIzHn283fWcppZa9dp3ffVVMdgsGTZX8Cs=",
         "ref": "refs/heads/main",
-        "rev": "ed7bb3b0bfb2f112ddb3edea74c0fe4f25247b2e",
-        "revCount": 73,
+        "rev": "37b64742bec261a6a75c5020e64eb3499ae0507f",
+        "revCount": 76,
         "type": "git",
         "url": "ssh://git@codefloe.com/Alfert/p7-events.git"
       },

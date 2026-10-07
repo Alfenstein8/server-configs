@@ -1,6 +1,7 @@
 # P7 Events (https://p7.shlambert.top): the module from P7's own repository (flake input
 # `p7`) runs the API server, Synapse on PostgreSQL and the site, and deploys each new
-# commit on main whose CI passed into /nix/var/nix/profiles/p7 (no rebuild here; see
+# release of P7 (once its Android APK is attached, so the app and the server update
+# together) into /nix/var/nix/profiles/p7 (no rebuild here; see
 # P7's README, "Production on NixOS"). Updating the `p7` input only matters when the
 # module itself changes.
 #
@@ -59,6 +60,8 @@ in
     ];
     autoDeploy = {
       enable = true;
+      # Releases only (mise run release in P7): merging to main doesn't go live.
+      track = "release";
       flakeUrl = "git+ssh://git@codefloe.com/Alfert/p7-events.git";
       forgeUrl = "https://codefloe.com";
       repository = "Alfert/p7-events";
