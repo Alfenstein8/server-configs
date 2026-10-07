@@ -18,4 +18,5 @@ in
   "qbit-manage.age".publicKeys = [ homeserver ];
   # P7 (services/p7.nix)
   "p7.age".publicKeys = [ homeserver ];
+  "p7-firebase.age".publicKeys = [ homeserver ];
 }

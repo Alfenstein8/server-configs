@@ -17,6 +17,11 @@
 #   P7_SMTP_PASS=      the Brevo SMTP key
 #   P7_KLIPY_API_KEY=  the KLIPY API key (handed to clients anyway: the GIF picker)
 #
+# Push to the Android app through Google (Firebase project p7-events): the service
+# account key is ../secrets/p7-firebase.age (JSON, from the Firebase console's Service
+# accounts tab), the app's ./p7-google-services.json isn't secret (the app gets its
+# values from the instance). UnifiedPush needs nothing here.
+#
 # The repository is public: the flake input and each deploy fetch it over HTTPS, and
 # the deploy job reads its releases without a token.
 {
@@ -34,6 +39,7 @@ in
   warnings = lib.optional (!ready) "P7 is off until secrets/p7.age exists (see services/p7.nix)";
 
   age.secrets.p7 = lib.mkIf ready { file = ../secrets/p7.age; };
+  age.secrets.p7-firebase = lib.mkIf ready { file = ../secrets/p7-firebase.age; };
 
   services.p7 = lib.mkIf ready {
     enable = true;
@@ -42,6 +48,10 @@ in
     configureCaddy = false;
     # Split into a file per secret at boot; each service gets only its own.
     secretsFile = config.age.secrets.p7.path;
+    firebase = {
+      serviceAccountFile = config.age.secrets.p7-firebase.path;
+      googleServicesFile = ./p7-google-services.json;
+    };
     smtp = {
       host = "smtp-relay.brevo.com";
       port = 587;
