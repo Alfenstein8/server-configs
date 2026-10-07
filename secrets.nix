@@ -45,7 +45,9 @@
     tailscale-authkey.file = ./secrets/tailscale-authkey.age;
     # qbit-manage's qBittorrent WebUI login, as an environment file:
     # QBIT_PASS=<password>. Read by systemd as root, so owned by root.
-    qbit-manage.file = ./secrets/qbit-manage.age;
+    # Off with arr/qbit-manage.nix until qbit-manage.age exists: a declared secret
+    # whose .age file is missing breaks evaluation of the whole flake.
+    # qbit-manage.file = ./secrets/qbit-manage.age;
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }
