@@ -16,4 +16,9 @@ in
   "headplane.age".publicKeys = [ homeserver ];
   "tailscale-authkey.age".publicKeys = [ homeserver ];
   "qbit-manage.age".publicKeys = [ homeserver ];
+  # P7 (services/p7.nix)
+  "p7-shared-secret.age".publicKeys = [ homeserver ];
+  "p7-smtp-pass.age".publicKeys = [ homeserver ];
+  "p7-klipy-key.age".publicKeys = [ homeserver ];
+  "p7-forge-token.age".publicKeys = [ homeserver ];
 }

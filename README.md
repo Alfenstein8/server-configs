@@ -135,7 +135,12 @@ them locally.
 - two entries resolve to the same host (they would otherwise silently overwrite
   each other, since `listToAttrs` keeps the first binding);
 - an entry proxies but has neither `port` nor `upstream`;
-- a host falls outside the wildcard's reach.
+- a host falls outside the wildcard's reach;
+- a forwarded port (`publicPort`, `publicHttpPort`) is 80 or 443, is already a
+  service's port, or is used both for HTTPS and for the HTTP redirect. Several
+  hosts may share one (the router forwards WAN 443 to a single port): each must
+  name it, so a public listener carries exactly the hosts that opted in
+  (`zehra.click` and `p7.shlambert.top` on 8443/8880).
 
 ## Layout
 
@@ -148,7 +153,7 @@ them locally.
 | `secrets.nix`, `secrets/` | agenix; edit with the `ageGen` alias from `bash.nix` |
 | `arr/`, `tubearchivist/` | Podman stacks; `docker-compose.nix` is hand-edited |
 | `home-assistant/` | Home Assistant, and the Energi Fyn component it pins; setup lives in its own README |
-| `services/` | systemd units for apps run out of `/home/alfred/manual` |
+| `services/` | systemd units for apps run out of `/home/alfred/manual`, and `p7.nix`: P7 Events from its own flake (input `p7`), which deploys each green commit itself |
 
 Whether a module is enabled is recorded in exactly one place: the `imports` list
 in `configuration.nix` (or `services/default.nix`). Modules commented out there

@@ -124,10 +124,12 @@ let
             service rather than one replacing the other.
 
             Isolation is the whole point: Caddy gives this port its own server
-            whose routing table holds this host and nothing else, so a service
-            added to the registry later cannot become internet-reachable by
-            accident. Forwarding WAN 443 -> 443 would instead publish every
-            vhost at once, since *.${domain} already resolves to the WAN IP.
+            whose routing table holds only the hosts that name this port, so a
+            service added to the registry later cannot become internet-reachable
+            by accident. Several hosts may share one (the router forwards WAN 443
+            to a single port), each opting in by naming it. Forwarding WAN 443 ->
+            443 would instead publish every vhost at once, since *.${domain}
+            already resolves to the WAN IP.
           '';
         };
 
@@ -252,11 +254,14 @@ let
     mapAttrsToList (_: s: s.publicPort) publicSvcs
     ++ mapAttrsToList (_: s: s.publicHttpPort) publicHttpSvcs;
 
-  # A forwarded port must belong to exactly one host -- that IS the isolation
-  # property, and two entries sharing one would silently dissolve it. 80 and 443
-  # are the shared listeners every other vhost lives on, so naming them here
-  # would publish the lot.
-  dupePorts = lib.unique (builtins.filter (p: lib.count (q: q == p) publicPorts > 1) publicPorts);
+  # A forwarded port carries only the hosts that name it -- that IS the isolation
+  # property. Several may share one (WAN 443 forwards to a single port), but a port
+  # can't be both an HTTPS listener and a plain-HTTP redirect one. 80 and 443 are
+  # the shared listeners every other vhost lives on, so naming them here would
+  # publish the lot.
+  httpsPorts = lib.unique (mapAttrsToList (_: s: s.publicPort) publicSvcs);
+  httpPorts = lib.unique (mapAttrsToList (_: s: s.publicHttpPort) publicHttpSvcs);
+  dupePorts = builtins.filter (p: builtins.elem p httpPorts) httpsPorts;
   sharedPorts = builtins.filter (p: p == 80 || p == 443) publicPorts;
 
   # A listener bound to a port some service already answers on fails at bind
@@ -378,7 +383,7 @@ in
       {
         assertion = dupePorts == [ ];
         message =
-          "shlam.services: publicPort/publicHttpPort must be unique per host, reused: "
+          "shlam.services: a port can't be both a publicPort and a publicHttpPort: "
           + concatStringsSep ", " (map toString dupePorts);
       }
       {
@@ -396,7 +401,7 @@ in
     ];
 
     # Only the forwarded ports; the router decides what actually reaches them.
-    networking.firewall.allowedTCPPorts = publicPorts;
+    networking.firewall.allowedTCPPorts = lib.unique publicPorts;
 
     services.caddy.virtualHosts =
       mapAttrs' (
@@ -407,7 +412,7 @@ in
         }
       ) vhostSvcs
       # Same site, second listener. Caddy keys servers by listen address, so
-      # this one's routing table contains exactly one host.
+      # this one's routing table contains exactly the hosts that name the port.
       // mapAttrs' (
         _: s:
         nameValuePair "https://${s.host}:${toString s.publicPort}" {

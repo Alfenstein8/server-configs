@@ -249,6 +249,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_4": {
+      "locked": {
+        "lastModified": 1791260994,
+        "narHash": "sha256-Miqqk/ammqnTUxaoCyvtwoPeLbI1ksFyLxi/CazZpWY=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "151fa4e8ddfdd8dd25d945ad94ed54a13de9f6e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nvf": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -297,6 +313,24 @@
         "type": "github"
       }
     },
+    "p7": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_4"
+      },
+      "locked": {
+        "lastModified": 1791375082,
+        "narHash": "sha256-wPgZzVK93Lgc+q18Q5e8lrwewRGjFmFY2bo3snIITdc=",
+        "ref": "refs/heads/main",
+        "rev": "e9d4b53afcf47b1f721d4d8c7d23cd099817cc76",
+        "revCount": 72,
+        "type": "git",
+        "url": "ssh://git@codefloe.com/Alfert/p7-events.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@codefloe.com/Alfert/p7-events.git"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -304,7 +338,8 @@
         "nix-minecraft": "nix-minecraft",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-legacy1": "nixpkgs-legacy1",
-        "nvf": "nvf"
+        "nvf": "nvf",
+        "p7": "p7"
       }
     },
     "systems": {
