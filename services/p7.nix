@@ -49,8 +49,10 @@ in
       # Brevo has p7.shlambert.top's SPF/DKIM records.
       from = "p7@p7.shlambert.top";
     };
-    # The debug key the Android app is built with for now (mise run app:build).
+    # Keys the Android app is signed with, for App Links: the release key (releases,
+    # installed through Obtainium) and the laptop's debug key (mise run app:build).
     androidApp.fingerprints = [
+      "0B:83:5E:C1:08:3F:5B:8C:6F:8C:18:98:BB:B5:19:D1:B7:29:42:BA:03:BE:2D:0B:74:4F:12:6D:18:36:6A:07"
       "79:78:72:26:E2:12:93:2B:7D:D7:DD:8F:03:A9:9A:48:51:0E:54:31:DB:5B:00:FF:FC:DB:E3:70:1F:6B:D7:01"
     ];
     autoDeploy = {
