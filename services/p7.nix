@@ -16,13 +16,9 @@
 #                      head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'
 #   P7_SMTP_PASS=      the Brevo SMTP key
 #   P7_KLIPY_API_KEY=  the KLIPY API key (handed to clients anyway: the GIF picker)
-#   P7_FORGE_TOKEN=    CodeFloe access token: read the repository (commit statuses)
 #
-# The repository is private, and fetched over SSH with a read-only deploy key that
-# lives outside the repo, like the Storage Box key in ../backup.nix: the flake input
-# is fetched while evaluating, before agenix has decrypted anything. Once, as root:
-#   ssh-keygen -t ed25519 -N "" -C p7-deploy -f /root/.ssh/p7-deploy
-# and add /root/.ssh/p7-deploy.pub to the repository's deploy keys (read-only).
+# The repository is public: the flake input and each deploy fetch it over HTTPS, and
+# the deploy job reads its releases without a token.
 {
   config,
   lib,
@@ -30,7 +26,6 @@
   ...
 }:
 let
-  deployKey = "/root/.ssh/p7-deploy";
   ready = builtins.pathExists ../secrets/p7.age;
 in
 {
@@ -62,22 +57,13 @@ in
       enable = true;
       # Releases only (mise run release in P7): merging to main doesn't go live.
       track = "release";
-      flakeUrl = "git+ssh://git@codefloe.com/Alfert/p7-events.git";
+      flakeUrl = "git+https://codefloe.com/Alfert/p7-events.git";
       forgeUrl = "https://codefloe.com";
       repository = "Alfert/p7-events";
-      sshKeyFile = deployKey;
+      # Public repository: no token (an invalid one would be refused, even there).
+      tokenFile = null;
     };
   };
-
-  # Fetching P7 (the flake input during a rebuild, and each deploy) over SSH.
-  programs.ssh.knownHosts."codefloe.com".publicKey =
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF0iVzx4KlQQGYTrEmXBaBQstbwMowbgAEXziPk5DST5";
-  # Root only: your own user's SSH to CodeFloe keeps its own keys.
-  programs.ssh.extraConfig = ''
-    Match host codefloe.com localuser root
-      IdentityFile ${deployKey}
-      IdentitiesOnly yes
-  '';
 
   shlam.services.p7 = {
     # No port: the module's site (app, API, Synapse routes) is the whole vhost body.

@@ -324,11 +324,11 @@
         "rev": "c56b18db9aae05095536c3c974dba85046b1a76c",
         "revCount": 77,
         "type": "git",
-        "url": "ssh://git@codefloe.com/Alfert/p7-events.git"
+        "url": "https://codefloe.com/Alfert/p7-events.git"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@codefloe.com/Alfert/p7-events.git"
+        "url": "https://codefloe.com/Alfert/p7-events.git"
       }
     },
     "root": {
