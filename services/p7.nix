@@ -7,14 +7,15 @@
 # Public, like zehra.click: the router's WAN 443/80 forwards reach 8443/8880, which
 # serve exactly the hosts that name those ports (see ../registry.nix).
 #
-# Secrets (agenix, ../secrets): until all of them exist P7 stays off with a warning,
-# since a missing .age file would break evaluation of the whole flake.
-#   p7-shared-secret  Synapse's registration shared secret; the bot's and guests'
-#                     passwords derive from it, so keep it. Any long random string:
-#                     head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'
-#   p7-smtp-pass      the Brevo SMTP key
-#   p7-klipy-key      the KLIPY API key (handed to clients anyway: the GIF picker)
-#   p7-forge-token    CodeFloe access token: read the repository (commit statuses)
+# Secrets: one agenix environment file, ../secrets/p7.age (ageGen secrets/p7.age).
+# Until it exists P7 stays off with a warning, since a missing .age file would break
+# evaluation of the whole flake.
+#   P7_SHARED_SECRET=  Synapse's registration shared secret; the bot's and guests'
+#                      passwords derive from it, so keep it. Any long random string:
+#                      head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'
+#   P7_SMTP_PASS=      the Brevo SMTP key
+#   P7_KLIPY_API_KEY=  the KLIPY API key (handed to clients anyway: the GIF picker)
+#   P7_FORGE_TOKEN=    CodeFloe access token: read the repository (commit statuses)
 #
 # The repository is private, and fetched over SSH with a read-only deploy key that
 # lives outside the repo, like the Storage Box key in ../backup.nix: the flake input
@@ -28,43 +29,30 @@
   ...
 }:
 let
-  secrets = [
-    "p7-shared-secret"
-    "p7-smtp-pass"
-    "p7-klipy-key"
-    "p7-forge-token"
-  ];
   deployKey = "/root/.ssh/p7-deploy";
-  file = name: ../secrets/${name}.age;
-  missing = builtins.filter (name: !builtins.pathExists (file name)) secrets;
-  ready = missing == [ ];
-  secret = name: config.age.secrets.${name}.path;
+  ready = builtins.pathExists ../secrets/p7.age;
 in
 {
   imports = [ inputs.p7.nixosModules.default ];
 
-  warnings = lib.optional (!ready) (
-    "P7 is off until its secrets exist (services/p7.nix): "
-    + lib.concatMapStringsSep ", " (name: "secrets/${name}.age") missing
-  );
+  warnings = lib.optional (!ready) "P7 is off until secrets/p7.age exists (see services/p7.nix)";
 
-  age.secrets = lib.mkIf ready (lib.genAttrs secrets (name: { file = file name; }));
+  age.secrets.p7 = lib.mkIf ready { file = ../secrets/p7.age; };
 
   services.p7 = lib.mkIf ready {
     enable = true;
     domain = config.shlam.services.p7.host;
     # The registry serves the site (below), with the wildcard certificate.
     configureCaddy = false;
-    sharedSecretFile = secret "p7-shared-secret";
+    # Split into a file per secret at boot; each service gets only its own.
+    secretsFile = config.age.secrets.p7.path;
     smtp = {
       host = "smtp-relay.brevo.com";
       port = 587;
       user = "REMOVED@smtp-brevo.com";
-      passwordFile = secret "p7-smtp-pass";
       # Brevo has p7.shlambert.top's SPF/DKIM records.
       from = "p7@p7.shlambert.top";
     };
-    klipyKeyFile = secret "p7-klipy-key";
     # The debug key the Android app is built with for now (mise run app:build).
     androidApp.fingerprints = [
       "79:78:72:26:E2:12:93:2B:7D:D7:DD:8F:03:A9:9A:48:51:0E:54:31:DB:5B:00:FF:FC:DB:E3:70:1F:6B:D7:01"
@@ -74,7 +62,6 @@ in
       flakeUrl = "git+ssh://git@codefloe.com/Alfert/p7-events.git";
       forgeUrl = "https://codefloe.com";
       repository = "Alfert/p7-events";
-      tokenFile = secret "p7-forge-token";
       sshKeyFile = deployKey;
     };
   };
