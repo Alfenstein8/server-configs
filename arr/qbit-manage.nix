@@ -28,12 +28,12 @@ in
     commands = {
       schedule = 60; # minutes
       startupDelay = 120;
-      # Stage 1: tag only -- `private` and `noHL` go on the torrents, nothing
-      # is limited or removed. Check the tags in qBittorrent, then turn on
-      # shareLimits to start deleting.
+      # Tagging was run on its own first and checked in qBittorrent. With
+      # shareLimits on, the unused-public group below stops and deletes. Set it
+      # back to false to return to tagging only.
       tagUpdate = true;
       tagNoHardLinks = true;
-      shareLimits = false;
+      shareLimits = true;
     };
 
     settings = {
