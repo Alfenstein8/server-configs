@@ -204,6 +204,19 @@ in
               for = "1m";
               summary = "Pool {{ .Labels.zpool }} is {{ .Labels.state }}";
             }
+            {
+              # From node_exporter's systemd collector (prometheus.nix). A
+              # failed oneshot -- a backup, a cert renewal -- stays failed
+              # until its next run, so this keeps repeating until it is fixed
+              # or `systemctl reset-failed`.
+              uid = "unit-failed";
+              title = "Systemd unit failed";
+              expr = ''node_systemd_unit_state{state="failed"}'';
+              op = "gt";
+              threshold = 0;
+              for = "1m";
+              summary = "{{ .Labels.name }} has failed -- journalctl -u {{ .Labels.name }}";
+            }
           ];
         }
       ];
