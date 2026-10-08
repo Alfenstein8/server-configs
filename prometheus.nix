@@ -22,12 +22,16 @@
       }
       {
         job_name = "immich";
+        # Both ports export the same process_* metrics; `worker` tells them
+        # apart without decoding port numbers (see dashboards/immich.nix).
         static_configs = [
           {
-            targets = [
-              "localhost:8083"
-              "localhost:8084"
-            ];
+            targets = [ "localhost:8083" ];
+            labels.worker = "api";
+          }
+          {
+            targets = [ "localhost:8084" ];
+            labels.worker = "microservices";
           }
         ];
       }

@@ -1,5 +1,31 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
+  # The provisioned Prometheus data source's uid, as Grafana generated it when
+  # it was first provisioned. Set nowhere else; changing it would orphan every
+  # dashboard and rule that points at it.
+  prometheus = "PBFA97CFB590B2093";
+
+  # Dashboards are files Grafana watches, one directory for the lot. Anything
+  # here is read-only in the UI; changes go through this list.
+  dashboards = pkgs.linkFarm "grafana-dashboards" [
+    {
+      # grafana.com/grafana/dashboards/1860. Picks its data source through a
+      # dashboard variable, so the download is provisioned as-is. Bump the
+      # revision and hash together.
+      name = "node-exporter-full.json";
+      path = pkgs.fetchurl {
+        url = "https://grafana.com/api/dashboards/1860/revisions/45/download";
+        hash = "sha256-GExrdAnzBtp1Ul13cvcZRbEM6iOtFrXXjEaY6g6lGYY=";
+      };
+    }
+    {
+      name = "immich.json";
+      path = pkgs.writeText "immich.json" (
+        builtins.toJSON (import ./dashboards/immich.nix { datasource = prometheus; })
+      );
+    }
+  ];
+
   # A Grafana-managed rule is a query (A) plus a threshold expression (C) on
   # it -- the same two steps the UI's simple mode builds. noDataState = OK: a
   # metric that is simply absent (no pool degraded, nothing booted) is not an
@@ -12,7 +38,7 @@ let
       data = [
         {
           refId = "A";
-          datasourceUid = "PBFA97CFB590B2093"; # the provisioned Prometheus, as Grafana named it
+          datasourceUid = prometheus;
           relativeTimeRange = {
             from = 600;
             to = 0;
@@ -84,6 +110,14 @@ in
         url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
       }
     ];
+    dashboards.settings.providers = [
+      {
+        name = "homeserver";
+        folder = "Homeserver";
+        options.path = dashboards;
+      }
+    ];
+
     alerting = {
       # Grafana fills $VARS in provisioning files from its environment, which
       # is how the webhook URL gets in without touching the repo or the store.
