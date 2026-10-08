@@ -11,6 +11,11 @@
         grpc_listen_address = "127.0.0.1";
       };
 
+      # The address the query frontend hands to queriers to call it back on.
+      # Left alone it is guessed from the first LAN interface, which the
+      # loopback-only gRPC listener above then refuses.
+      frontend.address = "127.0.0.1";
+
       target = "all"; # single-binary mode, runs all components in one process
 
       # One process, one copy. The default replication factor is 3, which a
