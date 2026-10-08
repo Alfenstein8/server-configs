@@ -31,6 +31,15 @@ in
         source_labels = ["__journal__systemd_unit"]
         target_label  = "unit"
       }
+      // Podman runs each container's --health-cmd in a transient unit named
+      // <container id>-<random>.service, and the random part is new on every
+      // container start -- a fresh, unreadable stream each time. One name.
+      rule {
+        source_labels = ["__journal__systemd_unit"]
+        regex         = "[0-9a-f]{64}-[0-9a-f]+\\.service"
+        target_label  = "unit"
+        replacement   = "podman-healthcheck.service"
+      }
       // Docker's journald driver sets CONTAINER_NAME; everything else lacks it.
       rule {
         source_labels = ["__journal_container_name"]
