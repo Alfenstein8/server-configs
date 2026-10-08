@@ -56,6 +56,7 @@
     ./prometheus.nix
     ./grafana.nix
     ./loki.nix
+    ./alloy.nix # ships the journal to Loki
     # ./mealie.nix
     ./freshrss.nix # RSS reader
     ./home-assistant # Home automation -- see home-assistant/README.md
