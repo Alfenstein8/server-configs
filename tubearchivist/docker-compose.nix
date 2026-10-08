@@ -108,7 +108,7 @@
       "TA_HOST" = "https://tube.shlambert.top";
       "TA_PASSWORD" = "verysecret";
       "TA_USERNAME" = "tubearchivist";
-      "TZ" = "America/New_York";
+      "TZ" = "Europe/Copenhagen";
     };
     volumes = [
       "/mnt/storage/data/media/youtube:/youtube:rw"
