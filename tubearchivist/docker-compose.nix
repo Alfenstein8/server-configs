@@ -123,7 +123,7 @@
     ];
     log-driver = "journald";
     extraOptions = [
-      "--health-cmd=[\"curl\", \"-f\", \"https://tube.shlambert.top:8000/api/health/\"]"
+      "--health-cmd=[\"curl\", \"-f\", \"http://localhost:8000/api/health/\"]"
       "--health-interval=2m0s"
       "--health-retries=3"
       "--health-start-period=30s"
