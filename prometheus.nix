@@ -42,7 +42,9 @@
       {
         job_name = "loki";
         static_configs = [
-          { targets = [ "localhost:${toString config.services.loki.configuration.server.http_listen_port}" ]; }
+          {
+            targets = [ "localhost:${toString config.services.loki.configuration.server.http_listen_port}" ];
+          }
         ];
       }
       {

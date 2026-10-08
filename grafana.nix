@@ -4,6 +4,7 @@ let
   # it was first provisioned. Set nowhere else; changing it would orphan every
   # dashboard and rule that points at it.
   prometheus = "PBFA97CFB590B2093";
+  loki = "P8E80F9AEF21F6940"; # likewise, for Loki
 
   # Dashboards are files Grafana watches, one directory for the lot. Anything
   # here is read-only in the UI; changes go through this list.
@@ -19,6 +20,12 @@ let
       };
     }
     {
+      name = "homeserver.json";
+      path = pkgs.writeText "homeserver.json" (
+        builtins.toJSON (import ./dashboards/homeserver.nix { inherit prometheus loki; })
+      );
+    }
+    {
       name = "immich.json";
       path = pkgs.writeText "immich.json" (
         builtins.toJSON (import ./dashboards/immich.nix { datasource = prometheus; })
@@ -30,47 +37,45 @@ let
   # it -- the same two steps the UI's simple mode builds. noDataState = OK: a
   # metric that is simply absent (no pool degraded, nothing booted) is not an
   # alert.
-  promRule =
-    r:
-    {
-      inherit (r) uid title for;
-      condition = "C";
-      data = [
-        {
+  promRule = r: {
+    inherit (r) uid title for;
+    condition = "C";
+    data = [
+      {
+        refId = "A";
+        datasourceUid = prometheus;
+        relativeTimeRange = {
+          from = 600;
+          to = 0;
+        };
+        model = {
           refId = "A";
-          datasourceUid = prometheus;
-          relativeTimeRange = {
-            from = 600;
-            to = 0;
-          };
-          model = {
-            refId = "A";
-            inherit (r) expr;
-            instant = true;
-          };
-        }
-        {
+          inherit (r) expr;
+          instant = true;
+        };
+      }
+      {
+        refId = "C";
+        datasourceUid = "__expr__";
+        model = {
           refId = "C";
-          datasourceUid = "__expr__";
-          model = {
-            refId = "C";
-            type = "threshold";
-            expression = "A";
-            conditions = [
-              {
-                evaluator = {
-                  type = r.op;
-                  params = [ r.threshold ];
-                };
-              }
-            ];
-          };
-        }
-      ];
-      noDataState = "OK";
-      execErrState = "Error";
-      annotations.summary = r.summary;
-    };
+          type = "threshold";
+          expression = "A";
+          conditions = [
+            {
+              evaluator = {
+                type = r.op;
+                params = [ r.threshold ];
+              };
+            }
+          ];
+        };
+      }
+    ];
+    noDataState = "OK";
+    execErrState = "Error";
+    annotations.summary = r.summary;
+  };
 in
 {
   services.grafana = {

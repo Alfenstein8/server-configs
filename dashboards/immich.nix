@@ -38,34 +38,42 @@ let
 
   stat =
     title: x: unit: expr:
-    panel "stat" title {
-      inherit x;
-      y = 0;
-      w = 6;
-      h = 4;
-    } unit [ ((target expr "") // { instant = true; }) ] { options.reduceOptions.calcs = [ "lastNotNull" ]; };
+    panel "stat" title
+      {
+        inherit x;
+        y = 0;
+        w = 6;
+        h = 4;
+      }
+      unit
+      [ ((target expr "") // { instant = true; }) ]
+      { options.reduceOptions.calcs = [ "lastNotNull" ]; };
 
   timeseries =
-    title: gridPos: unit: targets: panel "timeseries" title gridPos unit targets { };
+    title: gridPos: unit: targets:
+    panel "timeseries" title gridPos unit targets { };
 
   # Horizontal bars, largest first, as of the end of the dashboard's range.
   ranking =
     title: gridPos: unit: expr:
-    panel "bargauge" title gridPos unit [ ((target "sort_desc(${expr})" "{{method}}") // { instant = true; }) ] {
-      options = {
-        orientation = "horizontal";
-        displayMode = "gradient";
-        showUnfilled = true;
-        reduceOptions.calcs = [ "lastNotNull" ];
+    panel "bargauge" title gridPos unit
+      [ ((target "sort_desc(${expr})" "{{method}}") // { instant = true; }) ]
+      {
+        options = {
+          orientation = "horizontal";
+          displayMode = "gradient";
+          showUnfilled = true;
+          reduceOptions.calcs = [ "lastNotNull" ];
+        };
       };
-    };
 
   jobs = status: ''{__name__=~"immich_jobs_.+_${status}_total"}'';
 
   # Per-method timing histograms, method lifted out of the name. `part` is sum
   # or count; `.*` covers whatever unit suffix the exporter adds.
   methods =
-    part: ''label_replace({__name__=~"immich_.+_duration.*_${part}"}, "method", "$1", "__name__", "immich_(.+)_duration.*_${part}")'';
+    part:
+    ''label_replace({__name__=~"immich_.+_duration.*_${part}"}, "method", "$1", "__name__", "immich_(.+)_duration.*_${part}")'';
   overRange = part: "sum by (method) (increase(${methods part}[$__range:1m]))";
 in
 {
@@ -140,40 +148,30 @@ in
         h = 8;
       }
       "percentunit"
-      [ (target ''sum by (worker) (rate(process_cpu_time_total{job="immich"}[$__rate_interval]))'' "{{worker}}") ]
+      [
+        (target ''sum by (worker) (rate(process_cpu_time_total{job="immich"}[$__rate_interval]))'' "{{worker}}")
+      ]
     )
-    (timeseries "Memory"
-      {
-        x = 18;
-        y = 12;
-        w = 6;
-        h = 8;
-      }
-      "bytes"
-      [ (target ''sum by (worker) (process_memory_usage{job="immich"})'' "{{worker}}") ]
-    )
+    (timeseries "Memory" {
+      x = 18;
+      y = 12;
+      w = 6;
+      h = 8;
+    } "bytes" [ (target ''sum by (worker) (process_memory_usage{job="immich"})'' "{{worker}}") ])
 
     # Where the time goes: total time spent per method, and the slowest calls
     # on average. Both across the API and the microservices worker.
-    (ranking "Most time spent (range)"
-      {
-        x = 0;
-        y = 20;
-        w = 12;
-        h = 10;
-      }
-      "ms"
-      "topk(15, ${overRange "sum"})"
-    )
-    (ranking "Slowest on average (range)"
-      {
-        x = 12;
-        y = 20;
-        w = 12;
-        h = 10;
-      }
-      "ms"
-      "topk(15, ${overRange "sum"} / (${overRange "count"} > 0))"
-    )
+    (ranking "Most time spent (range)" {
+      x = 0;
+      y = 20;
+      w = 12;
+      h = 10;
+    } "ms" "topk(15, ${overRange "sum"})")
+    (ranking "Slowest on average (range)" {
+      x = 12;
+      y = 20;
+      w = 12;
+      h = 10;
+    } "ms" "topk(15, ${overRange "sum"} / (${overRange "count"} > 0))")
   ];
 }
