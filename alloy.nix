@@ -3,17 +3,23 @@
 # native services directly, the arr containers through docker's journald log
 # driver -- so the journal is the only source needed.
 let
+  # Alloy's UI: the pipeline graph and per-component health. Its default
+  # anyway, spelled out so the listener and the registry entry share it.
+  port = 12345;
   loki = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
 in
 {
   services.alloy = {
     enable = true;
     # Same as grafana.nix's analytics.reporting_enabled = false.
-    extraFlags = [ "--disable-reporting" ];
+    extraFlags = [
+      "--disable-reporting"
+      "--server.http.listen-addr=127.0.0.1:${toString port}"
+    ];
   };
 
   # The module reads /etc/alloy, so a switch reloads this instead of
-  # restarting. Alloy's own UI stays on its default, 127.0.0.1:12345.
+  # restarting.
   environment.etc."alloy/config.alloy".text = ''
     // Journal fields only exist as __journal_* until promoted to labels here.
     // Kept to a handful: every distinct label combination is its own stream in
@@ -56,4 +62,15 @@ in
       }
     }
   '';
+
+  shlam.services.alloy = {
+    inherit port;
+    dashboard = {
+      title = "Alloy";
+      group = "Infrastructure";
+      order = 25;
+      icon = "alloy.svg";
+      description = "Log Shipping";
+    };
+  };
 }
