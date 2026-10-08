@@ -89,20 +89,12 @@ in
 
       default_config = { };
 
-      # Home Assistant is reached only through Caddy, so it binds loopback and
-      # trusts the forwarded address from there -- without use_x_forwarded_for
-      # every login and every automation trace is attributed to 127.0.0.1.
-      http = {
-        server_host = [
-          "127.0.0.1"
-          "::1"
-        ];
-        use_x_forwarded_for = true;
-        trusted_proxies = [
-          "127.0.0.1"
-          "::1"
-        ];
-      };
+      # No `http:` key. Home Assistant reached only through Caddy should bind
+      # loopback and trust the forwarded address from there (server_host and
+      # trusted_proxies 127.0.0.1 / ::1, use_x_forwarded_for on) -- but those
+      # settings now live in .storage and are edited under Settings > System >
+      # Network. Home Assistant migrated the old YAML block there and ignores
+      # it afterwards; from 2027.2 it stops working altogether.
 
       # A plain `automation:` key would take the visual editor away: Home
       # Assistant only edits automations it can write back, and it cannot write
