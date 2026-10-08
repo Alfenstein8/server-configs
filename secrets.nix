@@ -26,6 +26,9 @@
       file = ./secrets/grafana.age;
       owner = "grafana";
     };
+    # Grafana's Discord webhook, as an environment file:
+    # DISCORD_WEBHOOK_URL=<url>. Read by systemd as root, so owned by root.
+    grafana-discord.file = ./secrets/grafana-discord.age;
     freshrss = {
       file = ./secrets/freshrss.age;
       owner = "freshrss";
