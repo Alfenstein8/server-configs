@@ -85,6 +85,11 @@
       order = 20;
       icon = "prometheus.svg";
       description = "Metrics Collection";
+      # Target health. Prometheus has no auth, so this needs no secret.
+      extra.widget = {
+        type = "prometheus";
+        url = "http://localhost:${toString config.services.prometheus.port}";
+      };
     };
   };
 }
