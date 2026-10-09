@@ -11,6 +11,42 @@ in
     enable = true;
     listenPort = port;
     allowedHosts = config.shlam.services.homepage.host;
+
+    # The info bar along the top. The unit is ProtectSystem=strict, which makes
+    # the filesystem read-only but leaves it visible, so statfs on the pool
+    # still works.
+    widgets = [
+      {
+        resources = {
+          cpu = true;
+          memory = true;
+          cputemp = true;
+          uptime = true;
+        };
+      }
+      {
+        resources = {
+          label = "System";
+          disk = "/";
+        };
+      }
+      {
+        resources = {
+          label = "Storage";
+          disk = "/mnt/storage";
+        };
+      }
+      {
+        datetime = {
+          text_size = "xl";
+          format = {
+            dateStyle = "long";
+            timeStyle = "short";
+            hourCycle = "h23";
+          };
+        };
+      }
+    ];
   };
 
   # No dashboard entry -- the dashboard should not link to itself.
