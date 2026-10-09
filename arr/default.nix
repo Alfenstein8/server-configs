@@ -38,6 +38,11 @@
         order = 20;
         icon = "sonarr.svg";
         description = "TV Show Automation";
+        extra.widget = {
+          type = "sonarr";
+          url = "http://localhost:8989";
+          key = "{{HOMEPAGE_VAR_SONARR_KEY}}";
+        };
       };
     };
 
