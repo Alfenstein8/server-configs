@@ -22,6 +22,11 @@
         order = 10;
         icon = "radarr.svg";
         description = "Movie Automation";
+        extra.widget = {
+          type = "radarr";
+          url = "http://localhost:7878";
+          key = "{{HOMEPAGE_VAR_RADARR_KEY}}";
+        };
       };
     };
 
