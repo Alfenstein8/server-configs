@@ -13,6 +13,11 @@
       order = 20;
       icon = "jellyseerr.svg";
       description = "Media Requests";
+      extra.widget = {
+        type = "seerr";
+        url = "http://localhost:${toString config.services.seerr.port}";
+        key = "{{HOMEPAGE_VAR_JELLYSEERR_KEY}}";
+      };
     };
   };
 }
