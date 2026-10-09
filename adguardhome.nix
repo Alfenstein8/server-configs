@@ -83,6 +83,13 @@ in
       order = 40;
       icon = "adguard-home.svg";
       description = "DNS & Ad Blocking";
+      # The plaintext of the bcrypt hash in settings.users above.
+      extra.widget = {
+        type = "adguard";
+        url = "http://localhost:${toString config.services.adguardhome.port}";
+        username = "alfred";
+        password = "{{HOMEPAGE_VAR_ADGUARD_PASS}}";
+      };
     };
   };
 }
