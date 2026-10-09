@@ -87,6 +87,14 @@
         order = 50;
         icon = "qbittorrent.svg";
         description = "Torrent Client";
+        # qBittorrent sees homepage arrive from the podman gateway rather than
+        # loopback, so its localhost auth bypass does not apply.
+        extra.widget = {
+          type = "qbittorrent";
+          url = "http://localhost:8080";
+          username = "{{HOMEPAGE_VAR_QBIT_USER}}";
+          password = "{{HOMEPAGE_VAR_QBIT_PASS}}";
+        };
       };
     };
 
