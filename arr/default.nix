@@ -54,6 +54,11 @@
         order = 30;
         icon = "bazarr.svg";
         description = "Subtitle Automation";
+        extra.widget = {
+          type = "bazarr";
+          url = "http://localhost:6767";
+          key = "{{HOMEPAGE_VAR_BAZARR_KEY}}";
+        };
       };
     };
 
