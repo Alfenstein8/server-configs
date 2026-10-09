@@ -26,6 +26,14 @@
       order = 10;
       icon = "immich.svg";
       description = "Photo & Video Backup";
+      # version 2 is the API from immich 1.118 on. The key must belong to an
+      # admin: the server statistics endpoint is admin-only.
+      extra.widget = {
+        type = "immich";
+        url = "http://localhost:${toString config.services.immich.port}";
+        key = "{{HOMEPAGE_VAR_IMMICH_KEY}}";
+        version = 2;
+      };
     };
   };
 
