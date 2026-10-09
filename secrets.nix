@@ -49,6 +49,11 @@
     # qbit-manage's qBittorrent WebUI login, as an environment file:
     # QBIT_PASS=<password>. Read by systemd as root, so owned by root.
     qbit-manage.file = ./secrets/qbit-manage.age;
+    # API keys and logins for homepage's service widgets, as an environment
+    # file: one HOMEPAGE_VAR_<NAME>=<value> per line, referenced from the
+    # widgets as {{HOMEPAGE_VAR_<NAME>}}. Read by systemd as root, so owned by
+    # root -- homepage itself runs as a DynamicUser and never sees the file.
+    homepage.file = ./secrets/homepage.age;
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }

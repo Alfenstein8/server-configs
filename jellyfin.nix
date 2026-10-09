@@ -28,6 +28,16 @@ in
       order = 10;
       icon = "jellyfin.svg";
       description = "Media Server";
+      # version 2 authenticates with the Authorization header rather than the
+      # legacy X-Emby-Token one.
+      extra.widget = {
+        type = "jellyfin";
+        url = "http://localhost:${toString port}";
+        key = "{{HOMEPAGE_VAR_JELLYFIN_KEY}}";
+        version = 2;
+        enableBlocks = true;
+        enableNowPlaying = true;
+      };
     };
   };
 }

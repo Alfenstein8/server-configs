@@ -11,6 +11,8 @@ in
     enable = true;
     listenPort = port;
     allowedHosts = config.shlam.services.homepage.host;
+    # Widget credentials -- see the homepage entry in ./secrets.nix.
+    environmentFiles = [ config.age.secrets.homepage.path ];
 
     # The info bar along the top. The unit is ProtectSystem=strict, which makes
     # the filesystem read-only but leaves it visible, so statfs on the pool
