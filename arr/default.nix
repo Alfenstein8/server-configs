@@ -70,6 +70,11 @@
         order = 40;
         icon = "prowlarr.svg";
         description = "Indexer Management";
+        extra.widget = {
+          type = "prowlarr";
+          url = "http://localhost:9696";
+          key = "{{HOMEPAGE_VAR_PROWLARR_KEY}}";
+        };
       };
     };
 
