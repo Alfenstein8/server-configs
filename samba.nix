@@ -8,7 +8,7 @@
         "server string" = "shlamb";
         "netbios name" = "shlamb";
         security = "user";
-        "hosts allow" = "192.168.0.0/24 10.8.0.0/24 127.0.0.1 localhost"; # 10.42.42.0/24 is wireguard
+        "hosts allow" = "192.168.0.0/24 10.8.0.0/24 100.64.0.0/10 127.0.0.1 localhost"; # 10.8.0.0/24 is wireguard, 100.64.0.0/10 is the tailnet
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
         "map to guest" = "bad user";
@@ -128,5 +128,21 @@
   };
 
   networking.firewall.allowPing = true;
+
+  # Share directories, owned to match each share's force user/group and
+  # directory mask (Shared stays 0770; navidrome and immich read it through the
+  # shared-files group). Existing directories get their owner and mode reset to these.
+  systemd.tmpfiles.rules = [
+    "d /mnt/storage/data/Shares                 0755 root         root         -"
+    "d /mnt/storage/data/Shares/Users           0755 root         root         -"
+    "d /mnt/storage/data/Shares/Public          0755 alfred       users        -"
+    "d /mnt/storage/data/Shares/shlammen        0770 shlammen     shlammen     -"
+    "d /mnt/storage/data/Shares/Shared          0770 shared-files shared-files -"
+    "d /mnt/storage/data/Shares/Users/alfred    0770 alfred       alfred       -"
+    "d /mnt/storage/data/Shares/Users/zehra     0755 zehra        users        -"
+    "d /mnt/storage/data/Shares/Users/ole       0755 ole          users        -"
+    "d /mnt/storage/data/Shares/Users/maj-britt 0755 maj-britt    users        -"
+    "d /mnt/storage/data/Shares/Users/esajas    0755 esajas       users        -"
+  ];
 
 }
