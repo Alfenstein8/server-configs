@@ -21,7 +21,7 @@
     ./secrets.nix
     # ./root-certificates.nix
     ./backup.nix # Offsite restic backup to the Hetzner Storage Box
-    # ./dawarich.nix
+    ./dawarich.nix # Location history
     ./zfs.nix # zsf Mirror
     ./users.nix
     ./services # Custom systemd services
