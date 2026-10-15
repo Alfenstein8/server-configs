@@ -10,8 +10,7 @@
 #
 # Secrets: one agenix environment file, ../secrets/hyggr.age (ageGen secrets/hyggr.age).
 # Until it exists Hyggr stays off with a warning, since a missing .age file would break
-# evaluation of the whole flake. (Made before the rename, it still names them P7_…,
-# which the module accepts too.)
+# evaluation of the whole flake.
 #   HYGGR_SHARED_SECRET=  Synapse's registration shared secret; the bot's and guests'
 #                         passwords derive from it, so keep it. Any long random string:
 #                         head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'
@@ -57,7 +56,7 @@ in
       host = "smtp-relay.brevo.com";
       port = 587;
       user = "REMOVED@smtp-brevo.com";
-      # Brevo needs hyggr.shlambert.top's SPF/DKIM records (it had p7.shlambert.top's).
+      # Brevo has hyggr.shlambert.top's SPF/DKIM records.
       from = "hyggr@hyggr.shlambert.top";
     };
     # Keys the Android app is signed with, for App Links: the release key (releases,
