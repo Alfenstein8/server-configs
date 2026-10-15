@@ -3,7 +3,7 @@
   imports = [
     ./quantumsurvivors.nix
     ./soundmachine.nix
-    ./p7.nix
+    ./hyggr.nix
     # ./kajak.nix
   ];
 }

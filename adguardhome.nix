@@ -52,7 +52,7 @@ in
       # the LAN path on the LAN and leaves the public answer to the clients that
       # actually need it.
       #
-      # The public hosts (p7.shlambert.top, zehra.click) have the same problem,
+      # The public hosts (hyggr.shlambert.top, zehra.click) have the same problem,
       # and the same answer: their real A records point at the WAN address, so a
       # phone on the Wi-Fi would be sent out and back in. Their :443 vhosts serve
       # the LAN directly.

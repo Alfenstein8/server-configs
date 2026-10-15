@@ -21,11 +21,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
-    # P7 Events: its NixOS module (services/p7.nix). The app itself deploys on its own
-    # (services.p7.autoDeploy), so this only needs updating when the module changes:
-    #   nix flake update p7
+    # Hyggr: its NixOS module (services/hyggr.nix). The app itself deploys on its own
+    # (services.hyggr.autoDeploy), so this only needs updating when the module changes:
+    #   nix flake update hyggr
     # Its own nixpkgs, not ours: the package needs a newer pnpm than this lock has.
-    p7.url = "git+https://codefloe.com/Alfert/p7-events.git";
+    hyggr.url = "git+https://codefloe.com/Alfert/hyggr.git";
   };
 
   outputs =
