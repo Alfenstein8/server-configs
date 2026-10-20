@@ -55,9 +55,11 @@
     # root -- homepage itself runs as a DynamicUser and never sees the file.
     homepage.file = ./secrets/homepage.age;
     # The Forgejo Actions runner's registration token, as an environment file:
-    # TOKEN=<token>, from Site Administration -> Actions -> Runners -> Create
-    # new runner. Only used on first registration; the runner keeps its own
-    # credentials in /var/lib/gitea-runner afterwards. Read by systemd as root.
+    # TOKEN=<token>, from Site Administration -> Actions -> Runners -> Show
+    # registration token. Not "Create new runner": that gives a runner token,
+    # which `forgejo-runner register` rejects. Only used on first registration;
+    # the runner keeps its own credentials in /var/lib/gitea-runner afterwards.
+    # Read by systemd as root.
     forgejo-runner.file = ./secrets/forgejo-runner.age;
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
