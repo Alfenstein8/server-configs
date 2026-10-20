@@ -1,24 +1,27 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 let
   port = 3000;
 in
 {
   # Forgejo only queues workflow jobs; this runner is what executes them, each in
-  # a podman container picked by the job's `runs-on` label. Registers over
-  # localhost, so it doesn't depend on the public hostname resolving.
-  services.gitea-actions-runner = {
-    package = pkgs.forgejo-runner;
-    instances.homeserver = {
-      enable = true;
-      name = "homeserver";
-      url = "http://localhost:${toString port}";
-      tokenFile = config.age.secrets.forgejo-runner.path;
-      labels = [
+  # a podman container picked by the job's `runs-on` label. Connects over
+  # localhost, so it doesn't depend on the public hostname resolving. It finds
+  # podman's socket on its own, and doesn't mount it into the job containers.
+  services.forgejo-runner.instances.homeserver = {
+    enable = true;
+    settings = {
+      runner.labels = [
         "ubuntu-latest:docker://node:20-bookworm"
         "ubuntu-22.04:docker://node:20-bullseye"
         "docker:docker://node:20-bookworm"
       ];
+      # The runner's UUID, as Site Administration -> Actions -> Runners shows it.
+      server.connections.default = {
+        url = "http://localhost:${toString port}";
+        uuid = "477d531d-3b52-49cf-a792-c502ef186c50";
+      };
     };
+    secrets.server.connections.default.token_url = config.age.secrets.forgejo-runner.path;
   };
 
   services.forgejo = {
