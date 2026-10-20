@@ -18,6 +18,7 @@ in
   "tailscale-authkey.age".publicKeys = [ homeserver ];
   "qbit-manage.age".publicKeys = [ homeserver ];
   "homepage.age".publicKeys = [ homeserver ];
+  "forgejo-runner.age".publicKeys = [ homeserver ];
   # Hyggr (services/hyggr.nix)
   "hyggr.age".publicKeys = [ homeserver ];
   "hyggr-firebase.age".publicKeys = [ homeserver ];
