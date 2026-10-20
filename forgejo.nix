@@ -37,7 +37,9 @@ in
         SSH_LISTEN_PORT = 2222;
         START_SSH_SERVER = true;
       };
-      service.DISABLE_REGISTRATION = false;
+      # Closed: the Actions runner below runs any account's workflows on this box.
+      # New accounts come from Site Administration -> User Accounts.
+      service.DISABLE_REGISTRATION = true;
       actions = {
         ENABLED = true;
         DEFAULT_ACTIONS_URL = "github";
