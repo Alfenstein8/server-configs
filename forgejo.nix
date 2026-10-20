@@ -4,9 +4,10 @@ let
 in
 {
   # Forgejo only queues workflow jobs; this runner is what executes them, each in
-  # a podman container picked by the job's `runs-on` label. Connects over
-  # localhost, so it doesn't depend on the public hostname resolving. It finds
-  # podman's socket on its own, and doesn't mount it into the job containers.
+  # a podman container picked by the job's `runs-on` label. Connects by the
+  # public URL, not localhost: jobs clone from the same URL, and localhost in a
+  # job container is the container. AdGuard's rewrite keeps it on the LAN. It
+  # finds podman's socket on its own, and doesn't mount it into the jobs.
   services.forgejo-runner.instances.homeserver = {
     enable = true;
     settings = {
@@ -17,7 +18,7 @@ in
       ];
       # The runner's UUID, as Site Administration -> Actions -> Runners shows it.
       server.connections.default = {
-        url = "http://localhost:${toString port}";
+        url = config.shlam.services.forgejo.url;
         uuid = "477d531d-3b52-49cf-a792-c502ef186c50";
       };
     };
