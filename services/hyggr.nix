@@ -92,6 +92,18 @@ in
     };
   };
 
+  # Synapse 1.162.0's tests fail on nixpkgs 2026-10-17 (tests.handlers.test_oidc
+  # test_map_userinfo_to_user), so it isn't in the binary cache and won't build. That's
+  # OIDC login, which this Synapse doesn't configure. Drop this once Synapse is cached
+  # again.
+  nixpkgs.overlays = [
+    (final: prev: {
+      matrix-synapse-unwrapped = prev.matrix-synapse-unwrapped.overridePythonAttrs {
+        doCheck = false;
+      };
+    })
+  ];
+
   # The API server's state (its own database) and Synapse's signing key and media.
   # Synapse's database is in PostgreSQL, which ../backup.nix already dumps.
   services.restic.backups.storagebox.paths = lib.mkIf ready [
