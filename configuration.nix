@@ -59,6 +59,7 @@
     ./alloy.nix # ships the journal to Loki
     # ./mealie.nix
     ./freshrss.nix # RSS reader
+    ./wishlist.nix # Gift wish lists
     ./home-assistant # Home automation -- see home-assistant/README.md
   ];
 
