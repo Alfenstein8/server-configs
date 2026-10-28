@@ -6,7 +6,7 @@ let
 in
 {
   virtualisation.oci-containers.containers."qbittorrent" = {
-    image = "lscr.io/linuxserver/qbittorrent:5.1.4-r2-ls440";
+    image = "lscr.io/linuxserver/qbittorrent:5.1.4-r3-ls453";
     environment = {
       "PGID" = "100";
       "PUID" = "1000";
