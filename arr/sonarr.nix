@@ -4,7 +4,7 @@ let
 in
 {
   virtualisation.oci-containers.containers."sonarr" = {
-    image = "lscr.io/linuxserver/sonarr:4.0.16.2944-ls302";
+    image = "lscr.io/linuxserver/sonarr:4.0.20.3014-ls329";
     environment = {
       "PGID" = "100";
       "PUID" = "1000";
