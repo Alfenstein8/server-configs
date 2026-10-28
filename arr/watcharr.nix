@@ -4,7 +4,7 @@ let
 in
 {
   virtualisation.oci-containers.containers."watcharr" = {
-    image = "ghcr.io/sbondco/watcharr:v3.0.1";
+    image = "ghcr.io/sbondco/watcharr:v4.3.0";
     volumes = [
       "/mnt/appdata/watcharr:/data:rw"
     ];
