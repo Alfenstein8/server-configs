@@ -4,7 +4,7 @@ let
 in
 {
   virtualisation.oci-containers.containers."radarr" = {
-    image = "lscr.io/linuxserver/radarr:6.0.4.10291-ls289";
+    image = "lscr.io/linuxserver/radarr:6.4.4.10685-ls324";
     environment = {
       "PGID" = "100";
       "PUID" = "1000";
