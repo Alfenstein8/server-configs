@@ -1,0 +1,61 @@
+{ lib, ... }:
+let
+  port = 6767;
+in
+{
+  virtualisation.oci-containers.containers."bazarr" = {
+    image = "lscr.io/linuxserver/bazarr:v1.5.5-ls336";
+    environment = {
+      "PGID" = "100";
+      "PUID" = "1000";
+      "TZ" = "Europe/Copenhagen";
+    };
+    volumes = [
+      "/etc/localtime:/etc/localtime:ro"
+      "/mnt/appdata/bazarr:/config:rw"
+      "/mnt/storage/data/media:/data:rw"
+    ];
+    ports = [
+      "${toString port}:${toString port}/tcp"
+    ];
+    log-driver = "journald";
+    extraOptions = [
+      "--ip=172.39.0.6"
+      "--network-alias=bazarr"
+      "--network=servarrnetwork"
+    ];
+  };
+  systemd.services."podman-bazarr" = {
+    serviceConfig = {
+      Restart = lib.mkOverride 90 "always";
+    };
+    after = [
+      "podman-network-servarrnetwork.service"
+    ];
+    requires = [
+      "podman-network-servarrnetwork.service"
+    ];
+    partOf = [
+      "podman-compose-arr-stack-root.target"
+    ];
+    wantedBy = [
+      "podman-compose-arr-stack-root.target"
+    ];
+  };
+
+  shlam.services.bazarr = {
+    inherit port;
+    dashboard = {
+      title = "Bazarr";
+      group = "Media administration";
+      order = 30;
+      icon = "bazarr.svg";
+      description = "Subtitle Automation";
+      extra.widget = {
+        type = "bazarr";
+        url = "http://localhost:${toString port}";
+        key = "{{HOMEPAGE_VAR_BAZARR_KEY}}";
+      };
+    };
+  };
+}

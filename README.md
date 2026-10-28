@@ -151,7 +151,8 @@ them locally.
 | `caddy.nix` | just `services.caddy.enable`; vhosts live with their services |
 | `acme.nix` | the DNS-01 wildcard |
 | `secrets.nix`, `secrets/` | agenix; edit with the `ageGen` alias from `bash.nix` |
-| `arr/`, `tubearchivist/` | Podman stacks; `docker-compose.nix` is hand-edited |
+| `arr/` | Podman stack, one file per container; `default.nix` holds the shared runtime, network and target |
+| `tubearchivist/` | Podman stack; `docker-compose.nix` is hand-edited |
 | `home-assistant/` | Home Assistant, and the Energi Fyn component it pins; setup lives in its own README |
 | `services/` | systemd units for apps run out of `/home/alfred/manual`, and `hyggr.nix`: Hyggr (formerly P7 Events) from its own flake (input `hyggr`), which deploys each new release itself |
 
