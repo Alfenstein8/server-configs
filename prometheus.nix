@@ -20,6 +20,13 @@
           "--collector.systemd.unit-exclude=.+[.](automount|device|mount|scope|slice)|[0-9a-f]{64}-[0-9a-f]+[.](service|timer)"
         ];
       };
+      # SMART data for the disk alerts in grafana.nix. "ZFS pool not online"
+      # only fires once a disk has already dropped out of the mirror; growing
+      # sector counts usually show up weeks before that. Finds the disks itself.
+      smartctl = {
+        enable = true;
+        listenAddress = "127.0.0.1";
+      };
     };
 
     globalConfig.scrape_interval = "10s"; # "1m"
@@ -29,6 +36,14 @@
         static_configs = [
           {
             targets = [ "localhost:${toString config.services.prometheus.exporters.node.port}" ];
+          }
+        ];
+      }
+      {
+        job_name = "smartctl";
+        static_configs = [
+          {
+            targets = [ "localhost:${toString config.services.prometheus.exporters.smartctl.port}" ];
           }
         ];
       }

@@ -222,6 +222,46 @@ in
               for = "1m";
               summary = "{{ .Labels.name }} has failed -- journalctl -u {{ .Labels.name }}";
             }
+            # The disk rules below are from the smartctl exporter (prometheus.nix).
+            {
+              uid = "smart-failed";
+              title = "Disk SMART health failed";
+              expr = "smartctl_device_smart_status";
+              op = "lt";
+              threshold = 1;
+              for = "0s";
+              summary = "{{ .Labels.device }} fails its own SMART health check -- replace it";
+            }
+            {
+              # Raw counts. Any at all on these disks is the early sign of one
+              # wearing out; check `smartctl -a` and plan the swap.
+              uid = "smart-bad-sectors";
+              title = "Disk has bad sectors";
+              expr = ''smartctl_device_attribute{attribute_value_type="raw", attribute_name=~"Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable"}'';
+              op = "gt";
+              threshold = 0;
+              for = "0s";
+              summary = ''{{ .Labels.device }}: {{ .Labels.attribute_name }} = {{ printf "%.0f" .Values.A.Value }}'';
+            }
+            {
+              uid = "nvme-warning";
+              title = "NVMe health warning";
+              expr = "smartctl_device_critical_warning + smartctl_device_media_errors";
+              op = "gt";
+              threshold = 0;
+              for = "0s";
+              summary = "{{ .Labels.device }} reports a critical warning or media errors -- smartctl -a /dev/{{ .Labels.device }}";
+            }
+            {
+              # Spinning disks only; the NVMe runs hotter and is fine with it.
+              uid = "hdd-hot";
+              title = "Hard disk too hot";
+              expr = ''smartctl_device_temperature{temperature_type="current"} and on (device) smartctl_device_rotation_rate > 0'';
+              op = "gt";
+              threshold = 45;
+              for = "30m";
+              summary = ''{{ .Labels.device }} is at {{ printf "%.0f" .Values.A.Value }} °C'';
+            }
           ];
         }
       ];
