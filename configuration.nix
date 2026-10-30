@@ -69,6 +69,23 @@
   boot.loader.efi.canTouchEfiVariables = true;
   # Memtest86+ in the boot menu, for checking RAM after swapping it.
   boot.loader.systemd-boot.memtest86.enable = true;
+  # /boot is only 500 MB and every generation with a new kernel adds one; once
+  # it is full, nixos-rebuild fails halfway through installing the bootloader.
+  boot.loader.systemd-boot.configurationLimit = 10;
+
+  # Without these, every generation and everything it pulled in stays in the
+  # store forever. 30 days of rollbacks is plenty for a server updated every
+  # week or two.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+  # Hardlinks identical store files. Its default is daily.
+  nix.optimise = {
+    automatic = true;
+    dates = [ "weekly" ];
+  };
 
   networking.hostName = hostname; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
