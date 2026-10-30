@@ -385,5 +385,66 @@ in
         };
       }
     )
+
+    # Node Exporter Full has no ARC panels, so they live here.
+    (row "ZFS ARC" 50)
+    (panel "timeseries" "ARC size and swap" (pos 0 51 12 8) prom
+      [
+        {
+          refId = "A";
+          expr = "node_zfs_arc_size";
+          legendFormat = "size";
+        }
+        {
+          refId = "B";
+          expr = "node_zfs_arc_c_max";
+          legendFormat = "limit (zfs_arc_max)";
+        }
+        {
+          refId = "C";
+          expr = "node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes";
+          legendFormat = "swap used";
+        }
+      ]
+      {
+        fieldConfig = {
+          defaults = {
+            unit = "bytes";
+            min = 0;
+          };
+          overrides = [ ];
+        };
+      }
+    )
+    (panel "timeseries" "ARC hit rate" (pos 12 51 12 8) prom
+      [
+        {
+          refId = "A";
+          # Over a fixed hour rather than $__rate_interval: on an idle pool a
+          # short window has no reads at all, and 0/0 leaves gaps.
+          expr = "sum(rate(node_zfs_arc_hits[1h])) / (sum(rate(node_zfs_arc_hits[1h])) + sum(rate(node_zfs_arc_misses[1h])))";
+          legendFormat = "all";
+        }
+        {
+          refId = "B";
+          expr = "rate(node_zfs_arc_demand_data_hits[1h]) / (rate(node_zfs_arc_demand_data_hits[1h]) + rate(node_zfs_arc_demand_data_misses[1h]))";
+          legendFormat = "file data";
+        }
+        {
+          refId = "C";
+          expr = "rate(node_zfs_arc_demand_metadata_hits[1h]) / (rate(node_zfs_arc_demand_metadata_hits[1h]) + rate(node_zfs_arc_demand_metadata_misses[1h]))";
+          legendFormat = "metadata";
+        }
+      ]
+      {
+        fieldConfig = {
+          defaults = {
+            unit = "percentunit";
+            max = 1;
+          };
+          overrides = [ ];
+        };
+      }
+    )
   ];
 }
