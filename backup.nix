@@ -42,8 +42,29 @@ let
   # Jellyfin's SQLite databases. Globbed rather than named below, so the 12.0
   # schema reshuffle cannot silently drop one from the backup.
   jellyfinData = "${config.services.jellyfin.dataDir}/data";
+
+  # Each job's last success, for the "Backup overdue" alert in grafana.nix.
+  # The failed-unit alert misses a job that never runs: a stopped timer, a
+  # run that hangs, the mirror skipped because its key is gone. ExecStartPost
+  # only runs after ExecStart succeeds, so any of those leaves the time stale.
+  textfileDir = "/var/lib/prometheus-node-exporter-text";
+  recordSuccess =
+    unit:
+    pkgs.writeShellScript "${unit}-record-success" ''
+      f=${textfileDir}/${unit}.prom
+      echo "backup_last_success_timestamp_seconds{unit=\"${unit}\"} $(date +%s)" > "$f.tmp"
+      mv "$f.tmp" "$f"
+    '';
 in
 {
+  systemd.tmpfiles.rules = [ "d ${textfileDir} 0755 root root -" ];
+  services.prometheus.exporters.node.extraFlags = [
+    "--collector.textfile.directory=${textfileDir}"
+  ];
+  systemd.services.restic-backups-storagebox.serviceConfig.ExecStartPost = [
+    (recordSuccess "restic-backups-storagebox")
+  ];
+
   services.restic.backups = {
     "storagebox" = {
       paths = [
@@ -159,6 +180,7 @@ in
       Type = "oneshot";
       IOSchedulingClass = "idle";
       Nice = 10;
+      ExecStartPost = [ (recordSuccess "storagebox-mirror") ];
     };
     script = ''
       rclone sync ${resticServerDir} :sftp:${boxRoot}/pc-repos \

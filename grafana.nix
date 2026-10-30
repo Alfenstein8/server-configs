@@ -222,6 +222,18 @@ in
               for = "1m";
               summary = "{{ .Labels.name }} has failed -- journalctl -u {{ .Labels.name }}";
             }
+            {
+              # Written by backup.nix after each successful run. Both jobs are
+              # daily, so 36 hours is one missed night plus slack. A job that
+              # has not succeeded since this was added has no series yet.
+              uid = "backup-overdue";
+              title = "Backup overdue";
+              expr = "(time() - backup_last_success_timestamp_seconds) / 3600";
+              op = "gt";
+              threshold = 36;
+              for = "0s";
+              summary = ''{{ .Labels.unit }} last succeeded {{ printf "%.0f" .Values.A.Value }} hours ago'';
+            }
             # The disk rules below are from the smartctl exporter (prometheus.nix).
             {
               uid = "smart-failed";
