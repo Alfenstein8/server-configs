@@ -37,13 +37,13 @@ let
   # it -- the same two steps the UI's simple mode builds. noDataState = OK: a
   # metric that is simply absent (no pool degraded, nothing booted) is not an
   # alert.
-  promRule = r: {
+  rule = datasourceUid: instantQuery: r: {
     inherit (r) uid title for;
     condition = "C";
     data = [
       {
         refId = "A";
-        datasourceUid = prometheus;
+        inherit datasourceUid;
         relativeTimeRange = {
           from = 600;
           to = 0;
@@ -51,8 +51,8 @@ let
         model = {
           refId = "A";
           inherit (r) expr;
-          instant = true;
-        };
+        }
+        // instantQuery;
       }
       {
         refId = "C";
@@ -76,6 +76,9 @@ let
     execErrState = "Error";
     annotations.summary = r.summary;
   };
+  promRule = rule prometheus { instant = true; };
+  # The same shape over a LogQL metric query, for what only the journal says.
+  lokiRule = rule loki { queryType = "instant"; };
 in
 {
   services.grafana = {
@@ -273,6 +276,23 @@ in
               threshold = 45;
               for = "30m";
               summary = ''{{ .Labels.device }} is at {{ printf "%.0f" .Values.A.Value }} °C'';
+            }
+          ]
+          ++ map lokiRule [
+            {
+              # Checksum and I/O errors on a pool that stays ONLINE, which
+              # "ZFS pool not online" never sees -- a scrub that repairs
+              # something, a disk that fails a read. Only ZED reports them,
+              # one journal line per event. Matched on the syslog identifier:
+              # those lines often reach the journal without a unit. `delay`
+              # (slow I/O) is left out; HDDs trip it under load.
+              uid = "zfs-errors";
+              title = "ZFS reported errors";
+              expr = ''sum(count_over_time({job="systemd-journal", identifier="zed"} |~ "class=(checksum|io|data|deadman|probe_failure|authentication) " [1h]))'';
+              op = "gt";
+              threshold = 0;
+              for = "0s";
+              summary = ''ZED logged {{ printf "%.0f" .Values.A.Value }} error events in the last hour -- zpool status -v'';
             }
           ];
         }
