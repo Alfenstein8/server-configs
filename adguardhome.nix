@@ -33,6 +33,47 @@ in
         port = 53;
       };
 
+      # Security lists only: malware, phishing and scams, no ad blocking.
+      # Like the rewrites below, this replaces the UI's list on every start.
+      # Kept small on purpose -- overlapping lists add little but make it
+      # harder to tell which one broke a site (the query log names the list).
+      # The ids are the ones in AdGuard's catalog
+      # (adguardteam.github.io/HostlistsRegistry/assets/filters.json).
+      filters =
+        map
+          (f: f // { enabled = true; })
+          [
+            {
+              # Malware, phishing, C2, cryptojacking. Already includes
+              # URLhaus, PhishTank and OpenPhish, so those are not listed.
+              id = 44;
+              name = "HaGeZi's Threat Intelligence Feeds";
+              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt";
+            }
+            {
+              # Fake shops, subscription traps, scam sites. Not in the
+              # catalog, so straight from HaGeZi; the id is just unused there.
+              id = 1001;
+              name = "HaGeZi's Fake";
+              url = "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/fake.txt";
+            }
+            {
+              id = 10;
+              name = "Scam Blocklist by DurableNapkin";
+              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_10.txt";
+            }
+            {
+              id = 12;
+              name = "Dandelion Sprout's Anti-Malware List";
+              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_12.txt";
+            }
+            {
+              id = 50;
+              name = "uBlock filters - Badware risks";
+              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_50.txt";
+            }
+          ];
+
       # Split horizon for the control server, and for every host published
       # through the router's port forward.
       #
