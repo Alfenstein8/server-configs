@@ -4,6 +4,9 @@ let
   # back to LAN clients, so the two must agree.
   lanIP = "192.168.0.188";
 
+  # The web UI.
+  port = 3005;
+
   # Hosts on the router's port forward (shlam.services.<name>.publicPort, see
   # ../registry.nix): their public A records point at the WAN address too.
   publicHosts = lib.mapAttrsToList (_: s: s.host) (
@@ -14,9 +17,8 @@ in
   services.adguardhome = {
     enable = true;
     openFirewall = true;
-    host = "0.0.0.0";
-    port = 3005;
     settings = {
+      http.address = "0.0.0.0:${toString port}";
       users = [
         {
           name = "alfred";
@@ -76,7 +78,7 @@ in
   };
 
   shlam.services.adguard = {
-    port = config.services.adguardhome.port;
+    inherit port;
     dashboard = {
       title = "AdGuard Home";
       group = "Infrastructure";
@@ -86,7 +88,7 @@ in
       # The plaintext of the bcrypt hash in settings.users above.
       extra.widget = {
         type = "adguard";
-        url = "http://localhost:${toString config.services.adguardhome.port}";
+        url = "http://localhost:${toString port}";
         username = "alfred";
         password = "{{HOMEPAGE_VAR_ADGUARD_PASS}}";
       };
