@@ -39,6 +39,10 @@ in
       # harder to tell which one broke a site (the query log names the list).
       # The ids are the ones in AdGuard's catalog
       # (adguardteam.github.io/HostlistsRegistry/assets/filters.json).
+      #
+      # Not Dandelion Sprout's Anti-Malware List (catalog 12): it blocks all of
+      # *.top bar a short denyallow, and that takes *.shlambert.top with it.
+      # Check any list added here for TLD-wide rules (||*.top^ and the like).
       filters =
         map
           (f: f // { enabled = true; })
@@ -61,11 +65,6 @@ in
               id = 10;
               name = "Scam Blocklist by DurableNapkin";
               url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_10.txt";
-            }
-            {
-              id = 12;
-              name = "Dandelion Sprout's Anti-Malware List";
-              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_12.txt";
             }
             {
               id = 50;
