@@ -44,6 +44,13 @@ in
     # restic-prune-* units below.
     appendOnly = true;
 
+    # Bytes and blobs written, read and deleted per repository, for the Apps
+    # dashboard -- a backup that suddenly uploads ten times its usual size
+    # shows up there. Without --prometheus-no-auth Prometheus would need an
+    # htpasswd login of its own; the vhost refuses /metrics instead (below).
+    prometheus = true;
+    extraFlags = [ "--prometheus-no-auth" ];
+
     # privateRepos = true;
     # ^ Worth having -- it stops the laptop reaching the desktop's repository --
     # but it is a migration, not a flag. Access is only granted when the URL
@@ -124,6 +131,8 @@ in
 
   shlam.services.restic = {
     inherit port;
+    # Unauthenticated (see above), so Prometheus' business only.
+    extraConfig = "respond /metrics 404";
     dashboard = {
       title = "Restic";
       group = "File Management";

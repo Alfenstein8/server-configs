@@ -51,5 +51,28 @@ d.dashboard {
       ]
     ])
     (memory "forgejo" (pos 16 10 8 12))
+
+    # rest-server counts per repository (`repo`) and blob type (`type`: data,
+    # index, snapshots, ...). The client machines push nightly; the prune
+    # units in restic.nix work on the files directly and never show up here.
+    (d.row "Restic" 22)
+    (d.ranking "Uploaded by repository (range)" (pos 0 23 8
+      8
+    ) "bytes" "sum by (repo) (increase(rest_server_blob_write_bytes_total[$__range]))" "{{repo}}")
+    (d.timeseries "Uploaded" (pos 8 23 16 8) "bytes" [
+      [
+        "sum by (repo) (increase(rest_server_blob_write_bytes_total[1h])) > 0"
+        "{{repo}}"
+      ]
+    ])
+    (d.ranking "Downloaded by repository (range)" (pos 0 31 8
+      8
+    ) "bytes" "sum by (repo) (increase(rest_server_blob_read_bytes_total[$__range]))" "{{repo}}")
+    (d.timeseries "Snapshots written" (pos 8 31 16 8) "none" [
+      [
+        ''sum by (repo) (increase(rest_server_blob_write_total{type="snapshots"}[1h])) > 0''
+        "{{repo}}"
+      ]
+    ])
   ];
 }

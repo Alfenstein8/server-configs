@@ -116,6 +116,10 @@
         ];
       }
       {
+        job_name = "restic";
+        static_configs = [ { targets = [ "localhost:${config.services.restic.server.listenAddress}" ]; } ];
+      }
+      {
         job_name = "cadvisor";
         static_configs = [ { targets = [ "localhost:${toString config.services.cadvisor.port}" ]; } ];
       }
