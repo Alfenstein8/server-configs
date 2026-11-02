@@ -27,6 +27,14 @@
         enable = true;
         listenAddress = "127.0.0.1";
       };
+      # The one Postgres that immich and dawarich share. Connects over the
+      # socket as the postgres superuser (peer auth), so there is no password
+      # to keep -- it only ever reads the statistics views.
+      postgres = {
+        enable = true;
+        listenAddress = "127.0.0.1";
+        runAsLocalSuperUser = true;
+      };
     };
 
     globalConfig.scrape_interval = "10s"; # "1m"
@@ -72,6 +80,14 @@
         job_name = "grafana";
         static_configs = [
           { targets = [ "localhost:${toString config.services.grafana.settings.server.http_port}" ]; }
+        ];
+      }
+      {
+        job_name = "postgres";
+        static_configs = [
+          {
+            targets = [ "localhost:${toString config.services.prometheus.exporters.postgres.port}" ];
+          }
         ];
       }
       {

@@ -44,6 +44,7 @@ let
         })
         [
           "caddy"
+          "postgres"
         ]
   );
 
@@ -291,6 +292,17 @@ in
                 threshold = 45;
                 for = "30m";
                 summary = ''{{ .Labels.device }} is at {{ printf "%.0f" .Values.A.Value }} °C'';
+              }
+              {
+                # The exporter answers even when Postgres does not, so "Scrape
+                # target down" stays quiet; pg_up is its own verdict.
+                uid = "postgres-down";
+                title = "PostgreSQL down";
+                expr = "pg_up";
+                op = "lt";
+                threshold = 1;
+                for = "2m";
+                summary = "postgres_exporter cannot reach PostgreSQL -- journalctl -u postgresql";
               }
             ]
             ++ map lokiRule [
