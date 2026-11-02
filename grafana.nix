@@ -8,30 +8,44 @@ let
 
   # Dashboards are files Grafana watches, one directory for the lot. Anything
   # here is read-only in the UI; changes go through this list.
-  dashboards = pkgs.linkFarm "grafana-dashboards" [
-    {
-      # grafana.com/grafana/dashboards/1860. Picks its data source through a
-      # dashboard variable, so the download is provisioned as-is. Bump the
-      # revision and hash together.
-      name = "node-exporter-full.json";
-      path = pkgs.fetchurl {
-        url = "https://grafana.com/api/dashboards/1860/revisions/45/download";
-        hash = "sha256-GExrdAnzBtp1Ul13cvcZRbEM6iOtFrXXjEaY6g6lGYY=";
-      };
-    }
-    {
-      name = "homeserver.json";
-      path = pkgs.writeText "homeserver.json" (
-        builtins.toJSON (import ./dashboards/homeserver.nix { inherit prometheus loki; })
-      );
-    }
-    {
-      name = "immich.json";
-      path = pkgs.writeText "immich.json" (
-        builtins.toJSON (import ./dashboards/immich.nix { datasource = prometheus; })
-      );
-    }
-  ];
+  dashboards = pkgs.linkFarm "grafana-dashboards" (
+    [
+      {
+        # grafana.com/grafana/dashboards/1860. Picks its data source through a
+        # dashboard variable, so the download is provisioned as-is. Bump the
+        # revision and hash together.
+        name = "node-exporter-full.json";
+        path = pkgs.fetchurl {
+          url = "https://grafana.com/api/dashboards/1860/revisions/45/download";
+          hash = "sha256-GExrdAnzBtp1Ul13cvcZRbEM6iOtFrXXjEaY6g6lGYY=";
+        };
+      }
+      {
+        name = "homeserver.json";
+        path = pkgs.writeText "homeserver.json" (
+          builtins.toJSON (import ./dashboards/homeserver.nix { inherit prometheus loki; })
+        );
+      }
+      {
+        name = "immich.json";
+        path = pkgs.writeText "immich.json" (
+          builtins.toJSON (import ./dashboards/immich.nix { datasource = prometheus; })
+        );
+      }
+    ]
+    # The rest share dashboards/lib.nix and take just the Prometheus uid.
+    ++
+      map
+        (name: {
+          name = "${name}.json";
+          path = pkgs.writeText "${name}.json" (
+            builtins.toJSON (import ./dashboards/${name}.nix { datasource = prometheus; })
+          );
+        })
+        [
+          "caddy"
+        ]
+  );
 
   # A Grafana-managed rule is a query (A) plus a threshold expression (C) on
   # it -- the same two steps the UI's simple mode builds. noDataState = OK: a
@@ -173,128 +187,129 @@ in
           name = "homeserver";
           folder = "Homeserver";
           interval = "1m";
-          rules = map promRule [
-            {
-              uid = "filesystem-full";
-              title = "Filesystem almost full";
-              expr = ''100 * (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|nsfs|fuse.*"} / node_filesystem_size_bytes)'';
-              op = "gt";
-              threshold = 90;
-              for = "10m";
-              summary = ''{{ .Labels.mountpoint }} is {{ printf "%.0f" .Values.A.Value }}% full'';
-            }
-            {
-              uid = "target-down";
-              title = "Scrape target down";
-              expr = "up";
-              op = "lt";
-              threshold = 1;
-              for = "5m";
-              summary = "Prometheus cannot scrape {{ .Labels.job }} at {{ .Labels.instance }}";
-            }
-            {
-              # Fires once after boot and resolves itself 15 minutes later.
-              uid = "rebooted";
-              title = "Server rebooted";
-              expr = "time() - node_boot_time_seconds";
-              op = "lt";
-              threshold = 900;
-              for = "0s";
-              summary = ''Up for {{ printf "%.0f" .Values.A.Value }} seconds'';
-            }
-            {
-              # One series per pool and state; the one at 1 is the current state.
-              uid = "zpool-unhealthy";
-              title = "ZFS pool not online";
-              expr = ''node_zfs_zpool_state{state!="online"}'';
-              op = "gt";
-              threshold = 0;
-              for = "1m";
-              summary = "Pool {{ .Labels.zpool }} is {{ .Labels.state }}";
-            }
-            {
-              # From node_exporter's systemd collector (prometheus.nix). A
-              # failed oneshot -- a backup, a cert renewal -- stays failed
-              # until its next run, so this keeps repeating until it is fixed
-              # or `systemctl reset-failed`.
-              uid = "unit-failed";
-              title = "Systemd unit failed";
-              expr = ''node_systemd_unit_state{state="failed"}'';
-              op = "gt";
-              threshold = 0;
-              for = "1m";
-              summary = "{{ .Labels.name }} has failed -- journalctl -u {{ .Labels.name }}";
-            }
-            {
-              # Written by backup.nix after each successful run. Both jobs are
-              # daily, so 36 hours is one missed night plus slack. A job that
-              # has not succeeded since this was added has no series yet.
-              uid = "backup-overdue";
-              title = "Backup overdue";
-              expr = "(time() - backup_last_success_timestamp_seconds) / 3600";
-              op = "gt";
-              threshold = 36;
-              for = "0s";
-              summary = ''{{ .Labels.unit }} last succeeded {{ printf "%.0f" .Values.A.Value }} hours ago'';
-            }
-            # The disk rules below are from the smartctl exporter (prometheus.nix).
-            {
-              uid = "smart-failed";
-              title = "Disk SMART health failed";
-              expr = "smartctl_device_smart_status";
-              op = "lt";
-              threshold = 1;
-              for = "0s";
-              summary = "{{ .Labels.device }} fails its own SMART health check -- replace it";
-            }
-            {
-              # Raw counts. Any at all on these disks is the early sign of one
-              # wearing out; check `smartctl -a` and plan the swap.
-              uid = "smart-bad-sectors";
-              title = "Disk has bad sectors";
-              expr = ''smartctl_device_attribute{attribute_value_type="raw", attribute_name=~"Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable"}'';
-              op = "gt";
-              threshold = 0;
-              for = "0s";
-              summary = ''{{ .Labels.device }}: {{ .Labels.attribute_name }} = {{ printf "%.0f" .Values.A.Value }}'';
-            }
-            {
-              uid = "nvme-warning";
-              title = "NVMe health warning";
-              expr = "smartctl_device_critical_warning + smartctl_device_media_errors";
-              op = "gt";
-              threshold = 0;
-              for = "0s";
-              summary = "{{ .Labels.device }} reports a critical warning or media errors -- smartctl -a /dev/{{ .Labels.device }}";
-            }
-            {
-              # Spinning disks only; the NVMe runs hotter and is fine with it.
-              uid = "hdd-hot";
-              title = "Hard disk too hot";
-              expr = ''smartctl_device_temperature{temperature_type="current"} and on (device) smartctl_device_rotation_rate > 0'';
-              op = "gt";
-              threshold = 45;
-              for = "30m";
-              summary = ''{{ .Labels.device }} is at {{ printf "%.0f" .Values.A.Value }} °C'';
-            }
-          ]
-          ++ map lokiRule [
-            {
-              # Checksum and I/O errors on a pool that stays ONLINE, which
-              # "ZFS pool not online" never sees -- a scrub that repairs
-              # something, a disk that fails a read. Only ZED reports them,
-              # one journal line per event. Matched on the syslog identifier:
-              # those lines often reach the journal without a unit. `delay`
-              # (slow I/O) is left out; HDDs trip it under load.
-              uid = "zfs-errors";
-              title = "ZFS reported errors";
-              expr = ''sum(count_over_time({job="systemd-journal", identifier="zed"} |~ "class=(checksum|io|data|deadman|probe_failure|authentication) " [1h]))'';
-              op = "gt";
-              threshold = 0;
-              for = "0s";
-              summary = ''ZED logged {{ printf "%.0f" .Values.A.Value }} error events in the last hour -- zpool status -v'';
-            }
-          ];
+          rules =
+            map promRule [
+              {
+                uid = "filesystem-full";
+                title = "Filesystem almost full";
+                expr = ''100 * (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|nsfs|fuse.*"} / node_filesystem_size_bytes)'';
+                op = "gt";
+                threshold = 90;
+                for = "10m";
+                summary = ''{{ .Labels.mountpoint }} is {{ printf "%.0f" .Values.A.Value }}% full'';
+              }
+              {
+                uid = "target-down";
+                title = "Scrape target down";
+                expr = "up";
+                op = "lt";
+                threshold = 1;
+                for = "5m";
+                summary = "Prometheus cannot scrape {{ .Labels.job }} at {{ .Labels.instance }}";
+              }
+              {
+                # Fires once after boot and resolves itself 15 minutes later.
+                uid = "rebooted";
+                title = "Server rebooted";
+                expr = "time() - node_boot_time_seconds";
+                op = "lt";
+                threshold = 900;
+                for = "0s";
+                summary = ''Up for {{ printf "%.0f" .Values.A.Value }} seconds'';
+              }
+              {
+                # One series per pool and state; the one at 1 is the current state.
+                uid = "zpool-unhealthy";
+                title = "ZFS pool not online";
+                expr = ''node_zfs_zpool_state{state!="online"}'';
+                op = "gt";
+                threshold = 0;
+                for = "1m";
+                summary = "Pool {{ .Labels.zpool }} is {{ .Labels.state }}";
+              }
+              {
+                # From node_exporter's systemd collector (prometheus.nix). A
+                # failed oneshot -- a backup, a cert renewal -- stays failed
+                # until its next run, so this keeps repeating until it is fixed
+                # or `systemctl reset-failed`.
+                uid = "unit-failed";
+                title = "Systemd unit failed";
+                expr = ''node_systemd_unit_state{state="failed"}'';
+                op = "gt";
+                threshold = 0;
+                for = "1m";
+                summary = "{{ .Labels.name }} has failed -- journalctl -u {{ .Labels.name }}";
+              }
+              {
+                # Written by backup.nix after each successful run. Both jobs are
+                # daily, so 36 hours is one missed night plus slack. A job that
+                # has not succeeded since this was added has no series yet.
+                uid = "backup-overdue";
+                title = "Backup overdue";
+                expr = "(time() - backup_last_success_timestamp_seconds) / 3600";
+                op = "gt";
+                threshold = 36;
+                for = "0s";
+                summary = ''{{ .Labels.unit }} last succeeded {{ printf "%.0f" .Values.A.Value }} hours ago'';
+              }
+              # The disk rules below are from the smartctl exporter (prometheus.nix).
+              {
+                uid = "smart-failed";
+                title = "Disk SMART health failed";
+                expr = "smartctl_device_smart_status";
+                op = "lt";
+                threshold = 1;
+                for = "0s";
+                summary = "{{ .Labels.device }} fails its own SMART health check -- replace it";
+              }
+              {
+                # Raw counts. Any at all on these disks is the early sign of one
+                # wearing out; check `smartctl -a` and plan the swap.
+                uid = "smart-bad-sectors";
+                title = "Disk has bad sectors";
+                expr = ''smartctl_device_attribute{attribute_value_type="raw", attribute_name=~"Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable"}'';
+                op = "gt";
+                threshold = 0;
+                for = "0s";
+                summary = ''{{ .Labels.device }}: {{ .Labels.attribute_name }} = {{ printf "%.0f" .Values.A.Value }}'';
+              }
+              {
+                uid = "nvme-warning";
+                title = "NVMe health warning";
+                expr = "smartctl_device_critical_warning + smartctl_device_media_errors";
+                op = "gt";
+                threshold = 0;
+                for = "0s";
+                summary = "{{ .Labels.device }} reports a critical warning or media errors -- smartctl -a /dev/{{ .Labels.device }}";
+              }
+              {
+                # Spinning disks only; the NVMe runs hotter and is fine with it.
+                uid = "hdd-hot";
+                title = "Hard disk too hot";
+                expr = ''smartctl_device_temperature{temperature_type="current"} and on (device) smartctl_device_rotation_rate > 0'';
+                op = "gt";
+                threshold = 45;
+                for = "30m";
+                summary = ''{{ .Labels.device }} is at {{ printf "%.0f" .Values.A.Value }} °C'';
+              }
+            ]
+            ++ map lokiRule [
+              {
+                # Checksum and I/O errors on a pool that stays ONLINE, which
+                # "ZFS pool not online" never sees -- a scrub that repairs
+                # something, a disk that fails a read. Only ZED reports them,
+                # one journal line per event. Matched on the syslog identifier:
+                # those lines often reach the journal without a unit. `delay`
+                # (slow I/O) is left out; HDDs trip it under load.
+                uid = "zfs-errors";
+                title = "ZFS reported errors";
+                expr = ''sum(count_over_time({job="systemd-journal", identifier="zed"} |~ "class=(checksum|io|data|deadman|probe_failure|authentication) " [1h]))'';
+                op = "gt";
+                threshold = 0;
+                for = "0s";
+                summary = ''ZED logged {{ printf "%.0f" .Values.A.Value }} error events in the last hour -- zpool status -v'';
+              }
+            ];
         }
       ];
     };

@@ -75,6 +75,12 @@
         ];
       }
       {
+        # The admin API, which also serves /metrics (globalConfig in caddy.nix).
+        # Loopback-only by default, and that is Caddy's choice, not ours.
+        job_name = "caddy";
+        static_configs = [ { targets = [ "localhost:2019" ]; } ];
+      }
+      {
         job_name = "immich";
         # Both ports export the same process_* metrics; `worker` tells them
         # apart without decoding port numbers (see dashboards/immich.nix).
