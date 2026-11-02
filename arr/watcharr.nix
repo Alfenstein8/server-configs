@@ -13,13 +13,6 @@ in
     ];
     log-driver = "journald";
     extraOptions = [
-      # Run the container inside podman-watcharr.service's own cgroup (split
-      # between conmon and the payload) rather than a /machine.slice scope, so
-      # systemd and cAdvisor see its memory and CPU under the unit's name.
-      # Overrides the module's --cgroups=enabled: these come later, and the
-      # last one wins. The unit already has Delegate=true, which this needs.
-      # Trial for the rest of the containers.
-      "--cgroups=split"
       "--ip=172.39.0.7"
       "--network-alias=watcharr"
       "--network=servarrnetwork"

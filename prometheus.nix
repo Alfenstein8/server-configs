@@ -1,5 +1,45 @@
-{ config, ... }:
+{ config, lib, ... }:
+let
+  # Every podman container, run inside its own podman-<name>.service cgroup
+  # (--cgroups=split) instead of a /machine.slice/libpod-<id>.scope. That is
+  # what lets cAdvisor below -- and `systemctl status` -- see each container's
+  # memory and CPU under its name: cAdvisor's own podman support fails here
+  # ("unable to determine ... rw layer id") and names nothing. Same layout
+  # podman's Quadlet uses. Tried on watcharr first, 2026-11-02.
+  #
+  # Listed rather than derived: the option cannot be defined from its own
+  # attribute names. The assertion below catches a container left off.
+  splitCgroupContainers = [
+    "archivist-es"
+    "archivist-redis"
+    "bazarr"
+    "flaresolverr"
+    "gluetun"
+    "prowlarr"
+    "qbittorrent"
+    "radarr"
+    "sonarr"
+    "tubearchivist"
+    "watcharr"
+    "wishlist"
+  ];
+in
 {
+  # The module passes --cgroups=enabled itself; extraOptions come after it on
+  # the command line and the last one wins. Its units already set
+  # Delegate=true, which split needs.
+  virtualisation.oci-containers.containers = lib.genAttrs splitCgroupContainers (_: {
+    extraOptions = [ "--cgroups=split" ];
+  });
+  assertions = [
+    {
+      assertion =
+        lib.sort lib.lessThan (builtins.attrNames config.virtualisation.oci-containers.containers)
+        == lib.sort lib.lessThan splitCgroupContainers;
+      message = "prometheus.nix: add new oci-containers to splitCgroupContainers (or remove gone ones), or the Containers dashboard will not see them.";
+    }
+  ];
+
   # Resource use per cgroup: every podman container (named, through podman's
   # API socket) and every systemd service (by cgroup path). node_exporter only
   # sees the host as a whole.
