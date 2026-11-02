@@ -110,6 +110,12 @@
         static_configs = [ { targets = [ config.services.headscale.settings.metrics_listen_addr ]; } ];
       }
       {
+        job_name = "forgejo";
+        static_configs = [
+          { targets = [ "localhost:${toString config.services.forgejo.settings.server.HTTP_PORT}" ]; }
+        ];
+      }
+      {
         job_name = "cadvisor";
         static_configs = [ { targets = [ "localhost:${toString config.services.cadvisor.port}" ]; } ];
       }

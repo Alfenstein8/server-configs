@@ -44,6 +44,9 @@ in
         ENABLED = true;
         DEFAULT_ACTIONS_URL = "github";
       };
+      # /metrics for prometheus.nix, which scrapes it over loopback. No TOKEN:
+      # the vhost below refuses the path instead, so it never leaves the box.
+      metrics.ENABLED = true;
     };
     lfs.enable = true;
   };
@@ -51,6 +54,8 @@ in
   shlam.services.forgejo = {
     subdomain = "git";
     inherit port;
+    # Forgejo's metrics are unauthenticated; they are Prometheus' business only.
+    extraConfig = "respond /metrics 404";
     dashboard = {
       title = "Forgejo";
       group = "Infrastructure";

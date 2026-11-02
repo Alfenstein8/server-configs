@@ -34,5 +34,22 @@ d.dashboard {
       ]
     ])
     (memory "headscale" (pos 16 1 8 8))
+
+    (d.row "Forgejo" 9)
+    (d.stat "Repositories" (pos 0 10 4 4) "none" "max(gitea_repositories)")
+    (d.stat "Users" (pos 4 10 4 4) "none" "max(gitea_users)")
+    (d.stat "Open issues" (pos 8 10 4 4) "none" "max(gitea_issues_open)")
+    (d.stat "Mirrors" (pos 12 10 4 4) "none" "max(gitea_mirrors)")
+    (d.timeseries "Repositories" (pos 0 14 16 8) "none" [
+      [
+        "max(gitea_repositories)"
+        "repositories"
+      ]
+      [
+        "max(gitea_releases)"
+        "releases"
+      ]
+    ])
+    (memory "forgejo" (pos 16 10 8 12))
   ];
 }
