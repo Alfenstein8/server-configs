@@ -48,6 +48,7 @@ let
           "endpoints"
           "containers"
           "apps"
+          "home-assistant"
         ]
   );
 

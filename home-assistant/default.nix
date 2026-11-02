@@ -67,6 +67,9 @@ in
       # be added from the UI without a rebuild, if Energi Fyn's undocumented
       # API stops answering. See ./README.md.
       "nordpool"
+
+      # /api/prometheus, configured below.
+      "prometheus"
     ];
 
     customComponents = [
@@ -88,6 +91,13 @@ in
       };
 
       default_config = { };
+
+      # Entity states as Prometheus metrics, scraped by prometheus.nix: the
+      # plug, power and the electricity price next to the server's own graphs,
+      # kept as long as Prometheus keeps anything. Without requires_auth the
+      # scrape needs no long-lived token; the vhost below refuses the path, so
+      # only loopback reaches it.
+      prometheus.requires_auth = false;
 
       # No `http:` key. Home Assistant reached only through Caddy should bind
       # loopback and trust the forwarded address from there (server_host and
@@ -259,6 +269,8 @@ in
   shlam.services.home-assistant = {
     subdomain = "ha";
     inherit port;
+    # The metrics endpoint is unauthenticated (prometheus.requires_auth above).
+    extraConfig = "respond /api/prometheus* 404";
     dashboard = {
       title = "Home Assistant";
       group = "Productivity & Utilities";

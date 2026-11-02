@@ -120,6 +120,15 @@
         static_configs = [ { targets = [ "localhost:${config.services.restic.server.listenAddress}" ]; } ];
       }
       {
+        job_name = "home-assistant";
+        metrics_path = "/api/prometheus";
+        # Entity states change on their own schedule; 10 s buys nothing.
+        scrape_interval = "1m";
+        static_configs = [
+          { targets = [ "localhost:${toString config.shlam.services.home-assistant.port}" ]; }
+        ];
+      }
+      {
         job_name = "cadvisor";
         static_configs = [ { targets = [ "localhost:${toString config.services.cadvisor.port}" ]; } ];
       }
