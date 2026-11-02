@@ -45,6 +45,7 @@ let
         [
           "caddy"
           "postgres"
+          "endpoints"
         ]
   );
 
@@ -303,6 +304,32 @@ in
                 threshold = 1;
                 for = "2m";
                 summary = "postgres_exporter cannot reach PostgreSQL -- journalctl -u postgresql";
+              }
+              # The two below are from the blackbox probes (blackbox.nix).
+              {
+                # Caddy's 502 when a backend is gone, a TLS failure, or DNS
+                # not answering. One alert per service.
+                uid = "endpoint-down";
+                title = "Endpoint not answering";
+                expr = "max by (service, instance) (probe_success)";
+                op = "lt";
+                threshold = 1;
+                for = "5m";
+                summary = "{{ .Labels.service }} ({{ .Labels.instance }}) fails its probe -- see the Endpoints dashboard";
+              }
+              {
+                # ACME renews 30 days ahead, so under 21 means renewal has
+                # been failing for over a week. One series per domain, since
+                # every host on a domain serves the same wildcard.
+                uid = "cert-expiring";
+                title = "Certificate not renewing";
+                # $$1, not $1: Grafana expands $VARS in provisioning files,
+                # and would turn $1 into an empty string.
+                expr = ''min by (domain) (label_replace((probe_ssl_earliest_cert_expiry - time()) / 86400, "domain", "$$1", "instance", "https://[^.]+[.]([^:/]+).*"))'';
+                op = "lt";
+                threshold = 21;
+                for = "1h";
+                summary = ''*.{{ .Labels.domain }} expires in {{ printf "%.0f" .Values.A.Value }} days -- systemctl status acme-order-renew-{{ .Labels.domain }}'';
               }
             ]
             ++ map lokiRule [

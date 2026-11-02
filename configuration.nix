@@ -54,6 +54,7 @@
     ./forgejo.nix
     ./adguardhome.nix
     ./prometheus.nix
+    ./blackbox.nix # probes every service URL and DNS from outside
     ./grafana.nix
     ./loki.nix
     ./alloy.nix # ships the journal to Loki
