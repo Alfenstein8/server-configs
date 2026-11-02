@@ -1,23 +1,31 @@
 # Containers and services: what is using the memory and CPU, from cAdvisor
-# (prometheus.nix). Podman containers carry a `name`; native services are
-# cgroups under /system.slice, named here by their unit.
+# (prometheus.nix), by systemd unit.
+#
+# Containers run with --cgroups=split, inside their own podman-<name>.service
+# (see arr/watcharr.nix), so a container is that unit's cgroup and is named
+# from it. cAdvisor's own podman support cannot read this podman's storage and
+# names nothing. Until every container is moved over, the rest show only the
+# podman CLI waiting in their unit: a few MB, not the container.
 { datasource }:
 let
   d = import ./lib.nix { inherit datasource; };
   inherit (d) pos;
 
-  containers = m: ''${m}{name!=""}'';
-  # Named by unit, e.g. immich-server. podman-<name>.service units are left
-  # out: the container itself runs in its own scope, so they hold only the
-  # podman CLI waiting on it.
-  #
   # `fn` wraps the bare selector (in rate() and the like) before the label is
   # lifted out: a range can only follow a selector, not label_replace().
-  services =
-    fn: m:
-    ''label_replace(${fn ''${m}{id=~"/system.slice/[^/]+[.]service", id!~"/system.slice/podman-.*"}''}, "unit", "$1", "id", "/system.slice/(.+)[.]service")'';
-  now = services (m: m);
+  byUnit =
+    selector: label: regex: fn: m:
+    ''label_replace(${fn "${m}{${selector}}"}, "${label}", "$1", "id", "${regex}")'';
 
+  # podman-network-* and podman-volume-* are podman's own oneshot helpers.
+  containers =
+    byUnit
+      ''id=~"/system.slice/podman-[^/]+[.]service", id!~"/system.slice/podman-(network|volume)-.*"''
+      "name"
+      "/system.slice/podman-(.+)[.]service";
+  services = byUnit ''id=~"/system.slice/[^/]+[.]service"'' "unit" "/system.slice/(.+)[.]service";
+
+  same = m: m;
   cpu = m: "rate(${m}[$__rate_interval])";
   overRange = m: "increase(${m}[$__range])";
 in
@@ -26,54 +34,55 @@ d.dashboard {
   title = "Containers & services";
   from = "now-6h";
   panels = [
-    (d.stat "Containers running" (pos 0 0 6 4) "none" ''count(container_last_seen{name!=""})'')
+    (d.stat "Containers" (pos 0 0 6 4) "none" "count(${containers same "container_last_seen"})")
     (d.stat "Container memory" (pos 6 0 6
       4
-    ) "bytes" "sum(${containers "container_memory_working_set_bytes"})")
+    ) "bytes" "sum(${containers same "container_memory_working_set_bytes"})")
     (d.alarm "OOM kills (range)" (pos 12 0 6
       4
     ) "none" "sum(increase(node_vmstat_oom_kill[$__range])) or vector(0)" 1)
     (d.stat "Started in the last hour" (pos 18 0 6
       4
-    ) "none" ''count(time() - container_start_time_seconds{name!=""} < 3600) or vector(0)'')
+    ) "none" "count(time() - ${containers same "container_start_time_seconds"} < 3600) or vector(0)")
 
     (d.row "Containers" 4)
     (d.timeseries "Memory" (pos 0 5 12 9) "bytes" [
       [
-        "max by (name) (${containers "container_memory_working_set_bytes"})"
+        "max by (name) (${containers same "container_memory_working_set_bytes"})"
         "{{name}}"
       ]
     ])
     (d.timeseries "CPU" (pos 12 5 12 9) "percentunit" [
       [
-        "sum by (name) (${cpu (containers "container_cpu_usage_seconds_total")})"
+        "sum by (name) (${containers cpu "container_cpu_usage_seconds_total"})"
         "{{name}}"
       ]
     ])
     (d.timeseries "Network received" (pos 0 14 12 8) "Bps" [
       [
-        "sum by (name) (${cpu (containers "container_network_receive_bytes_total")}) > 0"
+        "sum by (name) (${containers cpu "container_network_receive_bytes_total"}) > 0"
         "{{name}}"
       ]
     ])
     (d.timeseries "Network sent" (pos 12 14 12 8) "Bps" [
       [
-        "sum by (name) (${cpu (containers "container_network_transmit_bytes_total")}) > 0"
+        "sum by (name) (${containers cpu "container_network_transmit_bytes_total"}) > 0"
         "{{name}}"
       ]
     ])
 
     (d.row "Services" 22)
-    (d.ranking "Memory now (top 15)" (pos 0 23 12
-      12
-    ) "bytes" "topk(15, max by (unit) (${now "container_memory_working_set_bytes"}))" "{{unit}}")
+    (d.ranking "Memory now (top 15)" (pos 0 23 12 12) "bytes"
+      "topk(15, max by (unit) (${services same "container_memory_working_set_bytes"}))"
+      "{{unit}}"
+    )
     (d.ranking "CPU over the range (top 15)" (pos 12 23 12 12) "s"
       "topk(15, sum by (unit) (${services overRange "container_cpu_usage_seconds_total"}))"
       "{{unit}}"
     )
     (d.timeseries "Memory (top 10)" (pos 0 35 12 9) "bytes" [
       [
-        "topk(10, max by (unit) (${now "container_memory_working_set_bytes"}))"
+        "topk(10, max by (unit) (${services same "container_memory_working_set_bytes"}))"
         "{{unit}}"
       ]
     ])
