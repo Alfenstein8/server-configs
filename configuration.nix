@@ -58,6 +58,7 @@
     ./grafana.nix
     ./loki.nix
     ./alloy.nix # ships the journal to Loki
+    ./claude-ops # daily health check by Claude Code, reports to Discord
     # ./mealie.nix
     ./freshrss.nix # RSS reader
     ./wishlist.nix # Gift wish lists

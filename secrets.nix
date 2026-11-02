@@ -29,6 +29,13 @@
     # Grafana's Discord webhook, as an environment file:
     # DISCORD_WEBHOOK_URL=<url>. Read by systemd as root, so owned by root.
     grafana-discord.file = ./secrets/grafana-discord.age;
+    # The daily Claude Code check (claude-ops/): a long-lived token from
+    # `claude setup-token`, alone in the file. Read by systemd as root and
+    # passed to the unit with LoadCredential, so owned by root.
+    claude-ops.file = ./secrets/claude-ops.age;
+    # Its read-only Grafana access: a service-account token with the Viewer
+    # role, alone in the file. Root-owned for the same reason.
+    claude-ops-grafana.file = ./secrets/claude-ops-grafana.age;
     freshrss = {
       file = ./secrets/freshrss.age;
       owner = "freshrss";
