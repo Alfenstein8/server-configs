@@ -46,6 +46,7 @@ let
           "caddy"
           "postgres"
           "endpoints"
+          "containers"
         ]
   );
 
@@ -304,6 +305,18 @@ in
                 threshold = 1;
                 for = "2m";
                 summary = "postgres_exporter cannot reach PostgreSQL -- journalctl -u postgresql";
+              }
+              {
+                # The kernel's own count, so it covers native services and
+                # containers alike; the Containers & services dashboard shows
+                # who was using the memory.
+                uid = "oom-kill";
+                title = "Out-of-memory kill";
+                expr = "increase(node_vmstat_oom_kill[10m])";
+                op = "gt";
+                threshold = 0;
+                for = "0s";
+                summary = ''The kernel killed {{ printf "%.0f" .Values.A.Value }} process(es) for memory in the last 10 minutes -- journalctl -k | grep -i oom'';
               }
               # The two below are from the blackbox probes (blackbox.nix).
               {

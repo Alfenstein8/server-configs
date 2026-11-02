@@ -1,5 +1,28 @@
 { config, ... }:
 {
+  # Resource use per cgroup: every podman container (named, through podman's
+  # API socket) and every systemd service (by cgroup path). node_exporter only
+  # sees the host as a whole.
+  services.cadvisor = {
+    enable = true;
+    listenAddress = "127.0.0.1";
+    port = 9080; # not the default 8080, which is qbittorrent's
+    extraOptions = [
+      # What the dashboard uses, instead of the default everything-but.
+      "-enable_metrics=cpu,memory,network,diskIO,oom_event,pressure"
+      # Every image label as a metric label is a lot of series for nothing.
+      "-store_container_labels=false"
+      # The default is every second.
+      "-housekeeping_interval=10s"
+    ];
+  };
+  # The podman API is socket-activated; make sure the socket is there before
+  # cAdvisor looks for it, or containers show up as bare cgroup ids.
+  systemd.services.cadvisor = {
+    wants = [ "podman.socket" ];
+    after = [ "podman.socket" ];
+  };
+
   services.prometheus = {
     enable = true;
     # Grafana and Caddy reach it over loopback; nothing else needs to.
@@ -81,6 +104,10 @@
         static_configs = [
           { targets = [ "localhost:${toString config.services.grafana.settings.server.http_port}" ]; }
         ];
+      }
+      {
+        job_name = "cadvisor";
+        static_configs = [ { targets = [ "localhost:${toString config.services.cadvisor.port}" ]; } ];
       }
       {
         job_name = "postgres";
