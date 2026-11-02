@@ -116,10 +116,11 @@ in
       };
       server_url = config.shlam.services.headscale.url;
       logtail.enabled = false;
-      # Prometheus scrapes this (prometheus.nix). Left unset it defaults to
-      # 127.0.0.1:9090, which is cockpit's port -- whichever starts second
-      # fails to bind it.
-      metrics_listen_addr = "127.0.0.1:9095";
+      # Prometheus scrapes this (prometheus.nix). Pinned because the default,
+      # 127.0.0.1:9090, is cockpit's port. NOT 9095: that is Loki's gRPC
+      # default (loki.nix sets only its address), and headscale exits at
+      # startup when it cannot bind -- which took it down on 2026-11-02.
+      metrics_listen_addr = "127.0.0.1:9098";
     };
   };
   services.tailscale = {
