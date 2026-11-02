@@ -277,6 +277,10 @@ in
     wants = [ "network-online.target" ];
     environment = {
       HOME = stateDir;
+      # Claude Code runs its Bash tool through $SHELL, falling back to the
+      # user's login shell -- nologin for a system user, which left the first
+      # run with no shell at all. Set here, the account still cannot log in.
+      SHELL = "${pkgs.bash}/bin/bash";
       # No update checks or telemetry from an unattended run.
       DISABLE_AUTOUPDATER = "1";
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
