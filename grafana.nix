@@ -334,17 +334,21 @@ in
               }
               {
                 # ACME renews 30 days ahead, so under 21 means renewal has
-                # been failing for over a week. One series per domain, since
-                # every host on a domain serves the same wildcard.
+                # been failing for over a week. One series per URL would be
+                # thirty alerts for one wildcard; the soonest is enough.
+                #
+                # No label_replace to pull out the domain: written "$$1" (on the
+                # theory that Grafana expands $VARS here) it reached Prometheus
+                # unchanged and labelled the alert "$1" literally. Avoiding `$`
+                # beats guessing Grafana's rules. The Endpoints dashboard has
+                # the per-domain view.
                 uid = "cert-expiring";
                 title = "Certificate not renewing";
-                # $$1, not $1: Grafana expands $VARS in provisioning files,
-                # and would turn $1 into an empty string.
-                expr = ''min by (domain) (label_replace((probe_ssl_earliest_cert_expiry - time()) / 86400, "domain", "$$1", "instance", "https://[^.]+[.]([^:/]+).*"))'';
+                expr = "min((probe_ssl_earliest_cert_expiry - time()) / 86400)";
                 op = "lt";
                 threshold = 21;
                 for = "1h";
-                summary = ''*.{{ .Labels.domain }} expires in {{ printf "%.0f" .Values.A.Value }} days -- systemctl status acme-order-renew-{{ .Labels.domain }}'';
+                summary = ''A served certificate expires in {{ printf "%.0f" .Values.A.Value }} days -- systemctl status 'acme-order-renew-*' '';
               }
             ]
             ++ map lokiRule [
