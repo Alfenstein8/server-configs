@@ -2,10 +2,9 @@
 # (prometheus.nix), by systemd unit.
 #
 # Containers run with --cgroups=split, inside their own podman-<name>.service
-# (see arr/watcharr.nix), so a container is that unit's cgroup and is named
-# from it. cAdvisor's own podman support cannot read this podman's storage and
-# names nothing. Until every container is moved over, the rest show only the
-# podman CLI waiting in their unit: a few MB, not the container.
+# (see splitCgroupContainers in prometheus.nix), so a container is that unit's
+# cgroup and is named from it. cAdvisor's own podman support cannot read this
+# podman's storage and names nothing.
 { datasource }:
 let
   d = import ./lib.nix { inherit datasource; };
@@ -17,10 +16,11 @@ let
     selector: label: regex: fn: m:
     ''label_replace(${fn "${m}{${selector}}"}, "${label}", "$1", "id", "${regex}")'';
 
-  # podman-network-* and podman-volume-* are podman's own oneshot helpers.
+  # The rest of podman-* are podman's own oneshots -- network and volume
+  # setup, and the auto-update/prune/clean-transient/restart timers' units.
   containers =
     byUnit
-      ''id=~"/system.slice/podman-[^/]+[.]service", id!~"/system.slice/podman-(network|volume)-.*"''
+      ''id=~"/system.slice/podman-[^/]+[.]service", id!~"/system.slice/podman-(network-.*|volume-.*|auto-update|prune|clean-transient|restart)[.]service"''
       "name"
       "/system.slice/podman-(.+)[.]service";
   services = byUnit ''id=~"/system.slice/[^/]+[.]service"'' "unit" "/system.slice/(.+)[.]service";
@@ -58,18 +58,15 @@ d.dashboard {
         "{{name}}"
       ]
     ])
-    (d.timeseries "Network received" (pos 0 14 12 8) "Bps" [
-      [
-        "sum by (name) (${containers cpu "container_network_receive_bytes_total"}) > 0"
-        "{{name}}"
-      ]
-    ])
-    (d.timeseries "Network sent" (pos 12 14 12 8) "Bps" [
-      [
-        "sum by (name) (${containers cpu "container_network_transmit_bytes_total"}) > 0"
-        "{{name}}"
-      ]
-    ])
+    # No per-container network: cAdvisor only reads network stats for
+    # containers it recognises itself, not plain units -- and qbittorrent,
+    # prowlarr and flaresolverr share gluetun's network namespace anyway.
+    (d.ranking "Memory now" (pos 0 14 12
+      8
+    ) "bytes" "max by (name) (${containers same "container_memory_working_set_bytes"})" "{{name}}")
+    (d.ranking "CPU over the range" (pos 12 14 12
+      8
+    ) "s" "sum by (name) (${containers overRange "container_cpu_usage_seconds_total"})" "{{name}}")
 
     (d.row "Services" 22)
     (d.ranking "Memory now (top 15)" (pos 0 23 12 12) "bytes"
