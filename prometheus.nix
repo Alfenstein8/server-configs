@@ -106,6 +106,10 @@
         ];
       }
       {
+        job_name = "headscale";
+        static_configs = [ { targets = [ config.services.headscale.settings.metrics_listen_addr ]; } ];
+      }
+      {
         job_name = "cadvisor";
         static_configs = [ { targets = [ "localhost:${toString config.services.cadvisor.port}" ]; } ];
       }

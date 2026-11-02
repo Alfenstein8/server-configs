@@ -116,6 +116,10 @@ in
       };
       server_url = config.shlam.services.headscale.url;
       logtail.enabled = false;
+      # Prometheus scrapes this (prometheus.nix). Left unset it defaults to
+      # 127.0.0.1:9090, which is cockpit's port -- whichever starts second
+      # fails to bind it.
+      metrics_listen_addr = "127.0.0.1:9095";
     };
   };
   services.tailscale = {

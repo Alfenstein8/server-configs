@@ -47,6 +47,7 @@ let
           "postgres"
           "endpoints"
           "containers"
+          "apps"
         ]
   );
 
