@@ -236,6 +236,10 @@ let
       jq -r '"denied: \(.permission_denials | length), cost: \(.total_cost_usd)"' "$out"
       status=$(jq -r '.structured_output.status' "$out")
       echo "status: $status"
+      # The verdict in the journal too, so it is in Loki next to everything
+      # else and not only in Discord: summary, then one line per finding.
+      jq -r '.structured_output | "summary: \(.summary)",
+        (.findings[] | "finding [\(.severity)] \(.title) -- \(.next_step)")' "$out"
 
       if [ "$status" != ok ]; then
         post "$(jq -r '.structured_output as $r
