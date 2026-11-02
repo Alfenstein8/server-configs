@@ -26,7 +26,8 @@ let
         preferred_ip_protocol = "ip4";
         fail_if_not_ssl = true;
         # "Answers at all" rather than "returns 200": several services answer
-        # their root with a login challenge or a redirect. What should fail is
+        # their root with a login challenge or a redirect, and mushebrawl's
+        # signaling server answers a plain GET with 400. What should fail is
         # Caddy's own 502/503/504 when the backend is gone.
         valid_status_codes = [
           200
@@ -36,6 +37,7 @@ let
           303
           307
           308
+          400
           401
           403
           404
