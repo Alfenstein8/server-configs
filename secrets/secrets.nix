@@ -10,6 +10,7 @@ in
   "wireguard.age".publicKeys = [ homeserver ];
   "grafana.age".publicKeys = [ homeserver ];
   "grafana-discord.age".publicKeys = [ homeserver ];
+  "ntfy.age".publicKeys = [ homeserver ];
   "claude-ops.age".publicKeys = [ homeserver ];
   "claude-ops-grafana.age".publicKeys = [ homeserver ];
   "restic-htpasswd.age".publicKeys = [ homeserver ];

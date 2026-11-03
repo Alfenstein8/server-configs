@@ -56,6 +56,7 @@
     ./prometheus.nix
     ./blackbox.nix # probes every service URL and DNS from outside
     ./grafana.nix
+    ./ntfy.nix # push notifications to the phone
     ./loki.nix
     ./alloy.nix # ships the journal to Loki
     ./claude-ops # daily health check by Claude Code, reports to Discord
