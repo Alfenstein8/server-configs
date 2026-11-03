@@ -32,6 +32,10 @@
     # ntfy's users, ACLs and tokens, as an environment file (see ntfy.nix).
     # Read by systemd as root, so owned by root -- ntfy runs as a DynamicUser.
     ntfy.file = ./secrets/ntfy.age;
+    # The `homeserver` account's ntfy token, for everything that sends alerts
+    # (Grafana, claude-ops): NTFY_TOKEN=tk_..., the same token as in ntfy.age's
+    # NTFY_AUTH_TOKENS. Read by systemd as root, so owned by root.
+    ntfy-homeserver.file = ./secrets/ntfy-homeserver.age;
     # The daily Claude Code check (claude-ops/): a long-lived token from
     # `claude setup-token`, alone in the file. Read by systemd as root and
     # passed to the unit with LoadCredential, so owned by root.

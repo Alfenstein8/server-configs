@@ -7,9 +7,9 @@
 # A daily health check by Claude Code, run headless on this box. It reads
 # Prometheus, Loki, Grafana (as a Viewer), the journal and /etc/nixos,
 # decides whether anything needs
-# a human, and posts to the Discord webhook Grafana already uses -- only when
-# it does, plus a short all-clear on Mondays so silence means "fine" and not
-# "broken". A failed run posts too, and leaves the unit failed, which Grafana's
+# a human, and notifies -- ntfy (the `homeserver` topic, see ../ntfy.nix) and,
+# for now, the Discord webhook Grafana also uses -- only when it does, plus a
+# short all-clear on Mondays so silence means "fine" and not "broken". A failed run posts too, and leaves the unit failed, which Grafana's
 # "Systemd unit failed" alert also picks up.
 #
 # Containment, in two layers:
@@ -32,10 +32,14 @@
 #                           Service accounts). Viewer can read dashboards,
 #                           alert rules and their state, and change nothing.
 #
+#   ntfy-homeserver.age     NTFY_TOKEN=..., the senders' ntfy token, shared
+#                           with Grafana (see ../secrets.nix).
+#
 # Run it by hand: systemctl start claude-ops; journalctl -u claude-ops -f.
 # Reports are kept in /var/lib/claude-ops/reports, out of the session's reach.
 let
   stateDir = "/var/lib/claude-ops";
+  ntfy = "http://${config.services.ntfy-sh.settings.listen-http}";
   prometheus = "http://127.0.0.1:${toString config.services.prometheus.port}";
   loki = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
 
@@ -193,13 +197,26 @@ let
     ];
     text = ''
       creds="$CREDENTIALS_DIRECTORY"
-      # The webhook stays a plain shell variable: never exported, so the
-      # session cannot see it. The env-file format is grafana.nix's.
+      # The webhook and the token stay plain shell variables: never exported,
+      # so the session cannot see them. Both files use the env-file format
+      # Grafana reads them in.
       webhook=$(sed -n 's/^DISCORD_WEBHOOK_URL=//p' "$creds/discord")
+      ntfy_token=$(sed -n 's/^NTFY_TOKEN=//p' "$creds/ntfy")
 
+      # post <ntfy priority 1-5> <title> <body>. Each channel on its own, so
+      # one being down doesn't keep the other from getting the message.
+      # ntfy's JSON form rather than headers: titles carry emoji, and HTTP
+      # headers don't do UTF-8. Over loopback, so Caddy or DNS being what's
+      # broken doesn't silence the report.
       post() {
-        jq -n --arg c "$1" '{content: ($c | .[0:1990]), allowed_mentions: {parse: []}}' |
-          curl -sS --max-time 30 -H 'Content-Type: application/json' -d @- "$webhook" >/dev/null
+        jq -n --arg t "$2" --arg m "$3" \
+          '{content: ("**\($t)**\n\($m)" | .[0:1990]), allowed_mentions: {parse: []}}' |
+          curl -sS --max-time 30 -H 'Content-Type: application/json' -d @- "$webhook" >/dev/null ||
+          echo "posting to Discord failed" >&2
+        jq -n --arg t "$2" --arg m "$3" --argjson p "$1" \
+          '{topic: "homeserver", title: $t, message: ($m | .[0:4000]), priority: $p}' |
+          curl -fsS --max-time 30 -H "Authorization: Bearer $ntfy_token" -d @- ${ntfy} >/dev/null ||
+          echo "posting to ntfy failed" >&2
       }
 
       # The session works in work/, which holds nothing but its notes. Not the
@@ -224,12 +241,12 @@ let
           --output-format json \
           --json-schema ${lib.escapeShellArg schema} \
           >"$out"; then
-        post "⚠️ **homeserver check failed** -- claude exited with an error. journalctl -u claude-ops"
+        post 4 "⚠️ homeserver check failed" "claude exited with an error. journalctl -u claude-ops"
         exit 1
       fi
 
       if ! jq -e '.structured_output.status' "$out" >/dev/null; then
-        post "⚠️ **homeserver check failed** -- no verdict: $(jq -r '.result // .subtype // "unreadable output"' "$out" | head -c 300)"
+        post 4 "⚠️ homeserver check failed" "No verdict: $(jq -r '.result // .subtype // "unreadable output"' "$out" | head -c 300)"
         exit 1
       fi
 
@@ -237,18 +254,21 @@ let
       status=$(jq -r '.structured_output.status' "$out")
       echo "status: $status"
       # The verdict in the journal too, so it is in Loki next to everything
-      # else and not only in Discord: summary, then one line per finding.
+      # else and not only in the notifications: summary, then one line per finding.
       jq -r '.structured_output | "summary: \(.summary)",
         (.findings[] | "finding [\(.severity)] \(.title) -- \(.next_step)")' "$out"
 
       if [ "$status" != ok ]; then
-        post "$(jq -r '.structured_output as $r
-          | (if $r.status == "action" then "🔴 **homeserver: action needed**" else "🟡 **homeserver: worth a look**" end)
-          + "\n" + $r.summary + "\n"
-          + ($r.findings | map(select(.severity != "info"))
-              | map("\n**\(.title)**\n\(.evidence)\n→ \(.next_step)") | join("\n"))' "$out")"
+        body=$(jq -r '.structured_output | .summary + "\n"
+          + (.findings | map(select(.severity != "info"))
+              | map("\n\(.title)\n\(.evidence)\n→ \(.next_step)") | join("\n"))' "$out")
+        if [ "$status" = action ]; then
+          post 4 "🔴 homeserver: action needed" "$body"
+        else
+          post 3 "🟡 homeserver: worth a look" "$body"
+        fi
       elif [ "$(date +%u)" = 1 ]; then
-        post "🟢 homeserver weekly: all clear. $(jq -r '.structured_output.summary' "$out")"
+        post 2 "🟢 homeserver weekly: all clear" "$(jq -r '.structured_output.summary' "$out")"
       fi
 
       # A month of reports is plenty.
@@ -273,6 +293,7 @@ in
       "prometheus.service"
       "loki.service"
       "grafana.service"
+      "ntfy-sh.service"
     ];
     wants = [ "network-online.target" ];
     environment = {
@@ -297,6 +318,7 @@ in
       LoadCredential = [
         "token:${config.age.secrets.claude-ops.path}"
         "discord:${config.age.secrets.grafana-discord.path}"
+        "ntfy:${config.age.secrets.ntfy-homeserver.path}"
         "grafana:${config.age.secrets.claude-ops-grafana.path}"
       ];
       TimeoutStartSec = "30min";

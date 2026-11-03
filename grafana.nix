@@ -161,6 +161,28 @@ in
               }
             ];
           }
+          {
+            orgId = 1;
+            name = "ntfy";
+            receivers = [
+              {
+                # Not "ntfy-receiver": that uid is the old ntfy.sh one, deleted
+                # below on every start.
+                uid = "ntfy";
+                type = "webhook";
+                settings = {
+                  # Loopback rather than the public URL, so an alert still
+                  # gets out while Caddy or DNS is what's broken. ntfy's
+                  # built-in grafana template turns the webhook's JSON into a
+                  # title and message.
+                  url = "http://${config.services.ntfy-sh.settings.listen-http}/homeserver?template=grafana";
+                  httpMethod = "POST";
+                  authorization_scheme = "Bearer";
+                  authorization_credentials = "$NTFY_TOKEN";
+                };
+              }
+            ];
+          }
         ];
         # Dropping a contact point from this file leaves it in Grafana; it has
         # to be deleted by uid.
@@ -183,6 +205,17 @@ in
             "alertname"
           ];
           repeat_interval = "12h";
+          # Every alert to both, while ntfy proves itself: a policy sends to
+          # its first matching child, `continue` lets the next one match too.
+          # No matchers = matches everything. Retiring Discord is dropping its
+          # route and setting the root receiver to ntfy.
+          routes = [
+            {
+              receiver = "ntfy";
+              continue = true;
+            }
+            { receiver = "discord"; }
+          ];
         }
       ];
 
@@ -373,8 +406,11 @@ in
     };
   };
 
-  # Holds DISCORD_WEBHOOK_URL=... for the contact point above.
-  systemd.services.grafana.serviceConfig.EnvironmentFile = config.age.secrets.grafana-discord.path;
+  # DISCORD_WEBHOOK_URL=... and NTFY_TOKEN=... for the contact points above.
+  systemd.services.grafana.serviceConfig.EnvironmentFile = [
+    config.age.secrets.grafana-discord.path
+    config.age.secrets.ntfy-homeserver.path
+  ];
 
   shlam.services.grafana = {
     port = config.services.grafana.settings.server.http_port;
