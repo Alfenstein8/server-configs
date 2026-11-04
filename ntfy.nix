@@ -38,6 +38,10 @@ in
       auth-default-access = "deny-all";
       # The web app's login, for reading and testing from a browser.
       enable-login = true;
+      # How far back the web app and `ntfy sub --poll` can see (default 12h).
+      # The phone app keeps its own history regardless; this is for the PCs,
+      # whose client shows only what arrives while connected.
+      cache-duration = "720h";
     };
   };
 
