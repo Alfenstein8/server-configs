@@ -41,6 +41,11 @@ in
     };
   };
 
+  # ntfy reads users and tokens only at start, and a changed ntfy.age leaves
+  # the unit itself untouched, so nothing would restart it: a new token would
+  # get 401 until someone did. The .age file's store path changes with it.
+  systemd.services.ntfy-sh.restartTriggers = [ config.age.secrets.ntfy.file ];
+
   shlam.services.ntfy = {
     inherit port;
 
