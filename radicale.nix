@@ -1,7 +1,16 @@
+{ config, ... }:
 let
   port = 5232;
 in
 {
+  # The htpasswd file: one user:bcrypt-hash per line. Owned by radicale, which
+  # reads it itself. Add or change a user with `htpasswd -nB <user>` (from
+  # nixpkgs#apacheHttpd) and paste the line in with ageGen.
+  age.secrets.radicale-users = {
+    file = ./secrets/radicale-users.age;
+    owner = "radicale";
+  };
+
   services.radicale = {
     enable = true;
     settings = {
@@ -9,7 +18,7 @@ in
       server.hosts = [ "localhost:${toString port}" ];
       auth = {
         type = "htpasswd";
-        htpasswd_filename = "/etc/nixos/radicale-users";
+        htpasswd_filename = config.age.secrets.radicale-users.path;
         htpasswd_encryption = "bcrypt";
       };
     };
