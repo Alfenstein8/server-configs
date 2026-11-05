@@ -32,12 +32,12 @@
           allowedIPs = [ "10.8.0.3/32" ];
         }
         {
-          name = "zehra-desktop";
+          name = "desktop-4";
           publicKey = "/HcB18CU6+q82Be1F+Sz4dOEcp4VuL+7TJ5NWvkcFRU=";
           allowedIPs = [ "10.8.0.4/32" ];
         }
         {
-          name = "zehra-ipad";
+          name = "ipad-5";
           publicKey = "tYyz3mR7DuihQcBMFP8hhUMCVQyLLE1UPkWDv0RcfhU=";
           allowedIPs = [ "10.8.0.5/32" ];
         }
@@ -47,7 +47,7 @@
           allowedIPs = [ "10.8.0.6/32" ];
         }
         {
-          name = "ole-mobile";
+          name = "mobile-7";
           publicKey = "ychp24+0sdzMcc+GR8Ip6iVUD41Z3DYz3zdK1OeTq1s=";
           allowedIPs = [ "10.8.0.7/32" ];
         }
