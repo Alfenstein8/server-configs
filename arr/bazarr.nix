@@ -48,8 +48,9 @@ in
   shlam.services.bazarr = {
     inherit port;
     # Bazarr has no "External" mode and no environment override for its login;
-    # it is switched off by hand (Settings -> General -> Security ->
-    # Authentication: None) and lives in /mnt/appdata/bazarr's config.yaml.
+    # it is switched off by hand: Settings -> General -> Security, clear the
+    # Authentication field with its x (there is no "None" entry), Save. The
+    # setting lives in /mnt/appdata/bazarr's config.yaml.
     sso.forward = true;
     dashboard = {
       title = "Bazarr";
