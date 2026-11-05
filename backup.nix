@@ -48,6 +48,10 @@ let
   # schema reshuffle cannot silently drop one from the backup.
   jellyfinData = "${config.services.jellyfin.dataDir}/data";
 
+  # A literal rather than read from authelia.nix's settings, so commenting that
+  # module out does not break evaluation here.
+  autheliaDb = "/var/lib/authelia-main/db.sqlite3";
+
   # Each job's last success, for the "Backup overdue" alert in grafana.nix.
   # The failed-unit alert misses a job that never runs: a stopped timer, a
   # run that hangs, the mirror skipped because its key is gone. ExecStartPost
@@ -124,6 +128,17 @@ in
         done
         if [ "$found" -eq 0 ]; then
           echo "warning: no *.db under ${jellyfinData}; has jellyfin moved its state?" >&2
+        fi
+
+        # Authelia's registered second factors (TOTP secrets, passkeys), see
+        # ../authelia.nix. Its state directory is otherwise just the notifier
+        # file, so the consistent copy is all that is kept. Skipped when the
+        # database is absent, which is authelia.nix being out of the imports.
+        # Its rows are encrypted with authelia-storage.age, so a restore needs
+        # that key as well.
+        if [ -e ${autheliaDb} ]; then
+          install -d -m 0700 ${dbDumpDir}/authelia
+          ${pkgs.sqlite}/bin/sqlite3 ${autheliaDb} ".backup '${dbDumpDir}/authelia/db.sqlite3'"
         fi
       '';
 
