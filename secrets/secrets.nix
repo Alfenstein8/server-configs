@@ -26,6 +26,7 @@ in
   "radicale-users.age".publicKeys = [ homeserver ];
   "adguardhome-password.age".publicKeys = [ homeserver ];
   "storagebox-ssh.age".publicKeys = [ homeserver ];
+  "samba-shares.age".publicKeys = [ homeserver ];
   # Hyggr (services/hyggr.nix)
   "hyggr.age".publicKeys = [ homeserver ];
   "hyggr-firebase.age".publicKeys = [ homeserver ];
