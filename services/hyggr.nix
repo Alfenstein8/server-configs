@@ -19,8 +19,10 @@
 #
 # Push to the Android app through Google (Firebase project hyggr-events): the service
 # account key is ../secrets/hyggr-firebase.age (JSON, from the Firebase console's
-# Service accounts tab), the app's ./hyggr-google-services.json isn't secret (the app
-# gets its values from the instance). UnifiedPush needs nothing here.
+# Service accounts tab). The app's google-services.json is in
+# ../secrets/hyggr-google-services.age: not really secret (the app gets its values from
+# the instance), but it keeps the Firebase API key out of the repository.
+# UnifiedPush needs nothing here.
 #
 # The repository is public: the flake input and each deploy fetch it over HTTPS, and
 # the deploy job reads its releases without a token.
@@ -40,6 +42,9 @@ in
 
   age.secrets.hyggr = lib.mkIf ready { file = ../secrets/hyggr.age; };
   age.secrets.hyggr-firebase = lib.mkIf ready { file = ../secrets/hyggr-firebase.age; };
+  age.secrets.hyggr-google-services = lib.mkIf ready {
+    file = ../secrets/hyggr-google-services.age;
+  };
 
   services.hyggr = lib.mkIf ready {
     enable = true;
@@ -50,7 +55,7 @@ in
     secretsFile = config.age.secrets.hyggr.path;
     firebase = {
       serviceAccountFile = config.age.secrets.hyggr-firebase.path;
-      googleServicesFile = ./hyggr-google-services.json;
+      googleServicesFile = config.age.secrets.hyggr-google-services.path;
     };
     smtp = {
       host = "smtp-relay.brevo.com";
