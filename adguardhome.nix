@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   # This box's LAN address. AdGuard binds it, and the rewrite below hands it
   # back to LAN clients, so the two must agree.
@@ -14,17 +14,32 @@ let
   );
 in
 {
+  # The web UI login's bcrypt hash, alone in the file (`htpasswd -nbB alfred
+  # <password> | cut -d: -f2`, from nixpkgs#apacheHttpd). Kept out of
+  # settings.users so it stays out of the repository, and written into
+  # AdGuardHome.yaml after the module's own preStart has installed or merged
+  # it. Read by systemd as root and handed over with LoadCredential, since
+  # AdGuard runs as a DynamicUser. If you change the password, change the
+  # widget's plaintext in homepage.age (HOMEPAGE_VAR_ADGUARD_PASS) too.
+  age.secrets.adguardhome-password.file = ./secrets/adguardhome-password.age;
+  systemd.services.adguardhome = {
+    serviceConfig.LoadCredential = [
+      "password-hash:${config.age.secrets.adguardhome-password.path}"
+    ];
+    preStart = lib.mkAfter ''
+      HASH="$(< "$CREDENTIALS_DIRECTORY/password-hash")" \
+        ${lib.getExe pkgs.yq-go} -i \
+        '.users = [{"name": "alfred", "password": strenv(HASH)}]' \
+        "$STATE_DIRECTORY/AdGuardHome.yaml"
+      chmod 600 "$STATE_DIRECTORY/AdGuardHome.yaml"
+    '';
+  };
+
   services.adguardhome = {
     enable = true;
     openFirewall = true;
     settings = {
       http.address = "0.0.0.0:${toString port}";
-      users = [
-        {
-          name = "alfred";
-          password = "REMOVED-BCRYPT-HASH";
-        }
-      ];
       dns = {
         bind_hosts = [
           "127.0.0.1"
@@ -125,7 +140,7 @@ in
       order = 40;
       icon = "adguard-home.svg";
       description = "DNS & Ad Blocking";
-      # The plaintext of the bcrypt hash in settings.users above.
+      # The plaintext of the bcrypt hash in adguardhome-password.age (see top).
       extra.widget = {
         type = "adguard";
         url = "http://localhost:${toString port}";
