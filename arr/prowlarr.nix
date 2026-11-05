@@ -11,6 +11,8 @@ in
       "PGID" = "100";
       "PUID" = "1000";
       "TZ" = "Europe/Copenhagen";
+      # Its own login off, Authelia in front instead -- see ./sonarr.nix.
+      "PROWLARR__AUTH__METHOD" = "External";
     };
     volumes = [
       "/etc/localtime:/etc/localtime:ro"
@@ -38,6 +40,7 @@ in
 
   shlam.services.prowlarr = {
     inherit port;
+    sso.forward = true;
     dashboard = {
       title = "Prowlarr";
       group = "Media administration";

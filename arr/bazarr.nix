@@ -15,8 +15,10 @@ in
       "/mnt/appdata/bazarr:/config:rw"
       "/mnt/storage/data/media:/data:rw"
     ];
+    # Loopback only, as in ./sonarr.nix: published on 0.0.0.0 it would be a way
+    # around Authelia.
     ports = [
-      "${toString port}:${toString port}/tcp"
+      "127.0.0.1:${toString port}:${toString port}/tcp"
     ];
     log-driver = "journald";
     extraOptions = [
@@ -45,6 +47,10 @@ in
 
   shlam.services.bazarr = {
     inherit port;
+    # Bazarr has no "External" mode and no environment override for its login;
+    # it is switched off by hand (Settings -> General -> Security ->
+    # Authentication: None) and lives in /mnt/appdata/bazarr's config.yaml.
+    sso.forward = true;
     dashboard = {
       title = "Bazarr";
       group = "Media administration";

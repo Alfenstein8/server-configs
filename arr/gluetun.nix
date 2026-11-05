@@ -24,7 +24,9 @@ in
     ports = [
       "${qbittorrent}:${qbittorrent}/tcp"
       "6881:6881/tcp"
-      "${prowlarr}:${prowlarr}/tcp"
+      # Loopback only: prowlarr is behind Authelia (see ./prowlarr.nix), and a
+      # port published on 0.0.0.0 would be a way around it.
+      "127.0.0.1:${prowlarr}:${prowlarr}/tcp"
     ];
     log-driver = "journald";
     extraOptions = [

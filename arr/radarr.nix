@@ -9,14 +9,18 @@ in
       "PGID" = "100";
       "PUID" = "1000";
       "TZ" = "Europe/Copenhagen";
+      # Its own login off, Authelia in front instead -- see ./sonarr.nix.
+      "RADARR__AUTH__METHOD" = "External";
     };
     volumes = [
       "/etc/localtime:/etc/localtime:ro"
       "/mnt/appdata/radarr:/config:rw"
       "/mnt/storage/data/media:/data:rw"
     ];
+    # Loopback only, as in ./sonarr.nix: published on 0.0.0.0 it would be a way
+    # around Authelia.
     ports = [
-      "${toString port}:${toString port}/tcp"
+      "127.0.0.1:${toString port}:${toString port}/tcp"
     ];
     log-driver = "journald";
     extraOptions = [
@@ -45,6 +49,7 @@ in
 
   shlam.services.radarr = {
     inherit port;
+    sso.forward = true;
     dashboard = {
       title = "Radarr";
       group = "Media administration";
