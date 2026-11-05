@@ -26,11 +26,14 @@ in
     serviceConfig.LoadCredential = [
       "password-hash:${config.age.secrets.adguardhome-password.path}"
     ];
+    # Not `yq -i`: it chowns its temporary file back to the original owner,
+    # and chown is in @privileged, which the unit's SystemCallFilter kills.
     preStart = lib.mkAfter ''
       HASH="$(< "$CREDENTIALS_DIRECTORY/password-hash")" \
-        ${lib.getExe pkgs.yq-go} -i \
+        ${lib.getExe pkgs.yq-go} \
         '.users = [{"name": "alfred", "password": strenv(HASH)}]' \
-        "$STATE_DIRECTORY/AdGuardHome.yaml"
+        "$STATE_DIRECTORY/AdGuardHome.yaml" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
+      mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
       chmod 600 "$STATE_DIRECTORY/AdGuardHome.yaml"
     '';
   };
