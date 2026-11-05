@@ -101,10 +101,23 @@ in
       notifier.filesystem.filename = "${stateDir}/notifications.txt";
       totp.issuer = "shlambert.top";
 
+      # Since 4.39 the ID token carries almost no claims; the rest are only at
+      # the userinfo endpoint. Grafana evaluates role_attribute_path against the
+      # ID token first and stops at any non-empty answer, so without `groups`
+      # there it lands on the expression's 'Viewer' fallback and never looks at
+      # userinfo. A claims policy puts them back in the token.
+      identity_providers.oidc.claims_policies.grafana.id_token = [
+        "email"
+        "name"
+        "groups"
+        "preferred_username"
+      ];
+
       identity_providers.oidc.clients = [
         {
           client_id = "grafana";
           client_name = "Grafana";
+          claims_policy = "grafana";
           client_secret = secretRef "authelia-grafana-digest";
           authorization_policy = "two_factor";
           require_pkce = true;
