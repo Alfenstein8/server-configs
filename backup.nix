@@ -1,24 +1,29 @@
 { config, pkgs, ... }:
 let
-  # Hetzner Storage Box BX21. `account` is both the SSH username and the
-  # hostname label.
-  account = "uXXXXXX";
-  host = "${account}.your-storagebox.de";
+  # Hetzner Storage Box BX21, reached through an SSH host alias, `storagebox`,
+  # defined in an agenix-managed ssh_config (secrets/storagebox-ssh.age) so the
+  # account ID stays out of the repository:
+  #   Host storagebox
+  #     HostName <account>.your-storagebox.de
+  #     User <account>
+  #     Port 23
+  #     IdentityFile /root/.ssh/storagebox
+  #     UserKnownHostsFile /root/.ssh/known_hosts
+  # Passed with -F to the two jobs below rather than included system-wide: an
+  # Include of a root-only file makes ssh fail for every other user.
+  sshConfig = config.age.secrets.storagebox-ssh.path;
+  ssh = "ssh -F ${sshConfig} storagebox";
 
-  # Storage Boxes speak SSH on 23, not 22.
-  sshPort = 23;
-
-  # Generated on the server, public half registered with the box:
+  # The key is generated on the server, public half registered with the box:
   #   ssh-keygen -t ed25519 -N "" -f /root/.ssh/storagebox
   # Then one manual connection as root, which verifies the fingerprint against
   # the one in the Hetzner console and writes /root/.ssh/known_hosts. Both jobs
   # below need that entry -- neither trusts a key on first sight:
-  #   ssh -p 23 -i /root/.ssh/storagebox uXXXXXX@uXXXXXX.your-storagebox.de
+  #   ssh -F /run/agenix/storagebox-ssh storagebox
   # Deliberately outside the repo: agenix would work, but a missing .age file
   # breaks evaluation of the whole flake, and this key has to exist before the
   # first run either way.
   keyFile = "/root/.ssh/storagebox";
-  knownHosts = "/root/.ssh/known_hosts";
 
   # /home is the account root on a Storage Box, not the server's /home.
   boxRoot = "/home/restic";
@@ -57,6 +62,8 @@ let
     '';
 in
 {
+  age.secrets.storagebox-ssh.file = ./secrets/storagebox-ssh.age;
+
   systemd.tmpfiles.rules = [ "d ${textfileDir} 0755 root root -" ];
   services.prometheus.exporters.node.extraFlags = [
     "--collector.textfile.directory=${textfileDir}"
@@ -76,15 +83,13 @@ in
       ];
       initialize = true;
 
-      repository = "sftp:${account}@${host}:${boxRoot}/homeserver";
+      repository = "sftp:storagebox:${boxRoot}/homeserver";
 
       passwordFile = config.age.secrets.restic.path;
 
       # restic's sftp backend shells out to ssh, and the unit runs as root with
-      # no ~/.ssh/config -- so the port and the key have to be passed here.
-      extraOptions = [
-        "sftp.command='ssh ${account}@${host} -p ${toString sshPort} -i ${keyFile} -s sftp'"
-      ];
+      # no ~/.ssh/config -- so the alias's config file has to be passed here.
+      extraOptions = [ "sftp.command='${ssh} -s sftp'" ];
 
       # Runs as root in the unit's preStart, and the module hands it to
       # writeScript -- a standalone executable, so it needs its own shebang.
@@ -175,7 +180,10 @@ in
   systemd.services.storagebox-mirror = {
     description = "Mirror the restic REST repositories to the Storage Box";
     unitConfig.ConditionPathExists = keyFile;
-    path = [ pkgs.rclone ];
+    path = [
+      pkgs.rclone
+      pkgs.openssh
+    ];
     serviceConfig = {
       Type = "oneshot";
       IOSchedulingClass = "idle";
@@ -185,11 +193,7 @@ in
     script = ''
       rclone sync ${resticServerDir} :sftp:${boxRoot}/pc-repos \
         --config /dev/null \
-        --sftp-host=${host} \
-        --sftp-user=${account} \
-        --sftp-port=${toString sshPort} \
-        --sftp-key-file=${keyFile} \
-        --sftp-known-hosts-file=${knownHosts} \
+        --sftp-ssh="${ssh}" \
         --transfers=8 \
         --stats=0
     '';

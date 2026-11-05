@@ -25,6 +25,7 @@ in
   "forgejo-runner.age".publicKeys = [ homeserver ];
   "radicale-users.age".publicKeys = [ homeserver ];
   "adguardhome-password.age".publicKeys = [ homeserver ];
+  "storagebox-ssh.age".publicKeys = [ homeserver ];
   # Hyggr (services/hyggr.nix)
   "hyggr.age".publicKeys = [ homeserver ];
   "hyggr-firebase.age".publicKeys = [ homeserver ];
