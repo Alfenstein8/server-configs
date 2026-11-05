@@ -28,6 +28,15 @@ in
   "storagebox-ssh.age".publicKeys = [ homeserver ];
   "umami.age".publicKeys = [ homeserver ];
   "samba-shares.age".publicKeys = [ homeserver ];
+  "grafana-oidc.age".publicKeys = [ homeserver ];
+  # Authelia (authelia.nix)
+  "authelia-jwt.age".publicKeys = [ homeserver ];
+  "authelia-session.age".publicKeys = [ homeserver ];
+  "authelia-storage.age".publicKeys = [ homeserver ];
+  "authelia-oidc-hmac.age".publicKeys = [ homeserver ];
+  "authelia-oidc-issuer.age".publicKeys = [ homeserver ];
+  "authelia-users.age".publicKeys = [ homeserver ];
+  "authelia-grafana-digest.age".publicKeys = [ homeserver ];
   # Hyggr (services/hyggr.nix)
   "hyggr.age".publicKeys = [ homeserver ];
   "hyggr-firebase.age".publicKeys = [ homeserver ];

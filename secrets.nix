@@ -26,6 +26,12 @@
       file = ./secrets/grafana.age;
       owner = "grafana";
     };
+    # Grafana's OIDC client secret for Authelia, alone in the file. Authelia
+    # holds its digest in authelia-grafana-digest.age (see authelia.nix).
+    grafana-oidc = {
+      file = ./secrets/grafana-oidc.age;
+      owner = "grafana";
+    };
     # Grafana's Discord webhook, as an environment file:
     # DISCORD_WEBHOOK_URL=<url>. Read by systemd as root, so owned by root.
     grafana-discord.file = ./secrets/grafana-discord.age;

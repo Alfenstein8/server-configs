@@ -27,6 +27,7 @@
     ./services # Custom systemd services
     ./registry.nix # shlam.services.<name> -> Caddy vhosts
     ./caddy.nix # Reverse proxy
+    ./authelia.nix # Single sign-on (OIDC) at auth.shlambert.top
     ./headscale.nix
     ./headplane.nix # Web UI for headscale: users, nodes, pre-auth keys
     ./immich.nix # Image backup

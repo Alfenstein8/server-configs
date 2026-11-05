@@ -116,6 +116,33 @@ in
       };
       security.secret_key = "$__file{${config.age.secrets.grafana.path}}";
       analytics.reporting_enabled = false;
+
+      # "Sign in with Authelia" (authelia.nix holds the other half of this
+      # client). The local login form stays, for the admin account and for when
+      # Authelia is down. Members of the Authelia group `admins` get Admin;
+      # everyone else who can log in at all gets Viewer.
+      "auth.generic_oauth" =
+        let
+          issuer = config.shlam.services.auth.url;
+        in
+        {
+          enabled = true;
+          name = "Authelia";
+          icon = "signin";
+          client_id = "grafana";
+          client_secret = "$__file{${config.age.secrets.grafana-oidc.path}}";
+          scopes = "openid profile email groups";
+          empty_scopes = false;
+          use_pkce = true;
+          auth_url = "${issuer}/api/oidc/authorization";
+          token_url = "${issuer}/api/oidc/token";
+          api_url = "${issuer}/api/oidc/userinfo";
+          login_attribute_path = "preferred_username";
+          name_attribute_path = "name";
+          groups_attribute_path = "groups";
+          role_attribute_path = "contains(groups[*], 'admins') && 'Admin' || 'Viewer'";
+          allow_sign_up = true;
+        };
     };
   };
 
