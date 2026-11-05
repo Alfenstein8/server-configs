@@ -17,6 +17,11 @@
 #   HYGGR_SMTP_PASS=      the Brevo SMTP key
 #   HYGGR_KLIPY_API_KEY=  the KLIPY API key (handed to clients anyway: the GIF picker)
 #
+# The Brevo SMTP login is alone in ../secrets/hyggr-smtp-user.age. The module only takes
+# it as a string (smtp.user), which would put it in this public repository, so smtp.user
+# is a placeholder that keeps the module's authenticated-SMTP wiring on, and the API
+# server and Synapse's email settings each swap the real login in at start (below).
+#
 # Push to the Android app through Google (Firebase project hyggr-events): the service
 # account key is ../secrets/hyggr-firebase.age (JSON, from the Firebase console's
 # Service accounts tab). The app's google-services.json is in
@@ -45,6 +50,29 @@ in
   age.secrets.hyggr-google-services = lib.mkIf ready {
     file = ../secrets/hyggr-google-services.age;
   };
+  age.secrets.hyggr-smtp-user = lib.mkIf ready { file = ../secrets/hyggr-smtp-user.age; };
+
+  # The real SMTP login, over smtp.user's placeholder. The API server gets the
+  # placeholder as HYGGR_SMTP_USER in its Environment=, which this export overrides
+  # before the module's own script starts it.
+  systemd.services.hyggr = lib.mkIf ready {
+    serviceConfig.LoadCredential = [ "smtp-user:${config.age.secrets.hyggr-smtp-user.path}" ];
+    script = lib.mkBefore ''
+      HYGGR_SMTP_USER="$(< "$CREDENTIALS_DIRECTORY/smtp-user")"
+      export HYGGR_SMTP_USER
+    '';
+  };
+  # Synapse's email.yaml is JSON written by jq; rewrite its smtp_user after the module
+  # has written the file, then hand it back to Synapse.
+  systemd.services.hyggr-synapse-email = lib.mkIf ready {
+    serviceConfig.LoadCredential = [ "smtp-user:${config.age.secrets.hyggr-smtp-user.path}" ];
+    script = lib.mkAfter ''
+      jq --arg user "$(< "$CREDENTIALS_DIRECTORY/smtp-user")" '.email.smtp_user = $user' \
+        /run/hyggr-synapse/email.yaml > /run/hyggr-synapse/email.yaml.tmp
+      mv /run/hyggr-synapse/email.yaml.tmp /run/hyggr-synapse/email.yaml
+      chown matrix-synapse:matrix-synapse /run/hyggr-synapse/email.yaml
+    '';
+  };
 
   services.hyggr = lib.mkIf ready {
     enable = true;
@@ -60,7 +88,8 @@ in
     smtp = {
       host = "smtp-relay.brevo.com";
       port = 587;
-      user = "REMOVED@smtp-brevo.com";
+      # Placeholder, replaced at start from hyggr-smtp-user.age (see the top).
+      user = "from-hyggr-smtp-user.age";
       # Brevo has hyggr.shlambert.top's SPF/DKIM records.
       from = "hyggr@hyggr.shlambert.top";
     };

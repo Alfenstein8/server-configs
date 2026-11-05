@@ -30,4 +30,5 @@ in
   "hyggr.age".publicKeys = [ homeserver ];
   "hyggr-firebase.age".publicKeys = [ homeserver ];
   "hyggr-google-services.age".publicKeys = [ homeserver ];
+  "hyggr-smtp-user.age".publicKeys = [ homeserver ];
 }
