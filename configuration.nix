@@ -56,6 +56,7 @@
     ./prometheus.nix
     ./blackbox.nix # probes every service URL and DNS from outside
     ./grafana.nix
+    ./umami.nix # Web analytics for alfredmakne.dk
     ./ntfy.nix # push notifications to the phone
     ./loki.nix
     ./alloy.nix # ships the journal to Loki
