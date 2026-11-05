@@ -1,4 +1,10 @@
-# Single sign-on: Authelia at auth.shlambert.top, as an OpenID Connect provider.
+# Single sign-on: Authelia at auth.shlambert.top, as an OpenID Connect provider
+# and as Caddy's forward_auth backend.
+#
+# forward_auth is for services with no login worth keeping: set
+# shlam.services.<name>.sso.forward = true in the service's module, and the
+# registry puts the vhost behind Authelia while the rules below are generated
+# from the same entries.
 #
 # Apps that speak OIDC get a client below, and the app's own module points at
 # this one. Each client has two secrets: the app holds the plaintext (in its own
@@ -29,7 +35,7 @@
 #
 # Those registrations live in the SQLite database next to it, so losing
 # /var/lib/authelia-main means everyone registers their second factor again.
-{ config, ... }:
+{ config, lib, ... }:
 let
   instance = "main"; # -> authelia-main.service, user authelia-main
   user = "authelia-${instance}";
@@ -48,6 +54,13 @@ let
   # because the issuer key is set. It reads the file when Authelia starts, so the
   # digest stays out of the store.
   secretRef = name: ''{{ secret "${config.age.secrets.${name}.path}" }}'';
+
+  forwardSvcs = lib.filterAttrs (_: s: s.vhost && s.sso.forward) config.shlam.services;
+  forwardHosts = lib.mapAttrsToList (_: s: s.host) forwardSvcs;
+
+  # This box's LAN address, as in adguardhome.nix. If the two drift apart the
+  # probes merely see the login redirect again; nobody is let in by it.
+  lanIP = "192.168.0.188";
 in
 {
   age.secrets = {
@@ -85,10 +98,33 @@ in
         };
       };
 
-      # Only consulted by forward_auth, which nothing uses yet. Authelia refuses
-      # `deny` while there are no rules, so this is the strictest it accepts.
-      # Tighten it with rules when the first forward_auth service goes in.
-      access_control.default_policy = "two_factor";
+      # forward_auth's rules, one per shlam.services entry with sso.forward set
+      # (see ../registry.nix). Rules are matched top to bottom, first match wins.
+      access_control = {
+        # Authelia refuses `deny` while there are no rules, which is the case
+        # whenever no service has opted in.
+        default_policy = if forwardHosts == [ ] then "two_factor" else "deny";
+        rules = lib.optionals (forwardHosts != [ ]) (
+          [
+            {
+              # The box itself, which is where the blackbox probes come from:
+              # without this they would see the 302 to the login page and call
+              # the service up whether it is or not. Nothing on the box gains
+              # access by it -- it can reach every backend on localhost
+              # anyway. Caddy ignores a client's own X-Forwarded-For (no
+              # trusted_proxies), so the address cannot be spoofed.
+              domain = forwardHosts;
+              networks = [ "${lanIP}/32" ];
+              policy = "bypass";
+            }
+          ]
+          ++ lib.mapAttrsToList (_: s: {
+            domain = s.host;
+            subject = map (g: "group:${g}") s.sso.groups;
+            policy = "two_factor";
+          }) forwardSvcs
+        );
+      };
 
       session.cookies = [
         {

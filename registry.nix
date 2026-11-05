@@ -154,6 +154,28 @@ let
           description = "Create a Caddy virtual host. false = dashboard-only entry.";
         };
 
+        sso = {
+          forward = mkOption {
+            type = types.bool;
+            default = false;
+            description = ''
+              Put the vhost behind Authelia with Caddy's forward_auth: every
+              request is checked against auth.${domain} first, and anyone not
+              logged in is sent to its login page. authelia.nix turns this into
+              an access rule, so a service is opted in here and nowhere else.
+
+              Only the vhosts are covered. The service must not be reachable
+              some other way -- a container port published on 0.0.0.0, say --
+              or this is a lock on one door of several.
+            '';
+          };
+          groups = mkOption {
+            type = types.listOf types.str;
+            default = [ "admins" ];
+            description = "Authelia groups let through; a member of any one is enough.";
+          };
+        };
+
         extraConfig = mkOption {
           type = types.lines;
           default = "";
@@ -273,7 +295,22 @@ let
     p: concatStringsSep ", " (builtins.attrNames (filterAttrs (_: s: s.port == p) cfg.services));
   takenPorts = builtins.filter (p: portOwner p != "") publicPorts;
 
-  body = s: (optionalString s.proxy "reverse_proxy ${s.upstream}\n") + s.extraConfig;
+  # Authelia's authz endpoint, and the identity headers it answers with, passed
+  # on to the backend. copy_headers also strips those headers from the client's
+  # own request when Authelia doesn't set them, so they cannot be forged.
+  forwardAuth = ''
+    forward_auth ${cfg.services.auth.upstream} {
+      uri /api/authz/forward-auth
+      copy_headers Remote-User Remote-Groups Remote-Email Remote-Name
+    }
+  '';
+  ssoSvcs = filterAttrs (_: s: s.sso.forward) vhostSvcs;
+
+  body =
+    s:
+    (optionalString s.sso.forward forwardAuth)
+    + (optionalString s.proxy "reverse_proxy ${s.upstream}\n")
+    + s.extraConfig;
 
   # --- homepage-dashboard ---------------------------------------------------
 
@@ -391,6 +428,14 @@ in
         message =
           "shlam.services: publicPort/publicHttpPort already in use as a service port: "
           + concatStringsSep ", " (map (p: "${toString p} (${portOwner p})") takenPorts);
+      }
+      {
+        # Without it, forward_auth would point at nothing and every request
+        # would fail -- closed, but with a baffling 502.
+        assertion = ssoSvcs == { } || (cfg.services ? auth && config.services.authelia.instances ? main);
+        message =
+          "shlam.services: sso.forward is set but authelia.nix is not imported: "
+          + concatStringsSep ", " (builtins.attrNames ssoSvcs);
       }
       {
         assertion = sharedPorts == [ ];
