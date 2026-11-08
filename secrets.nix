@@ -32,9 +32,6 @@
       file = ./secrets/grafana-oidc.age;
       owner = "grafana";
     };
-    # Grafana's Discord webhook, as an environment file:
-    # DISCORD_WEBHOOK_URL=<url>. Read by systemd as root, so owned by root.
-    grafana-discord.file = ./secrets/grafana-discord.age;
     # ntfy's users, ACLs and tokens, as an environment file (see ntfy.nix).
     # Read by systemd as root, so owned by root -- ntfy runs as a DynamicUser.
     ntfy.file = ./secrets/ntfy.age;

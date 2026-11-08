@@ -61,7 +61,7 @@
     ./ntfy.nix # push notifications to the phone
     ./loki.nix
     ./alloy.nix # ships the journal to Loki
-    ./claude-ops # daily health check by Claude Code, reports to ntfy and Discord
+    ./claude-ops # daily health check by Claude Code, reports to ntfy
     # ./mealie.nix
     ./freshrss.nix # RSS reader
     ./wishlist.nix # Gift wish lists

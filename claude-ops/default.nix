@@ -7,9 +7,8 @@
 # A daily health check by Claude Code, run headless on this box. It reads
 # Prometheus, Loki, Grafana (as a Viewer), the journal and /etc/nixos,
 # decides whether anything needs
-# a human, and notifies -- ntfy (the `homeserver` topic, see ../ntfy.nix) and,
-# for now, the Discord webhook Grafana also uses -- only when it does, plus a
-# short all-clear on Mondays so silence means "fine" and not "broken". A failed run posts too, and leaves the unit failed, which Grafana's
+# a human, and notifies ntfy (the `homeserver` topic, see ../ntfy.nix) only
+# when it does, plus a short all-clear on Mondays so silence means "fine" and not "broken". A failed run posts too, and leaves the unit failed, which Grafana's
 # "Systemd unit failed" alert also picks up.
 #
 # Containment, in two layers:
@@ -197,22 +196,15 @@ let
     ];
     text = ''
       creds="$CREDENTIALS_DIRECTORY"
-      # The webhook and the token stay plain shell variables: never exported,
-      # so the session cannot see them. Both files use the env-file format
-      # Grafana reads them in.
-      webhook=$(sed -n 's/^DISCORD_WEBHOOK_URL=//p' "$creds/discord")
+      # The token stays a plain shell variable: never exported, so the session
+      # cannot see it. The file uses the env-file format Grafana reads it in.
       ntfy_token=$(sed -n 's/^NTFY_TOKEN=//p' "$creds/ntfy")
 
-      # post <ntfy priority 1-5> <title> <body>. Each channel on its own, so
-      # one being down doesn't keep the other from getting the message.
+      # post <ntfy priority 1-5> <title> <body>.
       # ntfy's JSON form rather than headers: titles carry emoji, and HTTP
       # headers don't do UTF-8. Over loopback, so Caddy or DNS being what's
       # broken doesn't silence the report.
       post() {
-        jq -n --arg t "$2" --arg m "$3" \
-          '{content: ("**\($t)**\n\($m)" | .[0:1990]), allowed_mentions: {parse: []}}' |
-          curl -sS --max-time 30 -H 'Content-Type: application/json' -d @- "$webhook" >/dev/null ||
-          echo "posting to Discord failed" >&2
         jq -n --arg t "$2" --arg m "$3" --argjson p "$1" \
           '{topic: "homeserver", title: $t, message: ($m | .[0:4000]), priority: $p}' |
           curl -fsS --max-time 30 -H "Authorization: Bearer $ntfy_token" -d @- ${ntfy} >/dev/null ||
@@ -317,7 +309,6 @@ in
       # Read as root by systemd, handed over readable only by this unit.
       LoadCredential = [
         "token:${config.age.secrets.claude-ops.path}"
-        "discord:${config.age.secrets.grafana-discord.path}"
         "ntfy:${config.age.secrets.ntfy-homeserver.path}"
         "grafana:${config.age.secrets.claude-ops-grafana.path}"
       ];

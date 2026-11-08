@@ -9,7 +9,6 @@ in
   "airvpn.age".publicKeys = [ homeserver ];
   "wireguard.age".publicKeys = [ homeserver ];
   "grafana.age".publicKeys = [ homeserver ];
-  "grafana-discord.age".publicKeys = [ homeserver ];
   "ntfy.age".publicKeys = [ homeserver ];
   "ntfy-homeserver.age".publicKeys = [ homeserver ];
   "claude-ops.age".publicKeys = [ homeserver ];

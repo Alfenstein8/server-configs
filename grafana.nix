@@ -174,20 +174,9 @@ in
 
     alerting = {
       # Grafana fills $VARS in provisioning files from its environment, which
-      # is how the webhook URL gets in without touching the repo or the store.
+      # is how the ntfy token gets in without touching the repo or the store.
       contactPoints.settings = {
         contactPoints = [
-          {
-            orgId = 1;
-            name = "discord";
-            receivers = [
-              {
-                uid = "discord";
-                type = "discord";
-                settings.url = "$DISCORD_WEBHOOK_URL";
-              }
-            ];
-          }
           {
             orgId = 1;
             name = "ntfy";
@@ -218,6 +207,10 @@ in
             orgId = 1;
             uid = "ntfy-receiver";
           }
+          {
+            orgId = 1;
+            uid = "discord";
+          }
         ];
       };
 
@@ -226,23 +219,12 @@ in
       policies.settings.policies = [
         {
           orgId = 1;
-          receiver = "discord";
+          receiver = "ntfy";
           group_by = [
             "grafana_folder"
             "alertname"
           ];
           repeat_interval = "12h";
-          # Every alert to both, while ntfy proves itself: a policy sends to
-          # its first matching child, `continue` lets the next one match too.
-          # No matchers = matches everything. Retiring Discord is dropping its
-          # route and setting the root receiver to ntfy.
-          routes = [
-            {
-              receiver = "ntfy";
-              continue = true;
-            }
-            { receiver = "discord"; }
-          ];
         }
       ];
 
@@ -433,9 +415,8 @@ in
     };
   };
 
-  # DISCORD_WEBHOOK_URL=... and NTFY_TOKEN=... for the contact points above.
+  # NTFY_TOKEN=... for the contact point above.
   systemd.services.grafana.serviceConfig.EnvironmentFile = [
-    config.age.secrets.grafana-discord.path
     config.age.secrets.ntfy-homeserver.path
   ];
 
