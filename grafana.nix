@@ -207,10 +207,6 @@ in
             orgId = 1;
             uid = "ntfy-receiver";
           }
-          {
-            orgId = 1;
-            uid = "discord";
-          }
         ];
       };
 
