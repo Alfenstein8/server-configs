@@ -274,6 +274,7 @@ in
     dashboard = {
       title = "Home Assistant";
       group = "Productivity & Utilities";
+      shared = true;
       order = 45;
       icon = "home-assistant.svg";
       description = "Home Automation";

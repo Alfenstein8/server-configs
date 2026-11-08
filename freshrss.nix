@@ -24,6 +24,7 @@
     dashboard = {
       title = "FreshRSS";
       group = "Productivity & Utilities";
+      shared = true;
       order = 30;
       icon = "freshrss.svg";
       description = "RSS Reader";

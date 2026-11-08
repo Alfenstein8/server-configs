@@ -18,6 +18,7 @@ in
     dashboard = {
       title = "Navidrome";
       group = "Media";
+      shared = true;
       order = 40;
       icon = "navidrome.svg";
       description = "Music";

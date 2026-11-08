@@ -10,6 +10,7 @@
     dashboard = {
       title = "Jellyseerr";
       group = "Media";
+      shared = true;
       order = 20;
       icon = "jellyseerr.svg";
       description = "Media Requests";

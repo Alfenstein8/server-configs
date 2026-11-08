@@ -45,6 +45,7 @@ in
     dashboard = {
       title = "Launchpad";
       group = "Productivity & Utilities";
+      shared = true;
       order = 50;
       icon = "mdi-music-box";
       description = "Soundmachine";

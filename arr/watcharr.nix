@@ -42,6 +42,7 @@ in
     dashboard = {
       title = "Watcharr";
       group = "Media";
+      shared = true;
       order = 30;
       icon = "watcharr-light.webp";
       description = "Watch list";

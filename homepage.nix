@@ -1,18 +1,62 @@
-{ config, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+# Two dashboards:
+#   admin.shlambert.top  every tile, with widgets; behind Authelia (admins).
+#     The NixOS module's own instance.
+#   home.shlambert.top   only the tiles with dashboard.shared set, for anyone
+#     who uses the services; no widgets, no secrets. A second unit built from
+#     the module's, below.
 let
-  port = 8082;
+  adminPort = 8082;
+  homePort = 8085;
+
+  yaml = pkgs.formats.yaml { };
+
+  base = config.systemd.services.homepage-dashboard;
+
+  homeWidgets = [
+    {
+      datetime = {
+        text_size = "xl";
+        format = {
+          dateStyle = "long";
+          timeStyle = "short";
+          hourCycle = "h23";
+        };
+      };
+    }
+  ];
+
+  # homepage copies its skeleton into a config directory that lacks a file,
+  # and /etc is read-only, so every file it looks for has to exist.
+  homeFiles = {
+    "services.yaml" = config.shlam.sharedDashboardServices;
+    "widgets.yaml" = homeWidgets;
+    "settings.yaml" = {
+      title = "shlambert";
+    };
+    "bookmarks.yaml" = [ ];
+    "docker.yaml" = { };
+    "kubernetes.yaml" = { };
+    "proxmox.yaml" = { };
+  };
 in
 {
-  # The service list is generated from shlam.services.<name>.dashboard by
+  # The admin service list is generated from shlam.services.<name>.dashboard by
   # ./registry.nix -- each service carries its own tile. Do not add a services
   # list here: the option merges by concatenation, so a second list would show
   # up as duplicate groups rather than as an error.
   services.homepage-dashboard = {
     enable = true;
-    listenPort = port;
-    allowedHosts = config.shlam.services.homepage.host;
+    listenPort = adminPort;
+    allowedHosts = config.shlam.services.admin.host;
     # Widget credentials -- see the homepage entry in ./secrets.nix.
     environmentFiles = [ config.age.secrets.homepage.path ];
+    settings.title = "shlambert admin";
 
     # The info bar along the top. The unit is ProtectSystem=strict, which makes
     # the filesystem read-only but leaves it visible, so statfs on the pool
@@ -38,22 +82,50 @@ in
           disk = "/mnt/storage";
         };
       }
-      {
-        datetime = {
-          text_size = "xl";
-          format = {
-            dateStyle = "long";
-            timeStyle = "short";
-            hourCycle = "h23";
-          };
-        };
-      }
-    ];
+    ]
+    ++ homeWidgets;
   };
 
-  # No dashboard entry -- the dashboard should not link to itself.
-  shlam.services.homepage = {
-    subdomain = "home";
-    inherit port;
+  environment.etc =
+    lib.mapAttrs' (
+      name: value: lib.nameValuePair "homepage-home/${name}" { source = yaml.generate name value; }
+    ) homeFiles
+    // {
+      "homepage-home/custom.css".text = "";
+      "homepage-home/custom.js".text = "";
+    };
+
+  # The module's unit with its own config, cache and state directories and
+  # port. Same hardening; no EnvironmentFile, since there are no widgets.
+  systemd.services.homepage-home = {
+    description = "Homepage Dashboard (shared)";
+    inherit (base) after wantedBy preStart;
+    environment = base.environment // {
+      HOMEPAGE_CONFIG_DIR = "/etc/homepage-home";
+      NIXPKGS_HOMEPAGE_CACHE_DIR = "/var/cache/homepage-home";
+      PORT = toString homePort;
+      HOMEPAGE_ALLOWED_HOSTS = config.shlam.services.home.host;
+    };
+    # ExecStartPre is the module's preStart, already inherited above.
+    serviceConfig = removeAttrs base.serviceConfig [
+      "EnvironmentFile"
+      "ExecStartPre"
+    ]
+    // {
+      StateDirectory = "homepage-home";
+      CacheDirectory = "homepage-home";
+      # Only the cpu widget needs all of /proc.
+      ProcSubset = "pid";
+    };
+    restartTriggers = map (n: config.environment.etc."homepage-home/${n}".source) (
+      builtins.attrNames homeFiles
+    );
   };
+
+  # No dashboard entries -- the dashboards should not link to themselves.
+  shlam.services.admin = {
+    port = adminPort;
+    sso.forward = true;
+  };
+  shlam.services.home.port = homePort;
 }

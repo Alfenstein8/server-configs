@@ -17,6 +17,7 @@ in
     dashboard = {
       title = "Dawarich";
       group = "Productivity & Utilities";
+      shared = true;
       order = 60;
       icon = "dawarich.svg";
       description = "Location History";
