@@ -120,6 +120,7 @@ in
     dashboard = {
       title = "Hyggr";
       group = "Productivity & Utilities";
+      shared = true;
       order = 90;
       icon = "mdi-calendar-account";
       description = "Make plans with friends";

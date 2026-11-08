@@ -29,6 +29,7 @@ in
     dashboard = {
       title = "Radicale";
       group = "Productivity & Utilities";
+      shared = true;
       order = 10;
       icon = "radicale.svg";
       description = "Calendar & Contacts";

@@ -49,6 +49,7 @@ in
     dashboard = {
       title = "Wishlist";
       group = "Productivity & Utilities";
+      shared = true;
       order = 50;
       icon = "mdi-gift";
       description = "Ønskelister";

@@ -11,6 +11,7 @@
     dashboard = {
       title = "TubeArchivist";
       group = "Media";
+      shared = true;
       order = 50;
       icon = "tube-archivist.webp";
       description = "YouTube Archive";

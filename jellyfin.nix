@@ -25,6 +25,7 @@ in
     dashboard = {
       title = "Jellyfin";
       group = "Media";
+      shared = true;
       order = 10;
       icon = "jellyfin.svg";
       description = "Media Server";

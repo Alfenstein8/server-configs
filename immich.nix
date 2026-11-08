@@ -23,6 +23,7 @@
     dashboard = {
       title = "Immich";
       group = "File Management";
+      shared = true;
       order = 10;
       icon = "immich.svg";
       description = "Photo & Video Backup";

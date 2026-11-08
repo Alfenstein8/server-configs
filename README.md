@@ -47,6 +47,7 @@ module**, never centrally — that way commenting the module out of
       order = 40;
       icon = "mealie.svg";
       description = "Recipes & Meal Planning";
+      shared = true;                          # also on home.shlambert.top
     };
   };
 }
@@ -54,7 +55,9 @@ module**, never centrally — that way commenting the module out of
 
 That produces `https://menu.shlambert.top`, reverse-proxied to `localhost:8001`,
 served with the `*.shlambert.top` wildcard certificate, with `:80` redirecting to
-`:443`, plus a tile on the dashboard.
+`:443`, plus a tile on the dashboards. Every tile is on the admin dashboard
+(`admin.shlambert.top`, behind Authelia); `shared = true` also puts it, without
+its widget, on the one for everyone else (`home.shlambert.top`).
 
 Then add the module to `imports` in `configuration.nix`.
 

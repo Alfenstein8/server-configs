@@ -186,8 +186,6 @@ let
           '';
         };
 
-        # Declared now, consumed later when homepage.nix is migrated. Entries
-        # that leave this null cost nothing.
         dashboard = mkOption {
           default = null;
           description = "homepage-dashboard entry, or null to omit from the dashboard.";
@@ -201,6 +199,15 @@ let
                   default = name;
                 };
                 group = mkOption { type = types.str; };
+                shared = mkOption {
+                  type = types.bool;
+                  default = false;
+                  description = ''
+                    Also show the tile on the shared dashboard (home.${domain}),
+                    the one for everyone, not just admins. Every tile is on the
+                    admin dashboard regardless.
+                  '';
+                };
                 icon = mkOption {
                   type = types.nullOr types.str;
                   default = null;
@@ -315,12 +322,12 @@ let
   # --- homepage-dashboard ---------------------------------------------------
 
   dashSvcs = builtins.filter (s: s.dashboard != null) (builtins.attrValues cfg.services);
-  byGroup = lib.groupBy (s: s.dashboard.group) dashSvcs;
-  present = builtins.attrNames byGroup;
+  sharedSvcs = builtins.filter (s: s.dashboard.shared) dashSvcs;
 
   # Groups listed in dashboardGroups come first, in that order; anything else
   # is appended alphabetically rather than silently dropped.
-  ordered =
+  orderedGroups =
+    present:
     builtins.filter (g: builtins.elem g present) cfg.dashboardGroups
     ++ lib.sort (a: b: a < b) (builtins.filter (g: !(builtins.elem g cfg.dashboardGroups)) present);
 
@@ -339,6 +346,18 @@ let
       })
       // s.dashboard.extra;
   };
+
+  # homepage's services.yaml: a list of { <group> = [ <tile> ... ]; }.
+  servicesYaml =
+    item: svcs:
+    let
+      byGroup = lib.groupBy (s: s.dashboard.group) svcs;
+    in
+    map (g: { ${g} = map item (lib.sort cmp byGroup.${g}); }) (orderedGroups (builtins.attrNames byGroup));
+
+  # No widgets on the shared dashboard: they show live data from the admin's
+  # point of view -- who is streaming what on Jellyfin, say -- to everyone.
+  sharedItem = s: lib.mapAttrs (_: tile: removeAttrs tile [ "widget" ]) (mkItem s);
 in
 {
   options.shlam = {
@@ -377,6 +396,16 @@ in
         Dashboard group order. Groups not listed here are appended, sorted
         alphabetically, so a typo in a group name shows up as a stray section
         rather than a missing tile.
+      '';
+    };
+
+    sharedDashboardServices = mkOption {
+      type = types.listOf (types.attrsOf types.anything);
+      internal = true;
+      readOnly = true;
+      description = ''
+        services.yaml for the shared dashboard (see ./homepage.nix): the tiles
+        with dashboard.shared set, without their widgets.
       '';
     };
 
@@ -477,8 +506,7 @@ in
     # This option merges by CONCATENATION, not replacement -- any hand-written
     # list left in homepage.nix would render alongside this one, every group
     # appearing twice.
-    services.homepage-dashboard.services = map (g: {
-      ${g} = map mkItem (lib.sort cmp byGroup.${g});
-    }) ordered;
+    services.homepage-dashboard.services = servicesYaml mkItem dashSvcs;
+    shlam.sharedDashboardServices = servicesYaml sharedItem sharedSvcs;
   };
 }
