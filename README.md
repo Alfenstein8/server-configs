@@ -19,6 +19,11 @@ registry's assertions without touching the running system. If something does go
 wrong after `switch`, `sudo nixos-rebuild switch --rollback` backs it out, and
 previous generations stay in the boot menu.
 
+To update nixpkgs and the other inputs, run the `update-server` agent skill
+([`.agents/skills/update-server`](.agents/skills/update-server/SKILL.md)): it
+updates `flake.lock`, builds before and after, and reads the changelogs of what
+moved before you deploy.
+
 Flakes only see **git-tracked** files. A newly added `.nix` module has no effect
 until it is at least `git add`-ed.
 
