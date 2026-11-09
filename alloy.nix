@@ -74,6 +74,10 @@ in
 
   shlam.services.alloy = {
     inherit port;
+    # The UI has no login of its own and shows the config and, under live
+    # debugging, the journal lines passing through. Loopback-bound above, so
+    # the vhost is the only way in.
+    sso.forward = true;
     dashboard = {
       title = "Alloy";
       group = "Infrastructure";
