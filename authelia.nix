@@ -95,6 +95,15 @@ in
     settings = {
       theme = "auto";
       server.address = "tcp://127.0.0.1:${toString port}/";
+      # forward_auth decides by the session cookie alone. The default also
+      # tries any `Authorization: Basic` header as an Authelia login, which
+      # swallows the backends' own: Cockpit's login form sends the system
+      # password that way, Authelia rejects it as one of its own users, and
+      # Cockpit shows the 401 as "Authentication failed".
+      server.endpoints.authz.forward-auth = {
+        implementation = "ForwardAuth";
+        authn_strategies = [ { name = "CookieSession"; } ];
+      };
       log.level = "info"; # the module's default is debug
 
       authentication_backend = {
