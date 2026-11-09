@@ -57,6 +57,13 @@
       file = ./secrets/headplane.age;
       owner = "headscale";
     };
+    # Headplane's OIDC client secret, the plaintext half of the pair whose
+    # digest is authelia-headplane-digest.age (see authelia.nix). Owned by
+    # headscale for the same reason as the cookie key above.
+    headplane-oidc = {
+      file = ./secrets/headplane-oidc.age;
+      owner = "headscale";
+    };
     # A reusable headscale pre-auth key, so tailscaled-autoconnect can register
     # this box again on its own. Left owned by root, which is who that unit
     # runs as. Create it with `headscale preauthkeys create` -- note the CLI

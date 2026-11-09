@@ -81,6 +81,8 @@ in
     # Grafana's client secret, as Authelia's PBKDF2 digest; the plaintext is
     # grafana-oidc.age (see grafana.nix).
     authelia-grafana-digest = ownedSecret "authelia-grafana-digest";
+    # Headplane's, likewise; the plaintext is headplane-oidc.age.
+    authelia-headplane-digest = ownedSecret "authelia-headplane-digest";
   };
 
   services.authelia.instances.${instance} = {
@@ -168,7 +170,41 @@ in
         "preferred_username"
       ];
 
+      # A client's authorization_policy is one of these, or plain one_factor /
+      # two_factor -- which let in anyone with an account. Headplane can hand
+      # out pre-auth keys for the whole tailnet, so it is admins only, as the
+      # forward_auth rules are.
+      identity_providers.oidc.authorization_policies.admins = {
+        default_policy = "deny";
+        rules = [
+          {
+            policy = "two_factor";
+            subject = "group:admins";
+          }
+        ];
+      };
+
       identity_providers.oidc.clients = [
+        {
+          # Headplane reads name and email from the userinfo endpoint, so it
+          # needs no claims policy, unlike Grafana.
+          client_id = "headplane";
+          client_name = "Headplane";
+          client_secret = secretRef "authelia-headplane-digest";
+          authorization_policy = "admins";
+          require_pkce = true;
+          pkce_challenge_method = "S256";
+          redirect_uris = [ "${config.shlam.services.headplane.url}/admin/oidc/callback" ];
+          scopes = [
+            "openid"
+            "profile"
+            "email"
+          ];
+          response_types = [ "code" ];
+          grant_types = [ "authorization_code" ];
+          userinfo_signed_response_alg = "none";
+          token_endpoint_auth_method = "client_secret_basic";
+        }
         {
           client_id = "grafana";
           client_name = "Grafana";

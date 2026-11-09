@@ -36,6 +36,8 @@ in
   "authelia-oidc-issuer.age".publicKeys = [ homeserver ];
   "authelia-users.age".publicKeys = [ homeserver ];
   "authelia-grafana-digest.age".publicKeys = [ homeserver ];
+  "authelia-headplane-digest.age".publicKeys = [ homeserver ];
+  "headplane-oidc.age".publicKeys = [ homeserver ];
   # Hyggr (services/hyggr.nix)
   "hyggr.age".publicKeys = [ homeserver ];
   "hyggr-firebase.age".publicKeys = [ homeserver ];
