@@ -15,6 +15,10 @@
   # 9090 shut, but behind Authelia the vhost should be the only door, not one
   # that relies on the firewall to stay the only one. The leading "" clears
   # the module's list rather than adding to it.
+  #
+  # A rebuild that changes this list does not restart the socket: systemd
+  # logs "Unit not functional until restarted" and Caddy gets connection
+  # refused (a 502) until `systemctl restart cockpit.socket`.
   systemd.sockets.cockpit.listenStreams = lib.mkForce [
     ""
     "127.0.0.1:${toString config.services.cockpit.port}"
