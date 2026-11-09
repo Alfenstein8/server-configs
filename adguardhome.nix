@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   # This box's LAN address. AdGuard binds it, and the rewrite below hands it
   # back to LAN clients, so the two must agree.
@@ -61,35 +66,32 @@ in
       # Not Dandelion Sprout's Anti-Malware List (catalog 12): it blocks all of
       # *.top bar a short denyallow, and that takes *.shlambert.top with it.
       # Check any list added here for TLD-wide rules (||*.top^ and the like).
-      filters =
-        map
-          (f: f // { enabled = true; })
-          [
-            {
-              # Malware, phishing, C2, cryptojacking. Already includes
-              # URLhaus, PhishTank and OpenPhish, so those are not listed.
-              id = 44;
-              name = "HaGeZi's Threat Intelligence Feeds";
-              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt";
-            }
-            {
-              # Fake shops, subscription traps, scam sites. Not in the
-              # catalog, so straight from HaGeZi; the id is just unused there.
-              id = 1001;
-              name = "HaGeZi's Fake";
-              url = "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/fake.txt";
-            }
-            {
-              id = 10;
-              name = "Scam Blocklist by DurableNapkin";
-              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_10.txt";
-            }
-            {
-              id = 50;
-              name = "uBlock filters - Badware risks";
-              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_50.txt";
-            }
-          ];
+      filters = map (f: f // { enabled = true; }) [
+        {
+          # Malware, phishing, C2, cryptojacking. Already includes
+          # URLhaus, PhishTank and OpenPhish, so those are not listed.
+          id = 44;
+          name = "HaGeZi's Threat Intelligence Feeds";
+          url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt";
+        }
+        {
+          # Fake shops, subscription traps, scam sites. Not in the
+          # catalog, so straight from HaGeZi; the id is just unused there.
+          id = 1001;
+          name = "HaGeZi's Fake";
+          url = "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/fake.txt";
+        }
+        {
+          id = 10;
+          name = "Scam Blocklist by DurableNapkin";
+          url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_10.txt";
+        }
+        {
+          id = 50;
+          name = "uBlock filters - Badware risks";
+          url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_50.txt";
+        }
+      ];
 
       # Split horizon for the control server, and for every host published
       # through the router's port forward.
@@ -121,17 +123,10 @@ in
       # to true, so a declared value wins over whatever the web UI holds. Any
       # rewrite added by hand there has to be written in here too, or it is
       # dropped on the next restart.
-      filtering.rewrites =
-        map
-          (domain: {
-            inherit domain;
-            answer = lanIP;
-          })
-          (
-            lib.unique (
-              [ config.shlam.services.headscale.host ] ++ publicHosts
-            )
-          );
+      filtering.rewrites = map (domain: {
+        inherit domain;
+        answer = lanIP;
+      }) (lib.unique ([ config.shlam.services.headscale.host ] ++ publicHosts));
     };
   };
 

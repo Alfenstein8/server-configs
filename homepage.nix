@@ -107,16 +107,17 @@ in
       HOMEPAGE_ALLOWED_HOSTS = config.shlam.services.home.host;
     };
     # ExecStartPre is the module's preStart, already inherited above.
-    serviceConfig = removeAttrs base.serviceConfig [
-      "EnvironmentFile"
-      "ExecStartPre"
-    ]
-    // {
-      StateDirectory = "homepage-home";
-      CacheDirectory = "homepage-home";
-      # Only the cpu widget needs all of /proc.
-      ProcSubset = "pid";
-    };
+    serviceConfig =
+      removeAttrs base.serviceConfig [
+        "EnvironmentFile"
+        "ExecStartPre"
+      ]
+      // {
+        StateDirectory = "homepage-home";
+        CacheDirectory = "homepage-home";
+        # Only the cpu widget needs all of /proc.
+        ProcSubset = "pid";
+      };
     restartTriggers = map (n: config.environment.etc."homepage-home/${n}".source) (
       builtins.attrNames homeFiles
     );

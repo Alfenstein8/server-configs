@@ -43,7 +43,9 @@ in
 {
   imports = [ inputs.hyggr.nixosModules.default ];
 
-  warnings = lib.optional (!ready) "Hyggr is off until secrets/hyggr.age exists (see services/hyggr.nix)";
+  warnings = lib.optional (
+    !ready
+  ) "Hyggr is off until secrets/hyggr.age exists (see services/hyggr.nix)";
 
   age.secrets.hyggr = lib.mkIf ready { file = ../secrets/hyggr.age; };
   age.secrets.hyggr-firebase = lib.mkIf ready { file = ../secrets/hyggr-firebase.age; };

@@ -353,7 +353,9 @@ let
     let
       byGroup = lib.groupBy (s: s.dashboard.group) svcs;
     in
-    map (g: { ${g} = map item (lib.sort cmp byGroup.${g}); }) (orderedGroups (builtins.attrNames byGroup));
+    map (g: { ${g} = map item (lib.sort cmp byGroup.${g}); }) (
+      orderedGroups (builtins.attrNames byGroup)
+    );
 
   # No widgets on the shared dashboard: they show live data from the admin's
   # point of view -- who is streaming what on Jellyfin, say -- to everyone.
