@@ -1,30 +1,38 @@
 #!/usr/bin/env bash
 # Update the flake and report what changed, for the update-server skill.
 #
-#   update-report.sh [--no-build] [input ...]
+#   update-report.sh [--no-build] [--no-containers] [input ...]
 #
-# Run from the repo root. Inputs default to all of them (`nix flake update`).
-# Builds the system before and after, so the first run downloads a lot.
-# Leaves flake.lock updated and uncommitted; everything else goes in a report
-# directory, printed at the end:
+# Run from the repo root, with no uncommitted changes. Inputs default to all of
+# them (`nix flake update`). Also bumps the pinned container images
+# (bump-images.sh). Builds the system before and after, so the first run
+# downloads a lot. Leaves flake.lock and the bumped image tags uncommitted;
+# everything else goes in a report directory, printed at the end:
 #   inputs.md         each input that moved: old -> new rev, dates, compare URL
+#   containers.md     each pinned image: old -> new tag and where its changelog is
 #   closure.txt       nix store diff-closures old new: every version change
 #   warnings.txt      evaluation warnings the new build has and the old didn't
 #   release-notes.diff  lines added to NixOS's release notes between the revs
 #   build-old.log, build-new.log
 set -euo pipefail
 
-build=1
-if [ "${1:-}" = --no-build ]; then
-  build=0
+build=1 containers=1
+while [ $# -gt 0 ]; do
+  case $1 in
+    --no-build) build=0 ;;
+    --no-containers) containers=0 ;;
+    *) break ;;
+  esac
   shift
-fi
+done
+here=$(dirname "$(readlink -f "$0")")
 
 nix() { command nix --extra-experimental-features 'nix-command flakes' "$@"; }
 
 [ -f flake.lock ] || { echo "run from the repo root" >&2; exit 2; }
-if ! git diff --quiet HEAD -- flake.lock; then
-  echo "flake.lock has uncommitted changes; commit or revert them first" >&2
+# Clean, so what this run changed is exactly `git diff` afterwards.
+if ! git diff --quiet HEAD; then
+  echo "uncommitted changes; commit or stash them first" >&2
   exit 2
 fi
 
@@ -54,6 +62,13 @@ fi
 echo "updating flake.lock..." >&2
 nix flake update "$@" 2>&1 | sed 's/^/  /' >&2
 cp flake.lock "$out/new.lock"
+
+if [ $containers = 1 ]; then
+  echo "bumping container images..." >&2
+  "$here/bump-images.sh" >"$out/containers.md"
+else
+  echo "(skipped: --no-containers)" >"$out/containers.md"
+fi
 
 # --- inputs.md ----------------------------------------------------------------
 jq -rn --slurpfile o "$out/old.lock" --slurpfile n "$out/new.lock" '
@@ -113,6 +128,7 @@ cat <<EOF
 NixOS $old_release -> $new_release, build: $status
 report: $out
   inputs.md           $(count '^- ' "$out/inputs.md") inputs moved
+  containers.md       $(count ' -> ' "$out/containers.md") images bumped
   closure.txt         $(count ':' "$out/closure.txt") packages changed
   warnings.txt        $(count . "$out/warnings.txt") new warnings
   release-notes.diff  $(count '^\+[^+]' "$out/release-notes.diff") lines added
