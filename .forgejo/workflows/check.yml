@@ -1,0 +1,58 @@
+# Checks every push and pull request before it gets near the server:
+#
+#   eval  the whole system evaluates, every assertion included (the registry's
+#         host/port/cert checks among them). A dry run: nothing is built.
+#   fmt   every .nix file is as nixfmt would write it. To fix a failure:
+#           nix shell --inputs-from . nixpkgs#nixfmt -c nixfmt <files>
+#
+# Neither catches what only shows up at runtime -- a unit script calling a
+# command missing from its PATH, say. That still needs a test on the box.
+#
+# Runs on the homeserver runner (forgejo.nix) in the nixos/nix image, not the
+# runner's node images: those have no Nix. That image has no Node either, so
+# no actions/checkout -- the repo is fetched with git and the job's token.
+name: check
+
+on:
+  push:
+  pull_request:
+
+env:
+  NIX_CONFIG: |
+    experimental-features = nix-command flakes
+    accept-flake-config = false
+
+jobs:
+  eval:
+    runs-on: docker
+    container:
+      image: nixos/nix:2.35.5
+    steps:
+      - name: Fetch the commit
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git -c http.extraHeader="Authorization: token $TOKEN" \
+            fetch -q --depth 1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" "$GITHUB_SHA"
+          git checkout -q FETCH_HEAD
+      - name: Evaluate the system
+        run: nix build --dry-run .#nixosConfigurations.homeserver.config.system.build.toplevel
+
+  fmt:
+    runs-on: docker
+    container:
+      image: nixos/nix:2.35.5
+    steps:
+      - name: Fetch the commit
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git -c http.extraHeader="Authorization: token $TOKEN" \
+            fetch -q --depth 1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" "$GITHUB_SHA"
+          git checkout -q FETCH_HEAD
+      # nixfmt from the flake's own nixpkgs, so its version moves with
+      # flake.lock rather than with whatever the image happens to carry.
+      - name: Check formatting
+        run: git ls-files -z '*.nix' | xargs -0 nix shell --inputs-from . nixpkgs#nixfmt -c nixfmt --check
