@@ -28,7 +28,7 @@
 
   # Containers
   virtualisation.oci-containers.containers."archivist-es" = {
-    image = "docker.io/bbilly1/tubearchivist-es:8.19.0";
+    image = "docker.io/bbilly1/tubearchivist-es:9.5.5";
     environment = {
       "ELASTIC_PASSWORD" = "verysecret";
       "ES_JAVA_OPTS" = "-Xms1g -Xmx1g";
@@ -98,12 +98,10 @@
     ];
   };
   virtualisation.oci-containers.containers."tubearchivist" = {
-    image = "docker.io/bbilly1/tubearchivist:v0.5.12";
+    image = "docker.io/bbilly1/tubearchivist:v0.6.0";
     environment = {
       "ELASTIC_PASSWORD" = "verysecret";
       "ES_URL" = "http://archivist-es:9200";
-      "HOST_GID" = "1000";
-      "HOST_UID" = "1000";
       "REDIS_CON" = "redis://archivist-redis:6379";
       "TA_HOST" = "https://tube.shlambert.top";
       "TA_PASSWORD" = "verysecret";
