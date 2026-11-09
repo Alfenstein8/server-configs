@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   port = 3000;
   cfg = config.services.forgejo;
@@ -101,7 +106,7 @@ in
     args=(${lib.escapeShellArgs oauthArgs})
 
     want=$({ printf '%s\n' "''${args[@]}"; cat "$secretFile"; } | sha256sum | cut -d' ' -f1)
-    id=$("$fj" admin auth list | awk -v n=${oauthName} '$2 == n { print $1 }')
+    id=$("$fj" admin auth list | ${lib.getExe pkgs.gawk} -v n=${oauthName} '$2 == n { print $1 }')
 
     if [ -z "$id" ]; then
       cmd=(add-oauth)
