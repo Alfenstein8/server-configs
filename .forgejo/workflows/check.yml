@@ -11,6 +11,14 @@
 # Runs on the homeserver runner (forgejo.nix) in the nixos/nix image, not the
 # runner's node images: those have no Nix. That image has no Node either, so
 # no actions/checkout -- the repo is fetched with git and the job's token.
+#
+# The job's /nix and flake cache are named podman volumes that outlive it, so
+# nixpkgs and nixfmt are downloaded once, not on every push (the runner only
+# mounts volumes it lists, see container.valid_volumes in forgejo.nix). An
+# empty named volume is filled from the image on first use, which is how the
+# job gets its Nix. The volume then hides the image's own /nix, so the names
+# carry the image version: bump both together, and a new image starts with a
+# fresh store instead of running the old Nix.
 name: check
 
 on:
@@ -23,10 +31,15 @@ env:
     accept-flake-config = false
 
 jobs:
-  eval:
+  # One job, not one per check: they share a store that has no daemon, so they
+  # shouldn't write to it at the same time.
+  check:
     runs-on: docker
     container:
       image: nixos/nix:2.35.5
+      volumes:
+        - ci-nix-2.35.5:/nix
+        - ci-nix-cache-2.35.5:/root/.cache/nix
     steps:
       - name: Fetch the commit
         env:
@@ -36,22 +49,19 @@ jobs:
           git -c http.extraHeader="Authorization: token $TOKEN" \
             fetch -q --depth 1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" "$GITHUB_SHA"
           git checkout -q FETCH_HEAD
+
+      # Each flake.lock update leaves the old inputs behind. Past 10 GB, start
+      # over: the collection keeps Nix itself (the profile is a GC root) and
+      # this run downloads the rest once more.
+      - name: Keep the store in bounds
+        run: |
+          used=$(du -sm /nix/store | cut -f1)
+          echo "store: $used MB"
+          if [ "$used" -gt 10240 ]; then nix-collect-garbage; fi
+
       - name: Evaluate the system
         run: nix build --dry-run .#nixosConfigurations.homeserver.config.system.build.toplevel
 
-  fmt:
-    runs-on: docker
-    container:
-      image: nixos/nix:2.35.5
-    steps:
-      - name: Fetch the commit
-        env:
-          TOKEN: ${{ github.token }}
-        run: |
-          git init -q .
-          git -c http.extraHeader="Authorization: token $TOKEN" \
-            fetch -q --depth 1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" "$GITHUB_SHA"
-          git checkout -q FETCH_HEAD
       # nixfmt from the flake's own nixpkgs, so its version moves with
       # flake.lock rather than with whatever the image happens to carry.
       - name: Check formatting

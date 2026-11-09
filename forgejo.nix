@@ -47,6 +47,12 @@ in
         "ubuntu-22.04:docker://node:20-bullseye"
         "docker:docker://node:20-bookworm"
       ];
+      # Named podman volumes a job may mount; anything else is refused. These
+      # are the check workflow's Nix store and flake cache
+      # (.forgejo/workflows/check.yml), kept between runs so nixpkgs isn't
+      # downloaded again for every push. To reset them:
+      #   podman volume ls -q | grep '^ci-nix-' | xargs podman volume rm
+      container.valid_volumes = [ "ci-nix-*" ];
       # The runner's UUID, as Site Administration -> Actions -> Runners shows it.
       server.connections.default = {
         url = config.shlam.services.forgejo.url;
