@@ -83,6 +83,8 @@ in
     authelia-grafana-digest = ownedSecret "authelia-grafana-digest";
     # Headplane's, likewise; the plaintext is headplane-oidc.age.
     authelia-headplane-digest = ownedSecret "authelia-headplane-digest";
+    # Immich's; the plaintext is immich-oidc.age (see immich.nix).
+    authelia-immich-digest = ownedSecret "authelia-immich-digest";
   };
 
   services.authelia.instances.${instance} = {
@@ -185,6 +187,33 @@ in
       };
 
       identity_providers.oidc.clients = [
+        {
+          # Shared, so plain two_factor: anyone with an Authelia account. Immich
+          # links a login to the Immich account with the same email.
+          client_id = "immich";
+          client_name = "Immich";
+          client_secret = secretRef "authelia-immich-digest";
+          authorization_policy = "two_factor";
+          require_pkce = true;
+          pkce_challenge_method = "S256";
+          redirect_uris = [
+            "${config.shlam.services.immich.url}/auth/login"
+            # Account settings -> OAuth -> Link, for linking an existing account.
+            "${config.shlam.services.immich.url}/user-settings"
+            # The phone app, which handles this scheme itself.
+            "app.immich:///oauth-callback"
+          ];
+          scopes = [
+            "openid"
+            "profile"
+            "email"
+          ];
+          response_types = [ "code" ];
+          grant_types = [ "authorization_code" ];
+          userinfo_signed_response_alg = "none";
+          # Immich's default; it can be changed there, but there is no reason to.
+          token_endpoint_auth_method = "client_secret_post";
+        }
         {
           # Headplane reads name and email from the userinfo endpoint, so it
           # needs no claims policy, unlike Grafana.

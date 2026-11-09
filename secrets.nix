@@ -4,6 +4,10 @@
     restic.file = ./secrets/restic.age;
     backblaze.file = ./secrets/backblaze.age;
     immich.file = ./secrets/immich.age;
+    # Immich's OIDC client secret, alone in the file; the digest half is
+    # authelia-immich-digest.age (see authelia.nix). Root-owned: the immich
+    # module reads it with LoadCredential.
+    immich-oidc.file = ./secrets/immich-oidc.age;
     airvpn.file = ./secrets/airvpn.age;
     wireguard.file = ./secrets/wireguard.age;
     restic-htpasswd = {
