@@ -28,7 +28,7 @@
 
   # Containers
   virtualisation.oci-containers.containers."archivist-es" = {
-    image = "docker.io/bbilly1/tubearchivist-es";
+    image = "docker.io/bbilly1/tubearchivist-es:8.19.0";
     environment = {
       "ELASTIC_PASSWORD" = "verysecret";
       "ES_JAVA_OPTS" = "-Xms1g -Xmx1g";
@@ -98,7 +98,7 @@
     ];
   };
   virtualisation.oci-containers.containers."tubearchivist" = {
-    image = "docker.io/bbilly1/tubearchivist:v0.5.9";
+    image = "docker.io/bbilly1/tubearchivist:v0.5.12";
     environment = {
       "ELASTIC_PASSWORD" = "verysecret";
       "ES_URL" = "http://archivist-es:9200";
