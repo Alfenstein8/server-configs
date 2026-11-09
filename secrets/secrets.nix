@@ -40,6 +40,8 @@ in
   "headplane-oidc.age".publicKeys = [ homeserver ];
   "authelia-immich-digest.age".publicKeys = [ homeserver ];
   "immich-oidc.age".publicKeys = [ homeserver ];
+  "authelia-forgejo-digest.age".publicKeys = [ homeserver ];
+  "forgejo-oidc.age".publicKeys = [ homeserver ];
   # Hyggr (services/hyggr.nix)
   "hyggr.age".publicKeys = [ homeserver ];
   "hyggr-firebase.age".publicKeys = [ homeserver ];

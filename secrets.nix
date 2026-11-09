@@ -88,6 +88,13 @@
     # the registration token, which the runner module doesn't accept). Read by
     # systemd as root and handed to the runner as a credential.
     forgejo-runner.file = ./secrets/forgejo-runner.age;
+    # Forgejo's OIDC client secret, alone in the file; the digest half is
+    # authelia-forgejo-digest.age (see authelia.nix). Owned by forgejo, which
+    # its unit's preStart runs as (see forgejo.nix).
+    forgejo-oidc = {
+      file = ./secrets/forgejo-oidc.age;
+      owner = "forgejo";
+    };
   };
   age.identityPaths = [ "/root/.ssh/id_ed25519" ];
 }

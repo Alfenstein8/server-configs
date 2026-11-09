@@ -85,6 +85,8 @@ in
     authelia-headplane-digest = ownedSecret "authelia-headplane-digest";
     # Immich's; the plaintext is immich-oidc.age (see immich.nix).
     authelia-immich-digest = ownedSecret "authelia-immich-digest";
+    # Forgejo's; the plaintext is forgejo-oidc.age (see forgejo.nix).
+    authelia-forgejo-digest = ownedSecret "authelia-forgejo-digest";
   };
 
   services.authelia.instances.${instance} = {
@@ -187,6 +189,28 @@ in
       };
 
       identity_providers.oidc.clients = [
+        {
+          # Plain two_factor: who may use Forgejo at all is Forgejo's call
+          # (registration is closed, so a login must link to an existing
+          # account). The callback path carries the login source's name,
+          # "Authelia", as set in forgejo.nix.
+          client_id = "forgejo";
+          client_name = "Forgejo";
+          client_secret = secretRef "authelia-forgejo-digest";
+          authorization_policy = "two_factor";
+          # Forgejo 15's OAuth2 client sends no PKCE challenge.
+          require_pkce = false;
+          redirect_uris = [ "${config.shlam.services.forgejo.url}/user/oauth2/Authelia/callback" ];
+          scopes = [
+            "openid"
+            "profile"
+            "email"
+          ];
+          response_types = [ "code" ];
+          grant_types = [ "authorization_code" ];
+          userinfo_signed_response_alg = "none";
+          token_endpoint_auth_method = "client_secret_basic";
+        }
         {
           # Shared, so plain two_factor: anyone with an Authelia account. Immich
           # links a login to the Immich account with the same email.
