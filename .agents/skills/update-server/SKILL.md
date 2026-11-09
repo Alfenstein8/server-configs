@@ -20,11 +20,12 @@ From the repo root, on a clean `main` (or a branch made for the update):
 .agents/skills/update-server/update-report.sh nixpkgs    # just some
 ```
 
-It builds the current system, runs `nix flake update`, moves every pinned
-`image = "…:tag"` to its newest tag of the same shape (`bump-images.sh`), builds
-again and writes a report directory (path printed last; the header of
-`update-report.sh` says what each file holds). The first run downloads a lot; give it up to an hour. Done when it
-prints the report path.
+It builds the current system, runs `nix flake update`, moves every enabled
+container image to its newest tag of the same shape (`bump-images.sh`), builds
+again and writes a report directory (path printed last; the headers of the two
+scripts say what each file holds and which images are left alone). The first
+run downloads a lot; give it up to an hour. Done when it prints the report
+path.
 
 If the **new** system fails to build, that failure is the first finding: read
 `build-new.log`, find the cause (usually a removed or renamed option, or a
@@ -45,17 +46,21 @@ Read every file in the report. Sort each change into one of these buckets:
 - **Container images** (`containers.md`) — an image whose app version moved
   goes in the first bucket. linuxserver tags are
   `<upstream version>-ls<build>`: when only the `-ls` number moved it is an
-  image rebuild (base packages), one line, no reading. Images listed as skipped (no tag,
-  `latest`, `pr-3109`) are not pinned to a version: mention them, and check that
-  a bumped app still works with its unpinned companion (tubearchivist with
-  `tubearchivist-es` and `redis`).
+  image rebuild (base packages), one line, no reading.
+  - *bump it by hand*: the image is built from variables or another file. Find
+    where its tag is set, look up the newest tag yourself, change it, and treat
+    it like any other bump.
+  - *left alone* (no tag, `latest`, a non-version tag, a digest): mention it.
+    When an app that shares a stack with one moved (same file or directory,
+    e.g. tubearchivist with its Elasticsearch and Redis), check the app's
+    changelog for the version it needs.
 - **Everything else** — libraries, patch bumps, unused packages. One line in the
   report as a count; no reading.
 
-Non-nixpkgs inputs (`inputs.md`): open the compare link and skim the commits for
-anything that touches what this repo uses. `nixpkgs-legacy1` is pinned and never
-moves; `hyggr` deploys its own app, so only changes to its NixOS module matter
-(options `services/hyggr.nix` sets).
+Non-nixpkgs inputs (`inputs.md`): read the comment above each input in
+`flake.nix` (why it is there, what of it matters), then open the compare link
+and skim the commits for anything that touches what this repo uses. An input
+pinned to a rev there never moves.
 
 ## 3. Read the changelogs
 
