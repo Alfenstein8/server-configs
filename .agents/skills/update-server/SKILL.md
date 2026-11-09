@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 You update `flake.lock` and the pinned container images here, on the
 workstation, and hand back a **verdict**: is this update safe to deploy, and
-what must Alfred do around it? The server pulls and switches later; you never
+what must the user do around it? The server pulls and switches later; you never
 deploy.
 
 ## 1. Update and build
