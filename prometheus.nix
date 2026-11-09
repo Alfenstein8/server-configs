@@ -206,6 +206,10 @@ in
 
   shlam.services.prometheus = {
     port = config.services.prometheus.port;
+    # Prometheus has no login of its own, so the vhost goes behind Authelia.
+    # Everything that queries it (Grafana, the widget below, claude-ops) does so
+    # on localhost and never passes through Caddy.
+    sso.forward = true;
     dashboard = {
       title = "Prometheus";
       group = "Infrastructure";
