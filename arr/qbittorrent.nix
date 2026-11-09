@@ -40,6 +40,9 @@ in
   shlam.services.qbittorrent = {
     subdomain = "torrent";
     inherit port;
+    # On top of qBittorrent's own login, which stays: qbit-manage, the
+    # private-tags script and the widget below all sign in with it.
+    sso.forward = true;
     dashboard = {
       title = "qBittorrent";
       group = "Media administration";

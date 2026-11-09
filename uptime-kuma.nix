@@ -11,6 +11,10 @@ in
   shlam.services.uptime-kuma = {
     subdomain = "uptime";
     inherit port;
+    # The module binds 127.0.0.1, so the vhost is the only way in. This also
+    # covers the push URLs (/api/push/...) and status pages; nothing uses
+    # either today.
+    sso.forward = true;
     dashboard = {
       title = "Uptime Kuma";
       group = "Productivity & Utilities";

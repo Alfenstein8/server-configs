@@ -22,10 +22,14 @@ in
       "/mnt/appdata/gluetun:/gluetun:rw"
     ];
     ports = [
-      "${qbittorrent}:${qbittorrent}/tcp"
       "6881:6881/tcp"
-      # Loopback only: prowlarr is behind Authelia (see ./prowlarr.nix), and a
-      # port published on 0.0.0.0 would be a way around it.
+      # Loopback only: prowlarr and qbittorrent are behind Authelia (see
+      # ./prowlarr.nix, ./qbittorrent.nix), and a port published on 0.0.0.0
+      # would be a way around it -- podman's DNAT skips the NixOS firewall.
+      # Sonarr and Radarr don't use these: their download client points at
+      # 172.39.0.2:8080, gluetun's address on servarrnetwork (--ip below). It
+      # must stay that, not the host's LAN address.
+      "127.0.0.1:${qbittorrent}:${qbittorrent}/tcp"
       "127.0.0.1:${prowlarr}:${prowlarr}/tcp"
     ];
     log-driver = "journald";
