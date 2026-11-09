@@ -61,6 +61,13 @@ let
   # This box's LAN address, as in adguardhome.nix. If the two drift apart the
   # probes merely see the login redirect again; nobody is let in by it.
   lanIP = "192.168.0.188";
+  # And its tailnet address, as in headscale.nix. The box is a tailnet node with
+  # MagicDNS, so its own requests for *.shlambert.top resolve to this and come
+  # from it -- the blackbox probes included. With only lanIP in the rule they
+  # never matched it: they got Authelia's 401, which blackbox counts as up, so
+  # a dead backend behind forward_auth went unnoticed. Tailscale only lets a
+  # node send from its own address, so no other node can claim this one.
+  tailnetIP = "100.64.0.2";
 in
 {
   age.secrets = {
@@ -114,7 +121,10 @@ in
               # anyway. Caddy ignores a client's own X-Forwarded-For (no
               # trusted_proxies), so the address cannot be spoofed.
               domain = forwardHosts;
-              networks = [ "${lanIP}/32" ];
+              networks = [
+                "${lanIP}/32"
+                "${tailnetIP}/32"
+              ];
               policy = "bypass";
             }
           ]
