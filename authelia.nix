@@ -185,6 +185,10 @@ in
       notifier =
         if smtpReady then
           {
+            # Authelia checks the SMTP login at startup and by default refuses
+            # to start if it fails -- which would take every login behind it
+            # down over an expired key. Only sending a code fails this way.
+            disable_startup_check = true;
             smtp = {
               # Port 587, STARTTLS required.
               address = "submission://smtp-relay.brevo.com:587";
