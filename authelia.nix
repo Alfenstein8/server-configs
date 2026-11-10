@@ -28,8 +28,16 @@
 # rebuild; Authelia reads the file only at startup (watch = false).
 #
 # Second factors (TOTP, passkeys) are registered at auth.shlambert.top after the
-# first password login. Registering asks for a one-time code that Authelia would
-# email; with no SMTP set up it is written to the notifier file instead:
+# first password login. Registering asks for a one-time code, which Authelia
+# emails from auth@shlambert.top through Brevo, the relay Hyggr uses. Two
+# secrets, each holding just the value, from Brevo's SMTP & API page:
+#
+#   secrets/authelia-smtp-user.age      the SMTP login (same for the account)
+#   secrets/authelia-smtp-password.age  an SMTP key of its own, not Hyggr's
+#
+# Brevo only sends for verified domains, so shlambert.top has to be added there
+# (Senders, Domains) and its DKIM/DMARC records put in Spaceship's DNS. Until
+# both .age files exist, the code is written to a file instead:
 #
 #   sudo cat /var/lib/authelia-main/notifications.txt
 #
@@ -68,6 +76,11 @@ let
   # a dead backend behind forward_auth went unnoticed. Tailscale only lets a
   # node send from its own address, so no other node can claim this one.
   tailnetIP = "100.64.0.2";
+
+  # Email for one-time codes, once its secrets exist; until then the file.
+  smtpReady =
+    builtins.pathExists ./secrets/authelia-smtp-user.age
+    && builtins.pathExists ./secrets/authelia-smtp-password.age;
 in
 {
   age.secrets = {
@@ -87,7 +100,16 @@ in
     authelia-immich-digest = ownedSecret "authelia-immich-digest";
     # Forgejo's; the plaintext is forgejo-oidc.age (see forgejo.nix).
     authelia-forgejo-digest = ownedSecret "authelia-forgejo-digest";
+  }
+  // lib.optionalAttrs smtpReady {
+    authelia-smtp-user = ownedSecret "authelia-smtp-user";
+    authelia-smtp-password = ownedSecret "authelia-smtp-password";
   };
+
+  warnings = lib.optional (!smtpReady) (
+    "authelia: one-time codes go to ${stateDir}/notifications.txt until "
+    + "secrets/authelia-smtp-{user,password}.age exist (see authelia.nix)"
+  );
 
   services.authelia.instances.${instance} = {
     enable = true;
@@ -159,7 +181,25 @@ in
       ];
 
       storage.local.path = "${stateDir}/db.sqlite3";
-      notifier.filesystem.filename = "${stateDir}/notifications.txt";
+      # Authelia takes exactly one notifier.
+      notifier =
+        if smtpReady then
+          {
+            # Authelia checks the SMTP login at startup and by default refuses
+            # to start if it fails -- which would take every login behind it
+            # down over an expired key. Only sending a code fails this way.
+            disable_startup_check = true;
+            smtp = {
+              # Port 587, STARTTLS required.
+              address = "submission://smtp-relay.brevo.com:587";
+              username = secretRef "authelia-smtp-user";
+              password = secretRef "authelia-smtp-password";
+              sender = "Authelia <auth@shlambert.top>";
+              subject = "[shlambert.top] {title}";
+            };
+          }
+        else
+          { filesystem.filename = "${stateDir}/notifications.txt"; };
       totp.issuer = "shlambert.top";
 
       # Since 4.39 the ID token carries almost no claims; the rest are only at
