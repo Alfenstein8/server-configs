@@ -117,7 +117,9 @@
       "tubearchivist_cache:/cache:rw"
     ];
     ports = [
-      "8000:8000/tcp"
+      # Loopback only: podman's DNAT skips the NixOS firewall, so a plain
+      # "8000:8000" was open to the whole LAN, around Caddy.
+      "127.0.0.1:8000:8000/tcp"
     ];
     dependsOn = [
       "archivist-es"
