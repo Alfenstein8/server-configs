@@ -140,7 +140,11 @@ in
           login_attribute_path = "preferred_username";
           name_attribute_path = "name";
           groups_attribute_path = "groups";
-          role_attribute_path = "contains(groups[*], 'admins') && 'Admin' || 'Viewer'";
+          # Authelia already refuses non-admins (authorization_policy in
+          # authelia.nix). Strict mode is the second lock: no `admins` group,
+          # no role, and Grafana refuses the login instead of making a Viewer.
+          role_attribute_path = "contains(groups[*], 'admins') && 'Admin'";
+          role_attribute_strict = true;
           allow_sign_up = true;
         };
     };

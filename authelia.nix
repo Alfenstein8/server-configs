@@ -176,8 +176,8 @@ in
 
       # A client's authorization_policy is one of these, or plain one_factor /
       # two_factor -- which let in anyone with an account. Headplane can hand
-      # out pre-auth keys for the whole tailnet, so it is admins only, as the
-      # forward_auth rules are.
+      # out pre-auth keys for the whole tailnet, and Grafana shows everything
+      # the box logs, so both are admins only, as the forward_auth rules are.
       identity_providers.oidc.authorization_policies.admins = {
         default_policy = "deny";
         rules = [
@@ -263,7 +263,9 @@ in
           client_name = "Grafana";
           claims_policy = "grafana";
           client_secret = secretRef "authelia-grafana-digest";
-          authorization_policy = "two_factor";
+          # Admins only: Grafana shows every dashboard and log line -- hostnames,
+          # addresses, service logs -- to anyone it lets in, even as Viewer.
+          authorization_policy = "admins";
           require_pkce = true;
           pkce_challenge_method = "S256";
           redirect_uris = [ "${config.shlam.services.grafana.url}/login/generic_oauth" ];
