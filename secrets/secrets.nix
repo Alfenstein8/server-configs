@@ -47,4 +47,6 @@ in
   "hyggr-firebase.age".publicKeys = [ homeserver ];
   "hyggr-google-services.age".publicKeys = [ homeserver ];
   "hyggr-smtp-user.age".publicKeys = [ homeserver ];
+  # TubeArchivist (tubearchivist/docker-compose.nix)
+  "tubearchivist.age".publicKeys = [ homeserver ];
 }
