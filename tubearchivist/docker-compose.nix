@@ -8,6 +8,11 @@
 }:
 
 {
+  # TA_PASSWORD and ELASTIC_PASSWORD, as an env file (KEY=value lines). Read by
+  # podman, which runs as root, so the default root-only mode is enough. Edit
+  # with: ageGen secrets/tubearchivist.age
+  age.secrets.tubearchivist.file = ../secrets/tubearchivist.age;
+
   # Runtime
   virtualisation.podman = {
     enable = true;
@@ -30,12 +35,12 @@
   virtualisation.oci-containers.containers."archivist-es" = {
     image = "docker.io/bbilly1/tubearchivist-es:9.5.5";
     environment = {
-      "ELASTIC_PASSWORD" = "verysecret";
       "ES_JAVA_OPTS" = "-Xms1g -Xmx1g";
       "discovery.type" = "single-node";
       "path.repo" = "/usr/share/elasticsearch/data/snapshot";
       "xpack.security.enabled" = "true";
     };
+    environmentFiles = [ config.age.secrets.tubearchivist.path ];
     volumes = [
       "tubearchivist_es:/usr/share/elasticsearch/data:rw"
     ];
@@ -100,14 +105,13 @@
   virtualisation.oci-containers.containers."tubearchivist" = {
     image = "docker.io/bbilly1/tubearchivist:v0.6.0";
     environment = {
-      "ELASTIC_PASSWORD" = "verysecret";
       "ES_URL" = "http://archivist-es:9200";
       "REDIS_CON" = "redis://archivist-redis:6379";
       "TA_HOST" = "https://tube.shlambert.top";
-      "TA_PASSWORD" = "verysecret";
       "TA_USERNAME" = "tubearchivist";
       "TZ" = "Europe/Copenhagen";
     };
+    environmentFiles = [ config.age.secrets.tubearchivist.path ];
     volumes = [
       "/mnt/storage/data/media/youtube:/youtube:rw"
       "tubearchivist_cache:/cache:rw"
