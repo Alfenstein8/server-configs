@@ -39,7 +39,10 @@ in
       "public" = {
         "path" = "/mnt/storage/data/Shares/Public";
         "browseable" = "yes";
-        "read only" = "no";
+        # Guests may read; writing takes a Samba login. Writes still land as
+        # alfred (force user below), so ownership stays uniform.
+        "read only" = "yes";
+        "write list" = "@samba-users";
         "guest ok" = "yes";
         "create mask" = "0644";
         "directory mask" = "0755";

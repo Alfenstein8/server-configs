@@ -8,8 +8,10 @@ in
     volumes = [
       "/mnt/appdata/watcharr:/data:rw"
     ];
+    # Loopback only, as in ./sonarr.nix: podman's DNAT skips the NixOS firewall,
+    # so a plain "3080:3080" was open to the whole LAN, around Caddy.
     ports = [
-      "${toString port}:${toString port}/tcp"
+      "127.0.0.1:${toString port}:${toString port}/tcp"
     ];
     log-driver = "journald";
     extraOptions = [
