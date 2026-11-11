@@ -39,6 +39,7 @@ let
   dataDir = "/mnt/storage/data/romm";
   stateDir = "/var/lib/romm";
   network = "romm";
+  rommUid = "1000";
 
   # Inside /mnt/storage/data, so the nightly snapshot carries it; next to the
   # PostgreSQL dump backup.nix writes. A literal there too.
@@ -135,13 +136,18 @@ in
     extraOptions = [ "--network=${network}" ];
   };
 
+  # The container runs as root, but its nginx serves ROMs, saves and covers as
+  # the image's `romm` user, uid 1000, so it must be able to read them. With
+  # root-only folders the scan (root) worked while every download failed with
+  # "Permission denied". A numeric uid, because it is the image's user, not
+  # one of ours.
   systemd.tmpfiles.rules = [
-    "d ${dataDir} 0750 root root -"
-    "d ${dataDir}/library 0750 root root -"
-    "d ${dataDir}/assets 0750 root root -"
-    "d ${dataDir}/config 0750 root root -"
-    "d ${stateDir} 0750 root root -"
-    "d ${stateDir}/resources 0750 root root -"
+    "d ${dataDir} 0750 ${rommUid} ${rommUid} -"
+    "d ${dataDir}/library 0750 ${rommUid} ${rommUid} -"
+    "d ${dataDir}/assets 0750 ${rommUid} ${rommUid} -"
+    "d ${dataDir}/config 0750 ${rommUid} ${rommUid} -"
+    "d ${stateDir} 0755 root root -"
+    "d ${stateDir}/resources 0750 ${rommUid} ${rommUid} -"
     "d ${stateDir}/redis 0750 root root -"
     # MariaDB's entrypoint chowns this to its own mysql user on first start.
     "d ${stateDir}/mysql 0750 root root -"
