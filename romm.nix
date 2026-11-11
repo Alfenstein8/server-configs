@@ -29,7 +29,7 @@
 # OIDC_CLAIM_ROLES set, RomM rejects every user whose groups match none of the
 # mapped roles.
 #
-# Metadata: Hasheous needs no account. IGDB, ScreenScraper, RetroAchievements and
+# Metadata: Hasheous, LaunchBox, Flashpoint and Steam need no account. IGDB, ScreenScraper, RetroAchievements and
 # SteamGridDB need keys; add them to secrets/romm.age as IGDB_CLIENT_ID=...,
 # IGDB_CLIENT_SECRET=..., SCREENSCRAPER_USER=..., SCREENSCRAPER_PASSWORD=...,
 # RETROACHIEVEMENTS_API_KEY=..., STEAMGRIDDB_API_KEY=... and restart podman-romm.
@@ -112,7 +112,15 @@ in
       DB_NAME = "romm";
       DB_USER = "romm";
 
+      # Metadata sources that need no account. LaunchBox matches by exact
+      # filename against its own index, which the scheduled update downloads.
+      # Flashpoint only covers Flash and browser games, Steam only the
+      # Windows, Linux and macOS platforms.
       HASHEOUS_API_ENABLED = "true";
+      LAUNCHBOX_API_ENABLED = "true";
+      ENABLE_SCHEDULED_UPDATE_LAUNCHBOX_METADATA = "true";
+      FLASHPOINT_API_ENABLED = "true";
+      STEAM_API_ENABLED = "true";
 
       OIDC_ENABLED = "true";
       OIDC_PROVIDER = "authelia";
