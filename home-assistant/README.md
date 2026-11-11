@@ -1,10 +1,11 @@
 # Home Assistant
 
 `ha.shlambert.top`. Runs the Ledvance WiFi plug over the LAN rather than through
-Tuya's cloud, reads the household's own electricity price from Energi Fyn, and
-switches the plug on only during the cheapest hours of the day.
+Tuya's cloud, reads the household's own electricity price from Energi Fyn (with
+Energi Data Service as the fallback), and switches the plug on only during the
+cheapest hours of the day.
 
-Three moving parts, each set up once through the web UI, because none of them
+Four moving parts, each set up once through the web UI, because none of them
 can be declared: they all need a credential or an id that only exists after the
 fact. What *is* declarative — the integrations themselves, the helpers, the
 template and the automation — lives in [`default.nix`](default.nix).
@@ -13,6 +14,10 @@ template and the automation — lives in [`default.nix`](default.nix).
 Energi Fyn API ──▶ sensor.<address>_current_price
                       │  attribute price_forecast: today, hour by hour,
                       │  spot + transport tariff
+                      │
+Energinet API ───▶ sensor.energi_data_service       (used only while the
+                      │  attribute raw_today: same     Energi Fyn sensor
+                      │  thing, tariff added           has no forecast)
                       ▼
             binary_sensor.cheap_electricity_now
                       │  on during the N cheapest hours
@@ -34,7 +39,7 @@ sudo nixos-rebuild switch --flake .#homeserver
 ```
 
 The first build is a long one: it compiles Home Assistant's dependency set plus
-the two custom components.
+the custom components.
 
 State lives in `/mnt/storage/data/home-assistant`, so restic's `storagebox` job
 picks it up — which matters, because the plug's local key and the Energi Fyn
@@ -148,6 +153,41 @@ Per meter it creates:
 For the energy dashboard: *Settings → Dashboards → Energy → Electricity grid →
 Add consumption*, and pick the `_electricity` sensor.
 
+### When the token dies
+
+The refresh token does get revoked — the log then says `Token refresh failed:
+400`, the price sensors go unavailable, and Grafana's *Electricity prices
+unavailable* alert fires within the hour. Energi Data Service (below) keeps the
+plug scheduling meanwhile, so this can wait for a convenient moment.
+
+The integration has no re-authenticate flow, so: *Settings → Devices & services
+→ Energi Fyn → ⋮ → Delete*, then *Add entry* with a fresh refresh token from
+the steps above. The sensors come back under the same entity ids. Then **close
+the portal tab without logging out**: the integration and the browser share
+one login session, and logging out ends it for both.
+
+## 3b. Energi Data Service
+
+The fallback price source: Energinet's public day-ahead prices, with the grid
+company's tariff added, and no account to log in to. *Settings → Devices &
+services → Add integration → **Energi Data Service***:
+
+1. **Country** — Denmark.
+2. **Price area** — `DK2`. The addresses are on Zealand, east of the Great
+   Belt; Energi Fyn's name notwithstanding, `DK1` is the wrong area.
+3. **Show price as an hourly average** — leave it **on**. The template in
+   `default.nix` expects one price an hour; 15-minute prices would make it pick
+   quarter-hours as if they were hours.
+4. VAT, decimals, cent and kWh/MWh can be anything: none of them change which
+   hour is cheapest. Leave the additional-costs template empty.
+5. **AI forecasts from Carnot** — off. **Automatically fetch tariff data** —
+   **on**, and pick the **grid company** (*net operator*): the one named on the
+   electricity bill as *netselskab*, not Energi Fyn. Without the tariff it ranks
+   on bare spot price, which regularly picks the wrong hours.
+
+Check it once against Energi Fyn while both work: the hours in its sensor's
+`raw_today` and in Energi Fyn's `price_forecast` (`total`) should rank the same.
+
 ## 4. Switching the plug on the cheap hours
 
 Nothing needs to be built — `default.nix` declares all of it — but it starts
@@ -174,21 +214,20 @@ Worth knowing:
   taxes and VAT are left out on purpose: a flat addition per kWh and a
   percentage cannot change which hour is cheapest.
 - **Today only.** Tomorrow's prices are published in the afternoon, but the
-  integration asks for today's date, so the window never crosses midnight. Each
+  template reads only today's, so the window never crosses midnight. Each
   day is scheduled on its own.
 - **The cheap hours are not contiguous.** For a load that has to run in one
   unbroken stretch, this is the wrong shape and wants a "cheapest N-hour block"
   template instead.
 - **Check it before trusting it:** *Developer tools → States*,
   `binary_sensor.cheap_electricity_now`, and read `cheapest_hours` against the
-  `price_forecast` on the price sensor.
+  `price_forecast` on the Energi Fyn price sensor.
 
-## If the Energi Fyn API stops answering
+## If both price sources stop answering
 
-It is an unofficial integration against an undocumented API, so plan for it. The
-core **Nord Pool** integration is already in the package for that reason — add
-it from *Settings → Devices & services*, area `DK1` (Funen is west of the Great
-Belt), currency `DKK`, no rebuild needed.
+Energi Fyn failing is covered by Energi Data Service. If that fails too, the core
+**Nord Pool** integration is already in the package — add it from *Settings →
+Devices & services*, area `DK2`, currency `DKK`, no rebuild needed.
 
 It is not a drop-in: Nord Pool serves bare spot prices, without the transport
 tariff, and exposes the day's hours through the `nordpool.get_prices_for_date`
@@ -209,6 +248,14 @@ nix run nixpkgs#nix-prefetch-github -- LovelessCodes energi_fyn --rev <commit>
 Worth reading the diff first. It is a young integration against an API nobody
 published, and `price_forecast` — the attribute everything here hangs off — is
 not a stable interface.
+
+## Bumping Energi Data Service
+
+[`energidataservice/default.nix`](energidataservice/default.nix) pins a release
+tag. Change `version`, let the rebuild tell you the hash it wanted, and compare
+the new `manifest.json`'s `requirements` with the two dependency files next to
+it — neither library is in nixpkgs, so a version bump there means a new wheel
+hash too.
 
 `tuya_local` needs none of this; it comes from nixpkgs and follows the flake
 lock.
