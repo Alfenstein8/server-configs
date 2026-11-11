@@ -31,6 +31,16 @@ let
     }
   ];
 
+  # Start typing anywhere on the page to filter the tiles by name or
+  # description; Enter opens the top match. With no match it offers a
+  # DuckDuckGo search. No suggestions: those would send every keystroke from
+  # the server to DuckDuckGo.
+  quicklaunch = {
+    searchDescriptions = true;
+    provider = "duckduckgo";
+    showSearchSuggestions = false;
+  };
+
   # homepage copies its skeleton into a config directory that lacks a file,
   # and /etc is read-only, so every file it looks for has to exist.
   homeFiles = {
@@ -38,6 +48,15 @@ let
     "widgets.yaml" = homeWidgets;
     "settings.yaml" = {
       title = "shlambert";
+      inherit quicklaunch;
+      # Served by Caddy, below: homepage only serves images from its own
+      # public/ directory, which is in the read-only store.
+      background = {
+        image = "/background.jpg";
+        blur = "sm";
+        brightness = 60;
+      };
+      cardBlur = "sm";
     };
     "bookmarks.yaml" = [ ];
     "docker.yaml" = { };
@@ -56,7 +75,10 @@ in
     allowedHosts = config.shlam.services.admin.host;
     # Widget credentials -- see the homepage entry in ./secrets.nix.
     environmentFiles = [ config.age.secrets.homepage.path ];
-    settings.title = "shlambert admin";
+    settings = {
+      title = "shlambert admin";
+      inherit quicklaunch;
+    };
 
     # The info bar along the top. The unit is ProtectSystem=strict, which makes
     # the filesystem read-only but leaves it visible, so statfs on the pool
@@ -128,5 +150,15 @@ in
     port = adminPort;
     sso.forward = true;
   };
-  shlam.services.home.port = homePort;
+  shlam.services.home = {
+    port = homePort;
+    # handle sorts before reverse_proxy, so this path never reaches homepage.
+    # Strip EXIF before replacing the photo: phone pictures carry GPS.
+    extraConfig = ''
+      handle /background.jpg {
+        root * ${./homepage}
+        file_server
+      }
+    '';
+  };
 }
