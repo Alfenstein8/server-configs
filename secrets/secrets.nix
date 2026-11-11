@@ -51,4 +51,8 @@ in
   "hyggr-smtp-user.age".publicKeys = [ homeserver ];
   # TubeArchivist (tubearchivist/docker-compose.nix)
   "tubearchivist.age".publicKeys = [ homeserver ];
+  # RomM (romm.nix)
+  "romm.age".publicKeys = [ homeserver ];
+  "romm-db.age".publicKeys = [ homeserver ];
+  "authelia-romm-digest.age".publicKeys = [ homeserver ];
 }

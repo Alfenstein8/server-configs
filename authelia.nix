@@ -100,6 +100,8 @@ in
     authelia-immich-digest = ownedSecret "authelia-immich-digest";
     # Forgejo's; the plaintext is forgejo-oidc.age (see forgejo.nix).
     authelia-forgejo-digest = ownedSecret "authelia-forgejo-digest";
+    # RomM's; the plaintext is OIDC_CLIENT_SECRET in romm.age (see romm.nix).
+    authelia-romm-digest = ownedSecret "authelia-romm-digest";
   }
   // lib.optionalAttrs smtpReady {
     authelia-smtp-user = ownedSecret "authelia-smtp-user";
@@ -214,6 +216,15 @@ in
         "preferred_username"
       ];
 
+      # RomM matches a login to its account by email, which since 4.39 is not
+      # in the ID token by default either. RomM's Authelia guide asks for these.
+      identity_providers.oidc.claims_policies.romm.id_token = [
+        "email"
+        "email_verified"
+        "name"
+        "preferred_username"
+      ];
+
       # A client's authorization_policy is one of these, or plain one_factor /
       # two_factor -- which let in anyone with an account. Headplane can hand
       # out pre-auth keys for the whole tailnet, and Grafana shows everything
@@ -288,6 +299,28 @@ in
           require_pkce = true;
           pkce_challenge_method = "S256";
           redirect_uris = [ "${config.shlam.services.headplane.url}/admin/oidc/callback" ];
+          scopes = [
+            "openid"
+            "profile"
+            "email"
+          ];
+          response_types = [ "code" ];
+          grant_types = [ "authorization_code" ];
+          userinfo_signed_response_alg = "none";
+          token_endpoint_auth_method = "client_secret_basic";
+        }
+        {
+          # Shared, so plain two_factor. A first login links to the RomM account
+          # with the same email, or creates an ordinary user (see romm.nix).
+          client_id = "romm";
+          client_name = "RomM";
+          claims_policy = "romm";
+          client_secret = secretRef "authelia-romm-digest";
+          authorization_policy = "two_factor";
+          # RomM sends a PKCE challenge on every request.
+          require_pkce = true;
+          pkce_challenge_method = "S256";
+          redirect_uris = [ "${config.shlam.services.romm.url}/api/oauth/openid" ];
           scopes = [
             "openid"
             "profile"

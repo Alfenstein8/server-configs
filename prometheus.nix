@@ -18,6 +18,8 @@ let
     "prowlarr"
     "qbittorrent"
     "radarr"
+    "romm"
+    "romm-db"
     "sonarr"
     "tubearchivist"
     "watcharr"
