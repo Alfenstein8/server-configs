@@ -51,12 +51,14 @@ let
       inherit quicklaunch;
       # Served by Caddy, below: homepage only serves images from its own
       # public/ directory, which is in the read-only store.
+      # brightness and saturate are Tailwind steps; anything else (60, say) is
+      # silently ignored: 0, 50, 75, 90, 95, 100, 105, 110, 125, 150, 200.
       background = {
         image = "/background.jpg";
-        blur = "sm";
-        brightness = 60;
+        blur = "md";
+        brightness = 50;
       };
-      cardBlur = "sm";
+      cardBlur = "md";
     };
     "bookmarks.yaml" = [ ];
     "docker.yaml" = { };
@@ -113,7 +115,16 @@ in
       name: value: lib.nameValuePair "homepage-home/${name}" { source = yaml.generate name value; }
     ) homeFiles
     // {
-      "homepage-home/custom.css".text = "";
+      # The cards are nearly transparent by default, which over a bright photo
+      # leaves light text on light grass.
+      "homepage-home/custom.css".text = ''
+        .service-card {
+          background-color: rgb(0 0 0 / 0.45);
+        }
+        .service-card, .service-group-name, #information-widgets {
+          text-shadow: 0 1px 3px rgb(0 0 0 / 0.8);
+        }
+      '';
       "homepage-home/custom.js".text = "";
     };
 
@@ -141,7 +152,7 @@ in
         ProcSubset = "pid";
       };
     restartTriggers = map (n: config.environment.etc."homepage-home/${n}".source) (
-      builtins.attrNames homeFiles
+      builtins.attrNames homeFiles ++ [ "custom.css" ]
     );
   };
 
