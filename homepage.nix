@@ -49,6 +49,9 @@ let
     "settings.yaml" = {
       title = "shlambert";
       inherit quicklaunch;
+      # Light mode's dark text doesn't read over the photo. A fixed theme also
+      # overrides a mode the browser saved earlier and hides the toggle.
+      theme = "dark";
       # Served by Caddy, below: homepage only serves images from its own
       # public/ directory, which is in the read-only store.
       # brightness and saturate are Tailwind steps; anything else (60, say) is
@@ -116,21 +119,13 @@ in
     ) homeFiles
     // {
       # The cards are nearly transparent by default, which over a bright photo
-      # leaves light text on light grass. Homepage puts the theme on <html> as
-      # .dark or .light, and light mode uses dark text, so each theme gets a
-      # backing and shadow that contrast with its own text colour.
+      # leaves light text on light grass. Dark theme only (settings.yaml).
       "homepage-home/custom.css".text = ''
-        html.dark .service-card {
+        .service-card {
           background-color: rgb(0 0 0 / 0.45);
         }
-        html.dark :is(.service-card, .service-group-name, #information-widgets) {
+        .service-card, .service-group-name, #information-widgets {
           text-shadow: 0 1px 3px rgb(0 0 0 / 0.8);
-        }
-        html.light .service-card {
-          background-color: rgb(255 255 255 / 0.6);
-        }
-        html.light :is(.service-card, .service-group-name, #information-widgets) {
-          text-shadow: 0 0 4px rgb(255 255 255 / 0.9);
         }
       '';
       "homepage-home/custom.js".text = "";
