@@ -394,18 +394,18 @@ in
               }
               {
                 # The Energi Fyn integration (home-assistant/) logs one line
-                # and goes quiet when its refresh token is rejected; the price
-                # sensors turn unavailable and the plug scheduler silently
-                # stops. It has no reauth flow, so the fix is deleting and
-                # re-adding the integration. Home Assistant itself being down
-                # is "Scrape target down"'s job.
+                # and goes quiet when its refresh token is rejected, and the
+                # price sensors turn unavailable. The plug scheduler carries on
+                # on Energi Data Service prices, so this is not urgent. The fix
+                # is in home-assistant/README.md, "When the token dies". Home
+                # Assistant itself being down is "Scrape target down"'s job.
                 uid = "electricity-prices-unavailable";
                 title = "Electricity prices unavailable";
                 expr = ''homeassistant_entity_available{entity=~"sensor.*_current_price"}'';
                 op = "lt";
                 threshold = 1;
                 for = "1h";
-                summary = "{{ .Labels.entity }} is unavailable -- the cheap-hours plug is not scheduling. Check the Energi Fyn integration in Home Assistant";
+                summary = "{{ .Labels.entity }} is unavailable -- Energi Fyn's token has probably died; the plug is on the Energi Data Service fallback. See home-assistant/README.md";
               }
             ]
             ++ map lokiRule [

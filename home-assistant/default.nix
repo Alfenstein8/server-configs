@@ -26,25 +26,51 @@ let
   # flake lock currently sits on the older one.
   haPython = pkgs.home-assistant.python3Packages or pkgs.home-assistant.python.pkgs;
   energi-fyn = haPython.callPackage ./energi-fyn.nix { };
+  energidataservice = haPython.callPackage ./energidataservice { };
 
-  # The Energi Fyn price sensor is `sensor.<address>_current_price`, and the
-  # address is whatever is on the account -- so it is looked up rather than
-  # written down. An empty result (integration not configured yet) leaves the
-  # templates below at "false" instead of erroring.
-  priceEntity = ''
-    {% set price = integration_entities('energi_fyn')
+  # Today's prices as `forecast`, a list of {hour, price} with hour the local
+  # hour of day (0-23) and price what ranks it: spot price plus the grid
+  # company's time-of-day tariff. Taxes, VAT and the supplier's markup are flat
+  # per kWh or a percentage, so they cannot change which hour is cheapest and
+  # it does not matter whether a source includes them.
+  #
+  # Energi Fyn first: it is the household's own price, so nothing about it can
+  # be configured wrong. Its `price_forecast` is [{hour, price, tarifPrice,
+  # total}], `total` being spot + tariff. But it runs on a token borrowed from
+  # the browser, and when that dies the sensor goes unavailable.
+  #
+  # Energi Data Service is then the fallback: Energinet's open API, no login.
+  # Its `raw_today` is [{hour: <start time>, price}] with the tariff already
+  # added -- provided its options have hourly resolution and "automatically
+  # fetch tariff data" on, with the right grid company (see ./README.md).
+  #
+  # Neither one populated leaves `forecast` empty, which the templates below
+  # read as "false" instead of erroring.
+  prices = ''
+    {% set rows = namespace(list=[]) %}
+    {% set fyn = integration_entities('energi_fyn')
          | select('search', '_current_price$') | list | first | default("") %}
-    {% set forecast = state_attr(price, 'price_forecast') if price else none %}
+    {% for p in (state_attr(fyn, 'price_forecast') if fyn else none) or [] %}
+      {% set rows.list = rows.list
+           + [{'hour': (p.hour | as_datetime).hour, 'price': p.total | float}] %}
+    {% endfor %}
+    {% if not rows.list %}
+      {% set eds = expand(integration_entities('energidataservice'))
+           | selectattr('attributes.raw_today', 'defined')
+           | selectattr('attributes.raw_today')
+           | map(attribute='attributes.raw_today') | first | default([]) %}
+      {% for p in eds %}
+        {% set rows.list = rows.list
+             + [{'hour': (p.hour | as_datetime | as_local).hour, 'price': p.price | float}] %}
+      {% endfor %}
+    {% endif %}
+    {% set forecast = rows.list %}
     {% set wanted = states('${hours}') | int(0) %}
   '';
 
-  # price_forecast is today's hourly list: {hour, price, tarifPrice, total}.
-  # `total` is spot + transport tariff, which is the number that actually
-  # decides when running the plug is cheap -- the tariff is time-differentiated
-  # and large enough to move the ranking away from bare spot price.
+  # `unique` because the day the clocks go back has two 02:00 rows.
   cheapestHours = ''
-    (forecast | sort(attribute='total'))[:wanted]
-      | map(attribute='hour') | map('as_datetime') | map(attribute='hour') | list
+    (forecast | sort(attribute='price'))[:wanted] | map(attribute='hour') | unique | list
   '';
 in
 {
@@ -63,9 +89,9 @@ in
       "default_config"
       "met"
 
-      # Not configured anywhere -- carried so a Nord Pool entry (area DK1) can
-      # be added from the UI without a rebuild, if Energi Fyn's undocumented
-      # API stops answering. See ./README.md.
+      # Not configured anywhere -- carried so a Nord Pool entry (area DK2: the
+      # addresses are on Zealand) can be added from the UI without a rebuild,
+      # if both price integrations below fail. See ./README.md.
       "nordpool"
 
       # /api/prometheus, configured below.
@@ -76,7 +102,10 @@ in
       # Local control of the Ledvance plug. It speaks Tuya firmware, and this
       # talks to it over the LAN instead of through Tuya's cloud.
       pkgs.home-assistant-custom-components.tuya_local
+      # Prices: Energi Fyn, with Energi Data Service as the fallback for when
+      # Energi Fyn's token dies. See `prices` above.
       energi-fyn
+      energidataservice
     ];
 
     config = {
@@ -204,7 +233,7 @@ in
               unique_id = "cheap_electricity_now";
               icon = "mdi:cash-clock";
               state = ''
-                ${priceEntity}
+                ${prices}
                 {% if forecast and wanted > 0 %}
                   {{ now().hour in (${cheapestHours}) }}
                 {% else %}
@@ -217,7 +246,7 @@ in
               # entity, nothing to watch) left it blank until a reload.
               attributes.cheapest_hours = ''
                 {%- set _minute = now().minute %}
-                ${priceEntity}
+                ${prices}
                 {% if forecast and wanted > 0 %}
                   {{ ${cheapestHours} | sort | map('string') | join(', ') }}
                 {% endif %}
