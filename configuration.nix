@@ -67,6 +67,7 @@
     ./wishlist.nix # Gift wish lists
     ./mushebrawl.nix # Online play for MusheBrawl (signaling server)
     ./home-assistant # Home automation -- see home-assistant/README.md
+    ./romm.nix # Retro game library and in-browser emulation
   ];
 
   # Bootloader.
