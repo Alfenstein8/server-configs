@@ -211,7 +211,12 @@ in
                   false
                 {% endif %}
               '';
+              # now() only to be re-rendered every minute like the state is.
+              # Without it this tracks just the entities its last render
+              # read, so a render while the integration was gone (no price
+              # entity, nothing to watch) left it blank until a reload.
               attributes.cheapest_hours = ''
+                {%- set _minute = now().minute %}
                 ${priceEntity}
                 {% if forecast and wanted > 0 %}
                   {{ ${cheapestHours} | sort | map('string') | join(', ') }}
