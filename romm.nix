@@ -149,8 +149,11 @@ in
     "d ${stateDir} 0755 root root -"
     "d ${stateDir}/resources 0750 ${rommUid} ${rommUid} -"
     "d ${stateDir}/redis 0750 root root -"
-    # MariaDB's entrypoint chowns this to its own mysql user on first start.
-    "d ${stateDir}/mysql 0750 root root -"
+    # MariaDB's mysql user, uid 999 in the image. Not root: tmpfiles applies
+    # these owners again on every switch, and root here took the data files
+    # away from the running database ("InnoDB: Operating system error number
+    # 13"). The entrypoint only chowns them back on the next container start.
+    "d ${stateDir}/mysql 0750 999 999 -"
   ];
 
   # The database as SQL, written just before the nightly restic run picks up
