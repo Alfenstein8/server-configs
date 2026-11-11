@@ -116,13 +116,21 @@ in
     ) homeFiles
     // {
       # The cards are nearly transparent by default, which over a bright photo
-      # leaves light text on light grass.
+      # leaves light text on light grass. Homepage puts the theme on <html> as
+      # .dark or .light, and light mode uses dark text, so each theme gets a
+      # backing and shadow that contrast with its own text colour.
       "homepage-home/custom.css".text = ''
-        .service-card {
+        html.dark .service-card {
           background-color: rgb(0 0 0 / 0.45);
         }
-        .service-card, .service-group-name, #information-widgets {
+        html.dark :is(.service-card, .service-group-name, #information-widgets) {
           text-shadow: 0 1px 3px rgb(0 0 0 / 0.8);
+        }
+        html.light .service-card {
+          background-color: rgb(255 255 255 / 0.6);
+        }
+        html.light :is(.service-card, .service-group-name, #information-widgets) {
+          text-shadow: 0 0 4px rgb(255 255 255 / 0.9);
         }
       '';
       "homepage-home/custom.js".text = "";
