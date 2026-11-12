@@ -11,6 +11,9 @@
   users.groups.alfred = { };
   users.users.alfred = {
     isNormalUser = true;
+    # What it already was, pinned: the roms Samba share in romm.nix writes as
+    # alfred for RomM's uid 1000 user.
+    uid = 1000;
     description = "Alfred";
     extraGroups = [
       "networkmanager"
