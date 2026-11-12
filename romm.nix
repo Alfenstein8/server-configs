@@ -29,6 +29,9 @@
 # OIDC_CLAIM_ROLES set, RomM rejects every user whose groups match none of the
 # mapped roles.
 #
+# Adding ROMs: copy them to \\shlamb\roms (smb://shlamb/roms), into
+# roms/<platform>/, then run a scan in RomM. See the share below.
+#
 # Metadata: Hasheous, LaunchBox, Flashpoint and Steam need no account. IGDB, ScreenScraper, RetroAchievements and
 # SteamGridDB need keys; add them to secrets/romm.age as IGDB_CLIENT_ID=...,
 # IGDB_CLIENT_SECRET=..., SCREENSCRAPER_USER=..., SCREENSCRAPER_PASSWORD=...,
@@ -162,6 +165,28 @@ in
     # away from the running database ("InnoDB: Operating system error number
     # 13"). The entrypoint only chowns them back on the next container start.
     "d ${stateDir}/mysql 0750 999 999 -"
+  ];
+
+  # \\shlamb\roms: the library over Samba, for adding ROMs from the LAN or
+  # the tailnet. Writes land as alfred, because alfred is uid 1000 -- the
+  # image's `romm` user that has to read them (checked on the server
+  # 2026-11-12; the assertion below holds users.nix to it). Only alfred may
+  # connect: the share is read-write, so anyone let in could delete ROMs too.
+  services.samba.settings.roms = {
+    path = "${dataDir}/library";
+    browseable = "yes";
+    "read only" = "no";
+    "guest ok" = "no";
+    "valid users" = "alfred";
+    "create mask" = "0640";
+    "directory mask" = "0750";
+    "force user" = "alfred";
+  };
+  assertions = [
+    {
+      assertion = toString config.users.users.alfred.uid == rommUid;
+      message = "romm.nix: the roms Samba share writes as alfred, so alfred must be uid ${rommUid}, RomM's own user";
+    }
   ];
 
   # The database as SQL, written just before the nightly restic run picks up
