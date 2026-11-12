@@ -37,6 +37,22 @@ in
     ];
   };
 
+  # \\shlamb\downloads: finished torrents, for copying off to a PC from the
+  # LAN or the tailnet. Read-only: qBittorrent is still seeding these and
+  # qbit-manage deletes them on its own schedule, so renaming or deleting one
+  # from here would break both. Only alfred may connect, as for the games and
+  # roms shares. Reads go as alfred, which is qBittorrent's PUID and so owns
+  # every file it writes. Here rather than in samba.nix, so commenting this
+  # module out takes the share with it.
+  services.samba.settings.downloads = {
+    path = "/mnt/storage/data/media/downloads/qbittorrent/completed";
+    browseable = "yes";
+    "read only" = "yes";
+    "guest ok" = "no";
+    "valid users" = "alfred";
+    "force user" = "alfred";
+  };
+
   shlam.services.qbittorrent = {
     subdomain = "torrent";
     inherit port;
