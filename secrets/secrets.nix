@@ -55,4 +55,8 @@ in
   "romm.age".publicKeys = [ homeserver ];
   "romm-db.age".publicKeys = [ homeserver ];
   "authelia-romm-digest.age".publicKeys = [ homeserver ];
+
+  # GameVault (gamevault.nix)
+  "gamevault.age".publicKeys = [ homeserver ];
+  "authelia-gamevault-digest.age".publicKeys = [ homeserver ];
 }

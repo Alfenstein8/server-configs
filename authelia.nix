@@ -102,6 +102,9 @@ in
     authelia-forgejo-digest = ownedSecret "authelia-forgejo-digest";
     # RomM's; the plaintext is OIDC_CLIENT_SECRET in romm.age (see romm.nix).
     authelia-romm-digest = ownedSecret "authelia-romm-digest";
+    # GameVault's; the plaintext is AUTH_OAUTH2_CLIENT_SECRET in gamevault.age
+    # (see gamevault.nix).
+    authelia-gamevault-digest = ownedSecret "authelia-gamevault-digest";
   }
   // lib.optionalAttrs smtpReady {
     authelia-smtp-user = ownedSecret "authelia-smtp-user";
@@ -225,6 +228,17 @@ in
         "preferred_username"
       ];
 
+      # GameVault builds its user from the ID token and the userinfo response,
+      # but an absent ID token claim still overrides the userinfo one with
+      # nothing: without preferred_username here every login would get a
+      # random GameVaultUser1234 name. So the token has to carry them itself.
+      identity_providers.oidc.claims_policies.gamevault.id_token = [
+        "email"
+        "email_verified"
+        "name"
+        "preferred_username"
+      ];
+
       # A client's authorization_policy is one of these, or plain one_factor /
       # two_factor -- which let in anyone with an account. Headplane can hand
       # out pre-auth keys for the whole tailnet, and Grafana shows everything
@@ -330,6 +344,29 @@ in
           grant_types = [ "authorization_code" ];
           userinfo_signed_response_alg = "none";
           token_endpoint_auth_method = "client_secret_basic";
+        }
+        {
+          # Shared, so plain two_factor. A first login links to the GameVault
+          # account with the same username or email, or creates an ordinary
+          # user (see gamevault.nix).
+          client_id = "gamevault";
+          client_name = "GameVault";
+          claims_policy = "gamevault";
+          client_secret = secretRef "authelia-gamevault-digest";
+          authorization_policy = "two_factor";
+          # GameVault's passport-oauth2 sends no PKCE challenge, and the client
+          # secret in the token request body rather than as Basic auth.
+          require_pkce = false;
+          redirect_uris = [ "${config.shlam.services.gamevault.url}/api/auth/oauth2/login" ];
+          scopes = [
+            "openid"
+            "profile"
+            "email"
+          ];
+          response_types = [ "code" ];
+          grant_types = [ "authorization_code" ];
+          userinfo_signed_response_alg = "none";
+          token_endpoint_auth_method = "client_secret_post";
         }
         {
           client_id = "grafana";
