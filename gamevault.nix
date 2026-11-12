@@ -32,6 +32,9 @@
 # itself stays on, but an SSO account has a random password, so to use it as a
 # way in while Authelia is down, set one under the profile's settings.
 #
+# Adding games: copy them to \\shlamb\games (smb://shlamb/games); see the share
+# below.
+#
 # Metadata: covers and descriptions come from IGDB, which needs a Twitch
 # developer app. Add METADATA_IGDB_CLIENT_ID=... and
 # METADATA_IGDB_CLIENT_SECRET=... to secrets/gamevault.age (the same pair RomM
@@ -145,6 +148,25 @@ in
   ];
 
   services.restic.backups.storagebox.exclude = [ "${dataDir}/files" ];
+
+  # \\shlamb\games: drop game archives into the library from the LAN or the
+  # tailnet. GameVault's file watcher picks them up on its own. Writes land as
+  # gamevault, which owns the folder, so the server can read and delete what
+  # comes in. Here rather than in samba.nix, so commenting this module out
+  # takes the share with it.
+  services.samba.settings.games = {
+    path = "${dataDir}/files";
+    browseable = "yes";
+    "read only" = "no";
+    "guest ok" = "no";
+    # Only alfred, as for the alfred share in samba.nix; anyone else in
+    # samba-users would also be able to delete games.
+    "valid users" = "alfred";
+    "create mask" = "0640";
+    "directory mask" = "0750";
+    "force user" = "gamevault";
+    "force group" = "gamevault";
+  };
 
   shlam.services.gamevault = {
     subdomain = "games";
