@@ -14,6 +14,7 @@ let
     "archivist-redis"
     "bazarr"
     "flaresolverr"
+    "gamevault"
     "gluetun"
     "prowlarr"
     "qbittorrent"
