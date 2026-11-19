@@ -10,7 +10,9 @@
     dataDir = "/mnt/storage/data/minecraft";
     servers.test = {
       enable = true;
-      package = pkgs.fabricServers.fabric-26_2;
+      # 26.x needs Java 25, but nix-minecraft's Fabric servers run the system
+      # default jre_headless (21) instead of the version Mojang asks for.
+      package = pkgs.fabricServers.fabric-26_2.override { jre_headless = pkgs.jdk25_headless; };
       serverProperties = {
         server-port = 43000;
         difficulty = 2;
