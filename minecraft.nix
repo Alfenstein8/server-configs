@@ -19,8 +19,11 @@
         gamemode = 0; # survival (0), creative (1), adventure (2), spectator (3)
         # Exposed to the internet: players must own a real Minecraft account
         # and be on the whitelist. Add them from the console:
-        #   sudo tmux -S /run/minecraft/test.sock attach   (Ctrl+b d to detach)
+        #   sudo -u minecraft tmux -S /run/minecraft/test.sock attach
         #   whitelist add <username>
+        # Detach with Ctrl+b then d: Ctrl+c stops the server. Attach as
+        # minecraft, not root, since a root-owned socket left behind blocks
+        # the service from restarting.
         online-mode = true;
         white-list = true;
         enforce-whitelist = true; # kicks online players removed from the list

@@ -131,6 +131,10 @@
   # Configure console keymap
   console.keyMap = "dk-latin1";
 
+  # Terminfo for every terminal (kitty included) for all users, so tools
+  # that switch user (sudo -u minecraft tmux ...) still know the terminal.
+  environment.enableAllTerminfo = true;
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
