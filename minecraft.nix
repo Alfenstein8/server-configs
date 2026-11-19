@@ -10,35 +10,37 @@
     dataDir = "/mnt/storage/data/minecraft";
     servers.test = {
       enable = true;
-      package = pkgs.fabricServers.fabric-1_21_11;
+      package = pkgs.fabricServers.fabric-26_2;
       serverProperties = {
         server-port = 43000;
         difficulty = 2;
         gamemode = 0; # survival (0), creative (1), adventure (2), spectator (3)
-        online-mode = false;
+        # Exposed to the internet: players must own a real Minecraft account
+        # and be on the whitelist. Add them from the console:
+        #   sudo tmux -S /run/minecraft/test.sock attach   (Ctrl+b d to detach)
+        #   whitelist add <username>
+        online-mode = true;
+        white-list = true;
+        enforce-whitelist = true; # kicks online players removed from the list
         max-players = 5;
         spawn-protection = 0;
         motd = "Shlambert Minecraft!";
         allow-cheats = true;
-        enable-rcon = true;
-        "rcon.password" = "login_NOW!";
-        "rcon.port" = 25575;
+        # No RCON: openFirewall would expose its port too. Use the tmux console.
+        enable-rcon = false;
       };
       symlinks = {
         mods = pkgs.linkFarmFromDrvs "mods" (
           builtins.attrValues {
             Lithium = pkgs.fetchurl {
-              url = "https://modrinth.com/mod/lithium/version/mc1.21.11-0.21.1-fabric";
-              sha256 = "sha256-u3WJp1c8W8iKckcm54FlJDpMitjDtTeOKvsMlaLAvc4=";
+              url = "https://cdn.modrinth.com/data/gvQqBUqZ/versions/f7vZ0VWU/lithium-fabric-0.25.3%2Bmc26.2.jar";
+              sha512 = "148b638f3c6229fbaf487120a2344a0af5e411a5aa6533d5db9d75da0a8c0d8304f63eb4cca13f4d03b2c9b4c23d559dd74c1d832422ef8a3087bd005e62a8bd";
             };
             FerriteCore = pkgs.fetchurl {
-              url = "https://cdn.modrinth.com/data/uXXizFIs/versions/eRLwt73x/ferritecore-8.0.3-fabric.jar";
-              sha256 = "sha256-yG6rrNvwY5ibLKgSyOk/VWuP7/HJ38B8rvodkKXHvzU=";
+              url = "https://cdn.modrinth.com/data/uXXizFIs/versions/d5ddUdiB/ferritecore-9.0.0-fabric.jar";
+              sha512 = "d81fa97e11784c19d42f89c2f433831d007603dd7193cee45fa177e4a6a9c52b384b198586e04a0f7f63cd996fed713322578bde9a8db57e1188854ae5cbe584";
             };
-            NoisiumForked = pkgs.fetchurl {
-              url = "https://cdn.modrinth.com/data/hasdd01q/versions/RHzCanhO/noisium-fabric-2.8.1%2Bmc1.21.11.jar";
-              sha256 = "sha256-Lt7/sGQtCRwwPdPuTvmXBy9b8NEDRtMHDVgvVBGyZLo=";
-            };
+            # Noisium has no 26.2 build yet.
           }
         );
       };
