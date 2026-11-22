@@ -51,6 +51,7 @@
     ./tubearchivist # Youtube
     # ./rustdesk.nix
     ./minecraft.nix
+    ./luanti.nix # Luanti (Minetest) server running Mineclonia
     # ./adguardhome.nix
     ./forgejo.nix
     ./adguardhome.nix
