@@ -38,7 +38,9 @@ in
       # new accounts can look around and chat but not build or dig. Let a
       # player in from in-game chat:
       #   /grant <name> interact
-      # `name` is the admin and gets every privilege. Log in as it right
+      # `name` is the admin and gets every privilege except `interact`:
+      # Mineclonia's shield mod sets give_to_admin = false on it, so the
+      # admin runs `/grant <admin> interact` once too. Log in as it right
       # after the first deploy, before anyone else claims the name.
       name = "alfred";
       default_privs = "shout";
