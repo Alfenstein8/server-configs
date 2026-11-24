@@ -14,8 +14,11 @@ let
 
   # Hosts on the router's port forward (shlam.services.<name>.publicPort, see
   # ../registry.nix): their public A records point at the WAN address too.
-  publicHosts = lib.mapAttrsToList (_: s: s.host) (
-    lib.filterAttrs (_: s: s.vhost && s.publicPort != null) config.shlam.services
+  # Their old-domain names too, while those are still answered.
+  publicHosts = lib.concatLists (
+    lib.mapAttrsToList (_: s: [ s.host ] ++ lib.optional (s.oldHost != null) s.oldHost) (
+      lib.filterAttrs (_: s: s.vhost && s.publicPort != null) config.shlam.services
+    )
   );
 in
 {
@@ -64,7 +67,7 @@ in
       # (adguardteam.github.io/HostlistsRegistry/assets/filters.json).
       #
       # Not Dandelion Sprout's Anti-Malware List (catalog 12): it blocks all of
-      # *.top bar a short denyallow, and that takes *.shlambert.top with it.
+      # *.top bar a short denyallow, and that takes the old domain with it.
       # Check any list added here for TLD-wide rules (||*.top^ and the like).
       filters = map (f: f // { enabled = true; }) [
         {
@@ -96,7 +99,7 @@ in
       # Split horizon for the control server, and for every host published
       # through the router's port forward.
       #
-      # *.shlambert.top resolves -- publicly, at the registrar -- to this box's
+      # The base domain's wildcard resolves -- publicly, at the registrar -- to this box's
       # LAN address. That is what makes every service work at home, and it is
       # also why nothing on this domain answers from the internet: an off-network
       # client is handed 192.168.0.188 and dials into its own LAN.
@@ -104,7 +107,7 @@ in
       # headscale is the one name that cannot live with that. A node has to
       # reach the control server *before* it has a tailnet to reach it through
       # (see ./headscale.nix, which keeps this host out of extra_records for
-      # exactly that reason), so headscale.shlambert.top needs a real public A
+      # exactly that reason), so headscale's host needs a real public A
       # record at the registrar pointing at the WAN address.
       #
       # That public record would then follow LAN clients home. server_url is
@@ -114,7 +117,7 @@ in
       # the LAN path on the LAN and leaves the public answer to the clients that
       # actually need it.
       #
-      # The public hosts (hyggr.shlambert.top, zehra.click) have the same problem,
+      # The public hosts (wishlist, zehra.click) have the same problem,
       # and the same answer: their real A records point at the WAN address, so a
       # phone on the Wi-Fi would be sent out and back in. Their :443 vhosts serve
       # the LAN directly.

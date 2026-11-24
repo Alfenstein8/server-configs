@@ -5,9 +5,9 @@
   ...
 }:
 # Two dashboards:
-#   admin.shlambert.top  every tile, with widgets; behind Authelia (admins).
+#   admin.<domain>       every tile, with widgets; behind Authelia (admins).
 #     The NixOS module's own instance.
-#   home.shlambert.top   only the tiles with dashboard.shared set, for anyone
+#   home.<domain>        only the tiles with dashboard.shared set, for anyone
 #     who uses the services; no widgets, no secrets. A second unit built from
 #     the module's, below.
 let

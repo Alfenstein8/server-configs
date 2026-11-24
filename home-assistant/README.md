@@ -1,6 +1,6 @@
 # Home Assistant
 
-`ha.shlambert.top`. Runs the Ledvance WiFi plug over the LAN rather than through
+`ha.zam.dk`. Runs the Ledvance WiFi plug over the LAN rather than through
 Tuya's cloud, reads the household's own electricity price from Energi Fyn (with
 Energi Data Service as the fallback), and switches the plug on only during the
 cheapest hours of the day.
@@ -53,7 +53,7 @@ rather than plain `automation:`.
 
 ## 1. First run
 
-Open <https://ha.shlambert.top> and create the owner account. Only the hostname
+Open <https://ha.zam.dk> and create the owner account. Only the hostname
 works: the LAN IP fails SNI, and AdGuard Home is what resolves the name at home.
 
 ## 2. The Ledvance plug

@@ -52,17 +52,17 @@ module**, never centrally — that way commenting the module out of
       order = 40;
       icon = "mealie.svg";
       description = "Recipes & Meal Planning";
-      shared = true;                          # also on home.shlambert.top
+      shared = true;                          # also on home.zam.dk     
     };
   };
 }
 ```
 
-That produces `https://menu.shlambert.top`, reverse-proxied to `localhost:8001`,
-served with the `*.shlambert.top` wildcard certificate, with `:80` redirecting to
+That produces `https://menu.zam.dk`, reverse-proxied to `localhost:8001`,
+served with the `*.zam.dk` wildcard certificate, with `:80` redirecting to
 `:443`, plus a tile on the dashboards. Every tile is on the admin dashboard
-(`admin.shlambert.top`, behind Authelia); `shared = true` also puts it, without
-its widget, on the one for everyone else (`home.shlambert.top`).
+(`admin.zam.dk`, behind Authelia); `shared = true` also puts it, without
+its widget, on the one for everyone else (`home.zam.dk`).
 
 Then add the module to `imports` in `configuration.nix`.
 
@@ -121,17 +121,28 @@ point a tile somewhere other than its own URL.
 
 ## TLS
 
-[`acme.nix`](acme.nix) obtains one wildcard certificate for `*.shlambert.top` over
-DNS-01 (Spaceship). Every virtual host uses it via `useACMEHost`, so Caddy performs
+[`acme.nix`](acme.nix) obtains one wildcard certificate for `*.zam.dk` over
+DNS-01 (Simply.com). Every virtual host uses it via `useACMEHost`, so Caddy performs
 no ACME of its own and `services.caddy.email` / `acmeCA` have no effect.
 
 Two consequences:
 
-- The wildcard covers **exactly one label**. `a.b.shlambert.top` would fail the TLS
+- The wildcard covers **exactly one label**. `a.b.zam.dk` would fail the TLS
   handshake at runtime, so the registry asserts against it at build time.
 - A DNS-01 failure degrades every host at once. Caddy still starts — a self-signed
   placeholder is always generated — but nothing will be trusted until
-  `acme-shlambert.top.service` succeeds.
+  `acme-zam.dk.service` succeeds.
+
+### The old domain
+
+The base domain was `shlambert.top` until zam.dk replaced it, and it is still
+served while everything moves over. Every service on the base domain also
+answers at `<subdomain>.shlambert.top` (`oldHost` in the registry), with a
+second wildcard certificate (Spaceship, as before). By default the old name
+redirects (308) to the new one. `oldHostMode = "serve"` answers there directly
+instead, for clients that can't follow a redirect: ntfy's phone app and
+MusheBrawl's WebSocket. Headscale and Hyggr haven't moved at all yet, because
+devices and Brevo are tied to their old names.
 
 Reaching the server by LAN IP fails SNI. Use the hostnames; AdGuard Home resolves
 them locally.
@@ -148,7 +159,7 @@ them locally.
   service's port, or is used both for HTTPS and for the HTTP redirect. Several
   hosts may share one (the router forwards WAN 443 to a single port): each must
   name it, so a public listener carries exactly the hosts that opted in
-  (`zehra.click` and `hyggr.shlambert.top` on 8443/8880).
+  (`zehra.click`, `hyggr.shlambert.top` and others on 8443/8880).
 
 ## Layout
 

@@ -2,8 +2,8 @@
 {
   # Cookieless, self-hosted web analytics for alfredmakne.dk.
   #
-  # Only the dashboard gets a vhost here, at stats.shlambert.top, which like every
-  # other *.shlambert.top host is LAN/tailnet only. Visitors never talk to this
+  # Only the dashboard gets a vhost here, at stats.<domain>, which like every
+  # other host on the base domain is LAN/tailnet only. Visitors never talk to this
   # host: the site's own Caddy block (services.portfolio-site, from the CV flake)
   # proxies just one path, alfredmakne.dk/stats/api/send, to Umami's /api/send on
   # localhost. The rest of Umami, its login and its API, stays off the internet.

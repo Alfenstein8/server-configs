@@ -1,4 +1,4 @@
-# Hyggr (https://hyggr.shlambert.top), formerly P7 Events: the module from Hyggr's own
+# Hyggr, formerly P7 Events: the module from Hyggr's own
 # repository (flake input `hyggr`) runs the API server, Synapse on PostgreSQL and the
 # site, and deploys each new release of Hyggr (once its Android APK is attached, so the
 # app and the server update together) into /nix/var/nix/profiles/hyggr (no rebuild
@@ -92,7 +92,7 @@ in
       port = 587;
       # Placeholder, replaced at start from hyggr-smtp-user.age (see the top).
       user = "from-hyggr-smtp-user.age";
-      # Brevo has hyggr.shlambert.top's SPF/DKIM records.
+      # Brevo has this host's SPF/DKIM records.
       from = "hyggr@hyggr.shlambert.top";
     };
     # Keys the Android app is signed with, for App Links: the release key (releases,
@@ -114,6 +114,10 @@ in
   };
 
   shlam.services.hyggr = {
+    # Still on the old domain: Brevo has its SPF/DKIM records and the app's
+    # App Links point here. Move it when those are redone for the new one.
+    host = "hyggr.${config.shlam.oldDomain}";
+    acmeHost = config.shlam.oldAcmeHost;
     # No port: the module's site (app, API, Synapse routes) is the whole vhost body.
     extraConfig = lib.mkIf ready config.services.hyggr.caddySite;
     vhost = ready;

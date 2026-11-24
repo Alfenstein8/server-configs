@@ -1,5 +1,5 @@
 # RomM (github.com/rommapp/romm): ROM library manager with in-browser
-# emulation (EmulatorJS), at emu.shlambert.top.
+# emulation (EmulatorJS), at emu.<domain>.
 #
 # Two containers on their own Podman network: RomM itself (it bundles its own
 # Valkey for background jobs) and MariaDB, the database RomM is built and tested

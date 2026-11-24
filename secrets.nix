@@ -1,6 +1,8 @@
 {
   age.secrets = {
     spaceship.file = ./secrets/spaceship.age;
+    # Simply.com's DNS API, for the base domain's certificate (see acme.nix).
+    simply.file = ./secrets/simply.age;
     restic.file = ./secrets/restic.age;
     backblaze.file = ./secrets/backblaze.age;
     immich.file = ./secrets/immich.age;

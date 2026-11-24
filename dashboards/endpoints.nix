@@ -6,7 +6,7 @@ let
   inherit (d) pos;
 
   # Days until the served certificate expires, one series per domain (every
-  # *.shlambert.top host serves the same wildcard).
+  # host on a domain serves the same wildcard).
   certDays = ''min by (domain) (label_replace((probe_ssl_earliest_cert_expiry - time()) / 86400, "domain", "$1", "instance", "https://[^.]+[.]([^:/]+).*"))'';
 
   upDown = {

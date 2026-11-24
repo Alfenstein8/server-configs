@@ -11,7 +11,7 @@
 #
 # The targets are every vhost in the registry (./registry.nix), so a new service
 # is probed as soon as it gets a URL. Probed from this box, they resolve as they
-# do on the LAN: *.shlambert.top is the LAN address, and headscale is pinned to
+# do on the LAN: the base domain's wildcard is the LAN address, and headscale is pinned to
 # loopback by headscale.nix.
 let
   port = config.services.prometheus.exporters.blackbox.port;

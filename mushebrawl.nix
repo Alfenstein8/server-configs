@@ -1,7 +1,9 @@
 # MusheBrawl signaling server (matchbox_server): introduces players to each
 # other over a WebSocket; the matches themselves run peer-to-peer, so this
 # carries almost no traffic. The game's default server is
-# wss://brawl.shlambert.top, so the host must stay reachable at that name.
+# wss://brawl.<old domain>, so the host must stay reachable at that name --
+# served there directly (oldHostMode below), since a WebSocket can't follow a
+# redirect to the new one.
 #
 # nixpkgs ships matchbox-server 0.11; the game is built against 0.14, so it's
 # built from crates.io here. To bump it, change the version and swap both
@@ -56,6 +58,7 @@ in
     # services/quantumsurvivors.nix).
     publicPort = 8443;
     publicHttpPort = 8880;
+    oldHostMode = "serve";
     dashboard = {
       title = "MusheBrawl";
       group = "Productivity & Utilities";

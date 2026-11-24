@@ -1,4 +1,4 @@
-# Single sign-on: Authelia at auth.shlambert.top, as an OpenID Connect provider
+# Single sign-on: Authelia at auth.<domain>, as an OpenID Connect provider
 # and as Caddy's forward_auth backend.
 #
 # forward_auth is for services with no login worth keeping: set
@@ -27,16 +27,16 @@
 # user or changing a password is `agenix -e secrets/authelia-users.age` and a
 # rebuild; Authelia reads the file only at startup (watch = false).
 #
-# Second factors (TOTP, passkeys) are registered at auth.shlambert.top after the
+# Second factors (TOTP, passkeys) are registered at auth.<domain> after the
 # first password login. Registering asks for a one-time code, which Authelia
-# emails from auth@shlambert.top through Brevo, the relay Hyggr uses. Two
+# emails from auth@<old domain> through Brevo, the relay Hyggr uses. Two
 # secrets, each holding just the value, from Brevo's SMTP & API page:
 #
 #   secrets/authelia-smtp-user.age      the SMTP login (same for the account)
 #   secrets/authelia-smtp-password.age  an SMTP key of its own, not Hyggr's
 #
-# Brevo only sends for verified domains, so shlambert.top has to be added there
-# (Senders, Domains) and its DKIM/DMARC records put in Spaceship's DNS. Until
+# Brevo only sends for verified domains, so the sender's has to be added there
+# (Senders, Domains) and its DKIM/DMARC records put in its DNS. Until
 # both .age files exist, the code is written to a file instead:
 #
 #   sudo cat /var/lib/authelia-main/notifications.txt
@@ -70,7 +70,7 @@ let
   # probes merely see the login redirect again; nobody is let in by it.
   lanIP = "192.168.0.188";
   # And its tailnet address, as in headscale.nix. The box is a tailnet node with
-  # MagicDNS, so its own requests for *.shlambert.top resolve to this and come
+  # MagicDNS, so its own requests for the base domain resolve to this and come
   # from it -- the blackbox probes included. With only lanIP in the rule they
   # never matched it: they got Authelia's 401, which blackbox counts as up, so
   # a dead backend behind forward_auth went unnoticed. Tailscale only lets a
@@ -180,7 +180,7 @@ in
 
       session.cookies = [
         {
-          domain = "shlambert.top";
+          domain = config.shlam.domain;
           authelia_url = config.shlam.services.auth.url;
         }
       ];
@@ -199,13 +199,15 @@ in
               address = "submission://smtp-relay.brevo.com:587";
               username = secretRef "authelia-smtp-user";
               password = secretRef "authelia-smtp-password";
-              sender = "Authelia <auth@shlambert.top>";
-              subject = "[shlambert.top] {title}";
+              # Still the old domain: Brevo only sends for verified domains,
+              # and the new base domain isn't one yet.
+              sender = "Authelia <auth@${config.shlam.oldDomain}>";
+              subject = "[${config.shlam.domain}] {title}";
             };
           }
         else
           { filesystem.filename = "${stateDir}/notifications.txt"; };
-      totp.issuer = "shlambert.top";
+      totp.issuer = config.shlam.domain;
 
       # Since 4.39 the ID token carries almost no claims; the rest are only at
       # the userinfo endpoint. Grafana evaluates role_attribute_path against the

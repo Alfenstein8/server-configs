@@ -1,7 +1,7 @@
 # ntfy (ntfy.sh): push notifications to the phone, from anything that can make
 # an HTTP request. One place for every alert -- Grafana, Uptime Kuma,
 # claude-ops -- to land, without tying them to Discord or any other chat app.
-# The Android app (F-Droid or Play) subscribes to https://ntfy.shlambert.top
+# The Android app (F-Droid or Play) subscribes to ntfy's registry URL
 # with the `alfred` login; it keeps its own connection open, no Google needed.
 #
 # Private: deny-all by default, so nothing reads or writes without a login.
@@ -57,9 +57,13 @@ in
     # zehra.click, hyggr and the rest on the router's WAN 443 -> 8443 /
     # WAN 80 -> 8880 forward (see services/quantumsurvivors.nix). Needs its own
     # A record at the registrar pointing at the WAN address, since the
-    # *.shlambert.top wildcard answers the LAN one.
+    # base domain's wildcard answers the LAN one.
     publicPort = 8443;
     publicHttpPort = 8880;
+    # Phones subscribed to the old name, and the app won't follow a
+    # redirect, and a redirected POST loses its body, so the old name serves
+    # ntfy itself until every subscription has moved to the new one.
+    oldHostMode = "serve";
     dashboard = {
       title = "ntfy";
       group = "Infrastructure";
