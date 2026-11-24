@@ -139,6 +139,10 @@ in
   shlam.services.forgejo = {
     subdomain = "git";
     inherit port;
+    # API clients (fj, tea, git over HTTPS) send a token in the Authorization
+    # header, which they drop on a redirect to another domain. Serve the old
+    # name directly until their saved logins point at the new one.
+    oldHostMode = "serve";
     # Forgejo's metrics are unauthenticated; they are Prometheus' business only.
     extraConfig = "respond /metrics 404";
     dashboard = {
