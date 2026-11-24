@@ -107,7 +107,7 @@
     environment = {
       "ES_URL" = "http://archivist-es:9200";
       "REDIS_CON" = "redis://archivist-redis:6379";
-      "TA_HOST" = "https://tube.shlambert.top";
+      "TA_HOST" = config.shlam.services.tubearchivist.url;
       "TA_USERNAME" = "tubearchivist";
       "TZ" = "Europe/Copenhagen";
     };

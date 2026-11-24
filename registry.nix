@@ -9,8 +9,8 @@
 #
 # generates:
 #
-#   services.caddy.virtualHosts."immich.shlambert.top" = {
-#     useACMEHost = "shlambert.top";
+#   services.caddy.virtualHosts."immich.<domain>" = {
+#     useACMEHost = "<domain>";
 #     extraConfig = "reverse_proxy localhost:2283\n";
 #   };
 #
@@ -40,11 +40,21 @@ let
   # `config` from inside an option *type* is the classic infinite-recursion
   # trap: option types are forced during manual generation
   # (documentation.nixos.enable defaults to true), outside any config context.
-  domain = "shlambert.top";
+  domain = "zam.dk";
 
   # security.acme.certs.<name> from ./acme.nix -- the DNS-01 wildcard. Only the
   # default: a service on another domain points at its own cert.
-  acmeHost = "shlambert.top";
+  acmeHost = "zam.dk";
+
+  # The previous base domain, kept alive while everything moves over. Every
+  # service on the base domain still answers at <subdomain>.<oldDomain> too
+  # (see oldHost below), so bookmarks, invite links and apps set up with the
+  # old address keep working. Headscale and Hyggr still live here outright (see
+  # ./headscale.nix and ./services/hyggr.nix): devices and Brevo are tied to the
+  # old names. Dropping the old domain means moving those two, then deleting
+  # this, oldHost and the old cert in ./acme.nix.
+  oldDomain = "shlambert.top";
+  oldAcmeHost = "shlambert.top";
 
   cfg = config.shlam;
 
@@ -78,6 +88,35 @@ let
             lexical default, not config.shlam.acmeHost, for the same reason as
             `domain` above. An assertion checks that the named cert actually
             covers `host`.
+          '';
+        };
+
+        oldHost = mkOption {
+          type = types.nullOr types.str;
+          default =
+            if config.host == "${config.subdomain}.${domain}" then "${config.subdomain}.${oldDomain}" else null;
+          defaultText = literalExpression ''"''${subdomain}.${oldDomain}" for hosts on ${domain}, else null'';
+          description = ''
+            The service's name under the old base domain, still answered while
+            things move over: on :443 and on publicPort/publicHttpPort when
+            those are set, with the old wildcard certificate. What it serves is
+            oldHostMode's call. null = no old name.
+          '';
+        };
+
+        oldHostMode = mkOption {
+          type = types.enum [
+            "redirect"
+            "serve"
+          ];
+          default = "redirect";
+          description = ''
+            "redirect" sends every request on to the same path at `host`, which
+            suits browsers and keeps apps that only accept their own origin
+            (ORIGIN, OIDC redirect URIs) happy. "serve" answers on the old name
+            exactly as on `host`, for clients that do not follow redirects
+            (ntfy's phone app, publishing scripts). Not with sso.forward: the
+            Authelia session cookie is only set for the new domain.
           '';
         };
 
@@ -236,12 +275,22 @@ let
     };
 
   vhostSvcs = filterAttrs (_: s: s.vhost) cfg.services;
+  oldSvcs = filterAttrs (_: s: s.oldHost != null) vhostSvcs;
+  oldServeSso = filterAttrs (_: s: s.oldHostMode == "serve" && s.sso.forward) oldSvcs;
+
+  # What an old name answers with: the service itself, or a hop to the new name.
+  # 308, not `permanent` (301): apps talking to an API (Immich, Jellyfin) POST
+  # through it, and a 301 lets the client turn that into a GET without a body.
+  oldBody = s: if s.oldHostMode == "serve" then body s else "redir https://${s.host}{uri} 308\n";
 
   # listToAttrs (which mapAttrs' is built on) keeps the FIRST binding, so two
   # entries resolving to the same host would silently drop one vhost. This
   # assertion is load-bearing, not hardening.
   dupes = filterAttrs (_: owners: builtins.length owners > 1) (
-    lib.zipAttrs (mapAttrsToList (n: s: { ${s.host} = n; }) vhostSvcs)
+    lib.zipAttrs (
+      mapAttrsToList (n: s: { ${s.host} = n; }) vhostSvcs
+      ++ mapAttrsToList (n: s: { ${s.oldHost} = n; }) oldSvcs
+    )
   );
 
   badUpstream = filterAttrs (_: s: s.proxy && s.upstream == null) cfg.services;
@@ -251,8 +300,8 @@ let
   # second domain could only ever be added by editing this file.
   certs = config.security.acme.certs;
 
-  # A wildcard covers exactly one label, so a.b.shlambert.top under
-  # *.shlambert.top would fail the TLS handshake at runtime with no build-time
+  # A wildcard covers exactly one label, so a.b.<domain> under
+  # *.<domain> would fail the TLS handshake at runtime with no build-time
   # signal.
   matches =
     pattern: h:
@@ -375,6 +424,20 @@ in
       '';
     };
 
+    oldDomain = mkOption {
+      type = types.str;
+      readOnly = true;
+      default = oldDomain;
+      description = "The previous base domain, still answered during the move (see oldHost).";
+    };
+
+    oldAcmeHost = mkOption {
+      type = types.str;
+      readOnly = true;
+      default = oldAcmeHost;
+      description = "security.acme.certs entry holding the *.${oldDomain} wildcard.";
+    };
+
     acmeHost = mkOption {
       type = types.str;
       readOnly = true;
@@ -469,6 +532,13 @@ in
           + concatStringsSep ", " (builtins.attrNames ssoSvcs);
       }
       {
+        assertion = oldServeSso == { };
+        message =
+          "shlam.services: oldHostMode = \"serve\" can't be combined with sso.forward "
+          + "(Authelia's cookie is only set for ${domain}): "
+          + concatStringsSep ", " (builtins.attrNames oldServeSso);
+      }
+      {
         assertion = sharedPorts == [ ];
         message =
           "shlam.services: publicPort/publicHttpPort cannot be 80 or 443 -- those are the "
@@ -503,7 +573,32 @@ in
         nameValuePair "http://${s.host}:${toString s.publicHttpPort}" {
           extraConfig = "redir https://{host}{uri} permanent\n";
         }
-      ) publicHttpSvcs;
+      ) publicHttpSvcs
+      # The old names, on the same listeners as the new ones.
+      // mapAttrs' (
+        _: s:
+        nameValuePair s.oldHost {
+          useACMEHost = oldAcmeHost;
+          extraConfig = oldBody s;
+        }
+      ) oldSvcs
+      // mapAttrs' (
+        _: s:
+        nameValuePair "https://${s.oldHost}:${toString s.publicPort}" {
+          useACMEHost = oldAcmeHost;
+          extraConfig = oldBody s;
+        }
+      ) (filterAttrs (_: s: s.publicPort != null) oldSvcs)
+      // mapAttrs' (
+        _: s:
+        nameValuePair "http://${s.oldHost}:${toString s.publicHttpPort}" {
+          extraConfig =
+            if s.oldHostMode == "serve" then
+              "redir https://{host}{uri} permanent\n"
+            else
+              "redir https://${s.host}{uri} 308\n";
+        }
+      ) (filterAttrs (_: s: s.publicHttpPort != null) oldSvcs);
 
     # This option merges by CONCATENATION, not replacement -- any hand-written
     # list left in homepage.nix would render alongside this one, every group

@@ -1,5 +1,5 @@
 # GameVault (gamevau.lt, github.com/Phalcode/gamevault-backend): a self-hosted
-# library for PC games, at games.shlambert.top.
+# library for PC games, at games.<domain>.
 #
 # The server also serves the GameVault 2 client as a web UI on the same port:
 # browse the library and download games there. Installing and launching games

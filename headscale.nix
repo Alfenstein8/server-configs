@@ -18,7 +18,7 @@ let
   # these itself, without consulting a nameserver at all, which is what makes
   # them work whatever resolver the node's network happened to hand it. A name
   # with no record here falls through to that resolver instead -- off-network
-  # that means public DNS, which for *.shlambert.top is a wildcard pointing at
+  # that means public DNS, which for the base domain is a wildcard pointing at
   # this box's LAN address. Off the LAN that address routes nowhere, so the
   # request does not fail, it hangs. immich was the one record written here by
   # hand, and was for exactly that reason the only service that worked over the
@@ -36,18 +36,27 @@ let
   #   - hosts on another domain (zehra.click). Those are public and resolve on
   #     their own, and a tailnet-only answer would go stale the day one moves
   #     off this box.
-  tailnetHosts = lib.filterAttrs (
-    name: s: name != "headscale" && s.vhost && lib.hasSuffix ".${config.shlam.domain}" s.host
-  ) config.shlam.services;
+  #
+  # Both base domains count while the move lasts, old names included: the old
+  # domain has the same LAN-address wildcard, and an old bookmark would
+  # hang off the LAN just the same.
+  ownDomain =
+    h: lib.hasSuffix ".${config.shlam.domain}" h || lib.hasSuffix ".${config.shlam.oldDomain}" h;
+  tailnetSvcs = lib.filterAttrs (name: s: name != "headscale" && s.vhost) config.shlam.services;
+  tailnetHosts = builtins.filter ownDomain (
+    lib.concatLists (
+      lib.mapAttrsToList (_: s: [ s.host ] ++ lib.optional (s.oldHost != null) s.oldHost) tailnetSvcs
+    )
+  );
 
-  extraRecords = lib.mapAttrsToList (_: s: {
-    name = s.host;
+  extraRecords = map (name: {
+    inherit name;
     type = "A";
     value = tailnetIP;
   }) tailnetHosts;
 in
 {
-  # This box is its own headscale client, and headscale.shlambert.top now has a
+  # This box is its own headscale client, and headscale's host now has a
   # public A record pointing at the WAN address (it has to -- that is what lets
   # a node off the LAN find the control server at all). Resolving it here would
   # send the local tailscaled out to the router and back in, a trip that only
@@ -68,7 +77,9 @@ in
     port = 3006;
     settings = {
       dns = {
-        base_domain = "ts.${config.shlam.domain}";
+        # On the old domain with server_url, for the same reason: renaming it
+        # renames every node's MagicDNS name.
+        base_domain = "ts.${config.shlam.oldDomain}";
         # Hand every node a public resolver, and let MagicDNS be the only DNS
         # it uses. These two belong together, and the module asserts it.
         #
@@ -90,7 +101,7 @@ in
         #
         # The old objection to that pair was that AdGuard's LAN address was the
         # only candidate, and a node away from home cannot reach it, so
-        # headscale.shlambert.top -- the one name that has to resolve before a
+        # headscale's host -- the one name that has to resolve before a
         # tunnel exists to resolve it through -- resolved to nothing and the
         # client logged itself out with `fetch control key: [...] context
         # canceled`, with no way back. A public resolver has no such edge: it
@@ -181,6 +192,12 @@ in
   shlam.services.headscale = {
     port = config.services.headscale.port;
     inherit publicPort;
+
+    # Still on the old domain: every node baked server_url in when it
+    # registered, so moving it means logging every device in again. Move it
+    # when that is worth doing, together with base_domain below.
+    host = "headscale.${config.shlam.oldDomain}";
+    acmeHost = config.shlam.oldAcmeHost;
 
     # Overrides the registry default of https://<host>, because a node bakes
     # server_url in when it registers and has to re-register if it ever changes.

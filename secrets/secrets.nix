@@ -3,6 +3,7 @@ let
 in
 {
   "spaceship.age".publicKeys = [ homeserver ];
+  "simply.age".publicKeys = [ homeserver ];
   "restic.age".publicKeys = [ homeserver ];
   "backblaze.age".publicKeys = [ homeserver ];
   "immich.age".publicKeys = [ homeserver ];

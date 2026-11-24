@@ -1,5 +1,5 @@
 # Luanti (formerly Minetest) server running Mineclonia.
-# Connect with the Luanti client to shlambert.top, port 30000 (UDP).
+# Connect with the Luanti client to the base domain, port 30000 (UDP).
 # https://docs.luanti.org/for-server-hosts/setup/
 { pkgs, ... }:
 let
