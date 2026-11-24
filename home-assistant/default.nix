@@ -303,6 +303,11 @@ in
   shlam.services.home-assistant = {
     subdomain = "ha";
     inherit port;
+    # The companion apps keep the server address they were set up with, and
+    # talk to it over a WebSocket and with an Authorization header -- neither
+    # survives a redirect to another domain. Serve the old name directly until
+    # every app has been pointed at the new one.
+    oldHostMode = "serve";
     # The metrics endpoint is unauthenticated (prometheus.requires_auth above).
     extraConfig = "respond /api/prometheus* 404";
     dashboard = {
