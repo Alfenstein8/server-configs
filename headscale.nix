@@ -69,7 +69,13 @@ in
   # reachable to itself even if the LAN is down. ./adguardhome.nix does the
   # equivalent for LAN clients that resolve through AdGuard; this box does not,
   # which is exactly how it got stranded.
-  networking.hosts."127.0.0.1" = [ config.shlam.services.headscale.host ];
+  # The old name too, while this box is still registered against it.
+  networking.hosts."127.0.0.1" = [
+    config.shlam.services.headscale.host
+  ]
+  ++ lib.optional (
+    config.shlam.services.headscale.oldHost != null
+  ) config.shlam.services.headscale.oldHost;
 
   services.headscale = {
     enable = true;
@@ -77,9 +83,8 @@ in
     port = 3006;
     settings = {
       dns = {
-        # On the old domain with server_url, for the same reason: renaming it
-        # renames every node's MagicDNS name.
-        base_domain = "ts.${config.shlam.oldDomain}";
+        # Changing it renames every node's MagicDNS name.
+        base_domain = "ts.${config.shlam.domain}";
         # Hand every node a public resolver, and let MagicDNS be the only DNS
         # it uses. These two belong together, and the module asserts it.
         #
@@ -193,11 +198,12 @@ in
     port = config.services.headscale.port;
     inherit publicPort;
 
-    # Still on the old domain: every node baked server_url in when it
-    # registered, so moving it means logging every device in again. Move it
-    # when that is worth doing, together with base_domain below.
-    host = "headscale.${config.shlam.oldDomain}";
-    acmeHost = config.shlam.oldAcmeHost;
+    # Every node baked server_url in when it registered, so the old name serves
+    # headscale itself rather than redirecting -- tailscaled doesn't follow one.
+    # Nodes still registered against it keep working; move each over with
+    # `tailscale up --login-server=<url> --force-reauth` before the old domain
+    # goes.
+    oldHostMode = "serve";
 
     # Overrides the registry default of https://<host>, because a node bakes
     # server_url in when it registers and has to re-register if it ever changes.
