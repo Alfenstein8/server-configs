@@ -22,6 +22,12 @@ in
 
   shlam.services.jellyfin = {
     inherit port;
+    # The apps on phones and TVs keep the server address they were set up with,
+    # and log in with an Authorization header -- which HTTP clients drop when a
+    # redirect crosses to another domain, so Jellyfin answers 400. Watcharr,
+    # which logs in through Jellyfin, broke the same way. Serve the old name
+    # directly until every client has been pointed at the new one.
+    oldHostMode = "serve";
     dashboard = {
       title = "Jellyfin";
       group = "Media";
