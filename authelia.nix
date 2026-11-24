@@ -29,7 +29,7 @@
 #
 # Second factors (TOTP, passkeys) are registered at auth.<domain> after the
 # first password login. Registering asks for a one-time code, which Authelia
-# emails from auth@<old domain> through Brevo, the relay Hyggr uses. Two
+# emails from auth@<domain> through Brevo, the relay Hyggr uses. Two
 # secrets, each holding just the value, from Brevo's SMTP & API page:
 #
 #   secrets/authelia-smtp-user.age      the SMTP login (same for the account)
@@ -199,9 +199,7 @@ in
               address = "submission://smtp-relay.brevo.com:587";
               username = secretRef "authelia-smtp-user";
               password = secretRef "authelia-smtp-password";
-              # Still the old domain: Brevo only sends for verified domains,
-              # and the new base domain isn't one yet.
-              sender = "Authelia <auth@${config.shlam.oldDomain}>";
+              sender = "Authelia <auth@${config.shlam.domain}>";
               subject = "[${config.shlam.domain}] {title}";
             };
           }
