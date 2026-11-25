@@ -85,13 +85,15 @@ in
   };
 
   virtualisation.oci-containers.containers.romm-db = {
-    # The current LTS line. Pinned to it rather than `latest`, so a new major
-    # never upgrades the data files on its own.
-    image = "docker.io/library/mariadb:11.8";
+    # The current LTS line (12.3; the next is 13.3). Pinned to it rather than
+    # `latest`, so a new major never upgrades the data files on its own --
+    # bump-images.sh moves it to any newer N.N, so check a proposed bump is an
+    # LTS before taking it.
+    image = "docker.io/library/mariadb:12.3";
     environment = {
       MARIADB_DATABASE = "romm";
       MARIADB_USER = "romm";
-      # Runs mariadb-upgrade when a newer 11.8 starts on older data files.
+      # Runs mariadb-upgrade when a newer release starts on older data files.
       MARIADB_AUTO_UPGRADE = "1";
     };
     environmentFiles = [ config.age.secrets.romm-db.path ];
